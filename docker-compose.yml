@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  vue:
+    container_name: mlm-site-front
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules # чтобы не конфликтовали локальные и контейнерные
+    environment:
+      - NODE_ENV=development
