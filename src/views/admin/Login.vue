@@ -25,7 +25,7 @@ async function submit() {
   error.value = '';
   try {
     await auth.login(login.value, password.value);
-    router.push('/dashboard'); // или другая защищённая страница
+    router.push('/admin/dashboard'); // или другая защищённая страница
   } catch (e) {
     error.value = 'Ошибка авторизации';
   } finally {
