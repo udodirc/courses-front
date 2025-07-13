@@ -12,9 +12,9 @@ function logout() {
 }
 
 const menu = [
-  { name: 'AdminDashboard', path: '/admin/dashboard'},
-  { name: 'AdminUsers', path: '/admin/users' },
-  { name: 'AdminSettings', path: '/admin/settings' },
+  { name: 'Админ панель', path: '/admin/dashboard'},
+  { name: 'Пользователи', path: '/admin/users' },
+  { name: 'Настройки', path: '/admin/settings' },
 ];
 </script>
 
