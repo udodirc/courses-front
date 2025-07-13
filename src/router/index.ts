@@ -1,0 +1,73 @@
+import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '../store/admin/auth/auth.store';
+
+// Layout
+import DashboardLayout from '../layouts/DashboardLayout.vue';
+
+const routes = [
+    // Страницы без авторизации
+    {
+        path: '/admin/login',
+        name: 'AdminLogin',
+        component: () => import('../views/admin/Login.vue'),
+    },
+
+    // Защищённые страницы
+    {
+        path: '/admin',
+        component: DashboardLayout,
+        meta: { requiresAuth: true },
+        children: [
+            {
+                path: 'dashboard',
+                name: 'AdminDashboard',
+                component: () => import('../views/admin/Dashboard.vue'),
+            },
+            {
+                path: 'users',
+                name: 'AdminUsers',
+                component: () => import('../views/admin/Users.vue'),
+            },
+            {
+                path: 'settings',
+                name: 'AdminSettings',
+                component: () => import('../views/admin/Settings.vue'),
+            },
+        ],
+    },
+
+    // fallback
+    // {
+    //     path: '/:pathMatch(.*)*',
+    //     redirect: '/admin/login',
+    // },
+];
+
+const router = createRouter({
+    history: createWebHistory(),
+    routes,
+});
+
+// 🔒 Защита маршрутов
+router.beforeEach(async (to, from, next) => {
+    const auth = useAuthStore();
+    // Если у нас есть токен, но нет загруженного пользователя — загружаем
+    if (auth.token && !auth.user) {
+        try {
+            await auth.fetchUser();
+        } catch (e) {
+            // Если токен невалидный — удаляем и перекидываем на логин
+            auth.logout();
+            return next('/admin/login');
+        }
+    }
+
+    // Если маршрут требует авторизации, а пользователь не аутентифицирован — редирект
+    if (to.meta.requiresAuth && !auth.isAuthenticated) {
+        return next('/admin/login');
+    }
+    // Всё ок — продолжаем
+    next();
+});
+
+export default router;
