@@ -17,9 +17,9 @@ export const useAuthStore = defineStore('auth', {
         isAuthenticated: (state) => !!state.token,
     },
     actions: {
-        async login(login: string, password: string) {
-            const response = await api.post('/admin/login', { login, password });
-            this.token = response.data.token;
+        async login(email: string, password: string) {
+            const response = await api.post('/admin/login', { email, password });
+            this.token = response.data.access_token;
             localStorage.setItem('token', this.token);
             await this.fetchUser();
         },
@@ -27,6 +27,7 @@ export const useAuthStore = defineStore('auth', {
             if (!this.token) return;
             try {
                 const response = await api.post('/admin/me');
+                console.log(response.data);
                 this.user = response.data;
             } catch {
                 this.logout();
