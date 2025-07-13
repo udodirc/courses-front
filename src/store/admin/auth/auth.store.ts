@@ -1,6 +1,4 @@
-// src/stores/auth.ts
 import { defineStore } from 'pinia';
-import api from '../../../api';
 
 interface User {
     id: number;
@@ -11,32 +9,38 @@ interface User {
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         user: null as User | null,
-        token: localStorage.getItem('token') || '',
+        token: '',
     }),
     getters: {
         isAuthenticated: (state) => !!state.token,
     },
     actions: {
         async login(email: string, password: string) {
-            const response = await api.post('/admin/login', { email, password });
-            this.token = response.data.access_token;
-            localStorage.setItem('token', this.token);
-            await this.fetchUser();
+            try {
+                const api = (await import('../../../api')).default;
+                const response = await api.post('/admin/login', { email, password });
+                this.token = response.data.access_token;
+                await this.fetchUser();
+            } catch (error) {
+                console.error('Login error:', error.response?.data || error.message);
+                throw error;
+            }
         },
         async fetchUser() {
             if (!this.token) return;
             try {
+                const api = (await import('../../../api')).default;
                 const response = await api.post('/admin/me');
-                console.log(response.data);
                 this.user = response.data;
-            } catch {
+            } catch (error) {
+                console.error('Fetch user error:', error.response?.data || error.message);
                 this.logout();
             }
         },
         logout() {
             this.token = '';
             this.user = null;
-            localStorage.removeItem('token');
         },
     },
+    persist: true,
 });

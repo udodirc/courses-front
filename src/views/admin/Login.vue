@@ -7,8 +7,7 @@
   </form>
 </template>
 
-<script lang="ts" setup>
-console.log('email loaded');
+<script lang="ts" setup>;
 import { ref } from 'vue';
 import { useAuthStore } from '../../store/admin/auth/auth.store.ts';
 import { useRouter } from 'vue-router';
