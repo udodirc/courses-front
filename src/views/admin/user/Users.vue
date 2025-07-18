@@ -1,58 +1,36 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import api from '../../../api';
+import { onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '../../../store/admin/user/user.store';
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  createdAt: string;
-}
-
-const users = ref<User[]>([]);
-const loading = ref(false);
-const error = ref('');
 const router = useRouter();
+const userStore = useUserStore();
 
-async function fetchUsers() {
-  loading.value = true;
+const users = computed(() => userStore.getUserList);
+const loading = computed(() => userStore.loading);
+const error = computed(() => userStore.error);
+
+function viewUser(id: number) {
+  router.push(`/admin/users/${id}`);
+}
+
+function editUser(id: number) {
+  router.push(`/admin/users/${id}/edit`);
+}
+
+async function deleteUser(id: number) {
+  const confirmed = confirm('Удалить пользователя?');
+  if (!confirmed) return;
+
   try {
-    const response = await api.get('/admin/users');
-    users.value = response.data.data;
-  } catch (e: any) {
-    error.value = e.response?.data?.message || 'Ошибка при загрузке пользователей';
-  } finally {
-    loading.value = false;
-  }
-}
-
-function viewUser(userId: number) {
-  router.push(`/admin/users/${userId}`);
-}
-
-function editUser(userId: number) {
-  router.push(`/admin/users/${userId}/edit`);
-}
-
-async function deleteUser(userId: number) {
-  const confirmDelete = confirm('Удалить этого пользователя?');
-
-  if (!confirmDelete) return;
-
-  loading.value = true;
-  try {
-    await api.delete(`/admin/users/${userId}`);
-    await fetchUsers();
-  } catch (e: any) {
-    error.value = e.response?.data?.message || 'Ошибка при удалении пользователя';
-  } finally {
-    loading.value = false;
+    await userStore.deleteUser(id);
+  } catch (_) {
+    alert(userStore.error);
   }
 }
 
 onMounted(() => {
-  fetchUsers();
+  userStore.fetchUserList();
 });
 </script>
 
@@ -80,15 +58,9 @@ onMounted(() => {
         <td>{{ user.email }}</td>
         <td>{{ new Date(user.createdAt).toLocaleString() }}</td>
         <td>
-          <button @click="viewUser(user.id)" class="icon-button" title="Посмотреть">
-            👁️
-          </button>
-          <button @click="editUser(user.id)" class="icon-button" title="Редактировать">
-            ✏️
-          </button>
-          <button @click="deleteUser(user.id)" class="icon-button danger" title="Удалить">
-            🗑️
-          </button>
+          <button @click="viewUser(user.id)" class="icon-button" title="Посмотреть">👁️</button>
+          <button @click="editUser(user.id)" class="icon-button" title="Редактировать">✏️</button>
+          <button @click="deleteUser(user.id)" class="icon-button danger" title="Удалить">🗑️</button>
         </td>
       </tr>
       </tbody>

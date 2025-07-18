@@ -1,37 +1,19 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import api from '../../../api';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  createdAt: string;
-}
+import { onMounted, computed } from 'vue';
+import { useRoute } from 'vue-router';
+import { useUserStore } from '../../../store/admin/user/user.store';
 
 const route = useRoute();
-const router = useRouter();
-
 const userId = Number(route.params.id);
-const user = ref<User | null>(null);
-const loading = ref(false);
-const error = ref('');
 
-async function fetchUser() {
-  loading.value = true;
-  try {
-    const response = await api.get(`/admin/users/${userId}`);
-    user.value = response.data.data;
-  } catch (e: any) {
-    error.value = e.response?.data?.message || 'Ошибка при загрузке пользователя';
-  } finally {
-    loading.value = false;
-  }
-}
+const userStore = useUserStore();
+
+const user = computed(() => userStore.user);
+const loading = computed(() => userStore.loading);
+const error = computed(() => userStore.error);
 
 onMounted(() => {
-  fetchUser();
+  userStore.fetchUser(userId);
 });
 </script>
 
@@ -65,14 +47,5 @@ onMounted(() => {
 .error {
   color: red;
   margin-top: 12px;
-}
-
-.back-button {
-  margin-top: 16px;
-  padding: 6px 12px;
-  background-color: #ddd;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
 }
 </style>
