@@ -44,9 +44,29 @@ const routes = [
                 component: () => import('../views/admin/user/UserEdit.vue'),
             },
             {
+                path: 'roles',
+                name: 'AdminRoles',
+                component: () => import('../views/admin/role/Roles.vue'),
+            },
+            {
                 path: 'settings',
                 name: 'AdminSettings',
                 component: () => import('../views/admin/Settings.vue'),
+            },
+            {
+                path: '/admin/roles/:id',
+                name: 'AdminRoleShow',
+                component: () => import('../views/admin/role/RoleShow.vue'),
+            },
+            {
+                path: '/admin/roles/create',
+                name: 'AdminRoleCreate',
+                component: () => import('../views/admin/role/RoleCreate.vue'),
+            },
+            {
+                path: 'roles/:id/edit',
+                name: 'AdminRoleEdit',
+                component: () => import('../views/admin/role/RoleEdit.vue'),
             },
         ],
     },

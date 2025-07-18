@@ -14,6 +14,7 @@ function logout() {
 const menu = [
   { name: 'Админ панель', path: '/admin/dashboard' },
   { name: 'Пользователи', path: '/admin/users' },
+  { name: 'Роли', path: '/admin/roles' },
   { name: 'Настройки', path: '/admin/settings' },
 ];
 </script>
@@ -52,7 +53,7 @@ const menu = [
 
     <!-- Footer -->
     <footer class="bg-gray-100 text-center text-sm text-gray-500 py-4">
-      &copy; 2025 Админка. Все права защищены.
+      &copy; Админка.
     </footer>
   </div>
 </template>

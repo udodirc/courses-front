@@ -46,7 +46,7 @@ async function fetchUser() {
 async function save() {
   loading.value = true;
   error.value = '';
-  console.log(selectedRoleName.value);
+
   try {
     await api.put(`/admin/users/${userId}`, {
       name: name.value,
