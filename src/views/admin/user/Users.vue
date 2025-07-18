@@ -40,6 +40,7 @@ onMounted(() => {
 
     <p v-if="loading">Загрузка...</p>
     <p v-if="error" class="error">{{ error }}</p>
+    <router-link to="/admin/users/create" class="create-button">➕ Создать пользователя</router-link>
 
     <table v-if="!loading && users.length" class="user-table">
       <thead>
@@ -110,4 +111,19 @@ onMounted(() => {
   color: red;
   margin-top: 12px;
 }
+
+.create-button {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 6px 12px;
+  background: #4ade80;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.create-button:hover {
+  background: #22c55e;
+}
+
 </style>

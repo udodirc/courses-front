@@ -10,6 +10,16 @@ export class UserApi {
             .catch((err) => Promise.reject(err));
     };
 
+    createUser = (data: { name: string; email: string; password: string }) => {
+        return api({
+            method: "POST",
+            url: "/admin/users",
+            data,
+        })
+            .then((response) => response.data)
+            .catch((err) => Promise.reject(err));
+    };
+
     deleteUser = (id: number) => {
         return api({
             method: "DELETE",

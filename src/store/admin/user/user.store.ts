@@ -27,6 +27,20 @@ export const useUserStore = defineStore('admin-user', {
             }
         },
 
+        async createUser(data: { name: string; email: string; password: string; role:string }) {
+            this.loading = true;
+            this.error = '';
+            try {
+                const response = await userApi.createUser(data);
+                this.userList.push(response.data);
+            } catch (e: any) {
+                this.error = e?.response?.data?.message || 'Ошибка создания';
+                throw e;
+            } finally {
+                this.loading = false;
+            }
+        },
+
         async deleteUser(id: number) {
             this.loading = true;
             this.error = '';

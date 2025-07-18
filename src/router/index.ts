@@ -30,8 +30,13 @@ const routes = [
             },
             {
                 path: '/admin/users/:id',
-                name: 'admin.users.show',
+                name: 'AdminUserShow',
                 component: () => import('../views/admin/user/UserShow.vue'),
+            },
+            {
+                path: '/admin/users/create',
+                name: 'AdminUserCreate',
+                component: () => import('../views/admin/user/UserCreate.vue'),
             },
             {
                 path: 'users/:id/edit',
