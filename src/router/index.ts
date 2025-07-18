@@ -26,7 +26,22 @@ const routes = [
             {
                 path: 'users',
                 name: 'AdminUsers',
-                component: () => import('../views/admin/Users.vue'),
+                component: () => import('../views/admin/user/Users.vue'),
+            },
+            {
+                path: '/admin/users/:id',
+                name: 'AdminUserShow',
+                component: () => import('../views/admin/user/UserShow.vue'),
+            },
+            {
+                path: '/admin/users/create',
+                name: 'AdminUserCreate',
+                component: () => import('../views/admin/user/UserCreate.vue'),
+            },
+            {
+                path: 'users/:id/edit',
+                name: 'AdminUserEdit',
+                component: () => import('../views/admin/user/UserEdit.vue'),
             },
             {
                 path: 'settings',
