@@ -1,0 +1,94 @@
+.flex { display: flex; }
+.flex-1 { flex: 1 1 0%; }
+.flex-col { flex-direction: column; }
+.justify-between { justify-content: space-between; }
+.items-center { align-items: center; }
+
+.bg-white { background-color: #ffffff; }
+.bg-gray-100 { background-color: #f3f4f6; }
+.bg-gray-200 { background-color: #e5e7eb; }
+.text-sm { font-size: 0.875rem; }
+.text-xl { font-size: 1.25rem; }
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+
+.shadow { box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.rounded { border-radius: 0.5rem; }
+.p-4 { padding: 1rem; }
+.p-6 { padding: 1.5rem; }
+.px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+.mb-4 { margin-bottom: 1rem; }
+.space-y-2 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.5rem; }
+
+.border-r { border-right: 1px solid #e5e7eb; }
+.text-red-600 { color: #dc2626; }
+.text-gray-500 { color: #6b7280; }
+
+.hover\:underline:hover { text-decoration: underline; }
+.hover\:bg-gray-200:hover { background-color: #e5e7eb; }
+.transition { transition: all 0.2s ease-in-out; }
+
+.min-h-screen { min-height: 100vh; }
+.w-64 { width: 16rem; }
+
+/* --- Typography --- */
+.text-sm      { font-size: 0.875rem; }
+.text-base    { font-size: 1rem; }
+.text-lg      { font-size: 1.125rem; }
+.text-xl      { font-size: 1.25rem; }
+.text-2xl     { font-size: 1.5rem; }
+.font-semibold { font-weight: 600; }
+.font-bold    { font-weight: 700; }
+.text-white   { color: #fff; }
+.text-gray-500 { color: #6b7280; }
+.text-gray-600 { color: #4b5563; }
+.text-red-600  { color: #dc2626; }
+.text-blue-500 { color: #3b82f6; }
+.text-yellow-500 { color: #f59e0b; }
+.text-green-600 { color: #16a34a; }
+
+/* --- Backgrounds --- */
+.bg-white     { background-color: #fff; }
+.bg-gray-50   { background-color: #f9fafb; }
+.bg-gray-100  { background-color: #f3f4f6; }
+.bg-blue-600  { background-color: #2563eb; }
+.bg-green-500 { background-color: #22c55e; }
+.bg-green-600:hover { background-color: #16a34a; }
+
+/* --- Layout --- */
+.max-w-md     { max-width: 28rem; }
+.max-w-5xl    { max-width: 64rem; }
+.mx-auto      { margin-left: auto; margin-right: auto; }
+.mt-4         { margin-top: 1rem; }
+.mt-8         { margin-top: 2rem; }
+.mb-4         { margin-bottom: 1rem; }
+.mb-2         { margin-bottom: 0.5rem; }
+.p-4          { padding: 1rem; }
+.p-6          { padding: 1.5rem; }
+.px-4         { padding-left: 1rem; padding-right: 1rem; }
+.py-2         { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+
+/* --- Buttons and links --- */
+.inline-block { display: inline-block; }
+.rounded      { border-radius: 0.5rem; }
+.shadow       { box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.border       { border: 1px solid #e5e7eb; }
+.border-b     { border-bottom: 1px solid #e5e7eb; }
+.w-full       { width: 100%; }
+.text-left    { text-align: left; }
+
+.hover\:underline:hover { text-decoration: underline; }
+.hover\:bg-gray-50:hover { background-color: #f9fafb; }
+.hover\:bg-green-600:hover { background-color: #16a34a; }
+.disabled\:opacity-50:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* --- Transitions --- */
+.transition { transition: all 0.2s ease-in-out; }
+
+.bg-black { background-color: #000; }
+.bg-gray-800 { background-color: #1f2937; }
+.hover\:bg-gray-800:hover { background-color: #1f2937; }
+.text-white { color: #fff; }
+.bg-red-600 { background-color: #dc2626; }
+.text-white { color: #fff; }
