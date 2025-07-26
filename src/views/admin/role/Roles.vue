@@ -84,7 +84,6 @@ onMounted(() => {
       <tr>
         <th class="px-4 py-2 border-b">ID</th>
         <th class="px-4 py-2 border-b">Имя</th>
-        <th class="px-4 py-2 border-b">Email</th>
         <th class="px-4 py-2 border-b">Создан</th>
         <th class="px-4 py-2 border-b">Действия</th>
       </tr>

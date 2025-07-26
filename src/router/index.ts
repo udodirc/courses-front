@@ -68,6 +68,11 @@ const routes = [
                 name: 'AdminRoleEdit',
                 component: () => import('../views/admin/role/RoleEdit.vue'),
             },
+            {
+                path: '/admin/assign-role',
+                name: 'AdminAssignRole',
+                component: () => import('../views/admin/role/AssignRole.vue'),
+            },
         ],
     },
 
