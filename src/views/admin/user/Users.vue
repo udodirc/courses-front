@@ -35,7 +35,7 @@ async function deleteUser(id: number) {
   if (!confirmed) return;
 
   try {
-    await userStore.deleteUser(id);
+    await userStore.deleteItem(id);
     // если на текущей странице больше нет данных, вернуться назад
     if (paginatedUsers.value.length === 0 && currentPage.value > 1) {
       currentPage.value--;
@@ -58,7 +58,7 @@ function prevPage() {
 }
 
 onMounted(() => {
-  userStore.fetchUserList();
+ userStore.fetchList();
 });
 </script>
 
@@ -85,6 +85,7 @@ onMounted(() => {
         <th class="px-4 py-2 border-b">ID</th>
         <th class="px-4 py-2 border-b">Имя</th>
         <th class="px-4 py-2 border-b">Email</th>
+        <th class="px-4 py-2 border-b">Роль</th>
         <th class="px-4 py-2 border-b">Создан</th>
         <th class="px-4 py-2 border-b">Действия</th>
       </tr>
@@ -94,6 +95,7 @@ onMounted(() => {
         <td class="px-4 py-2 border-b">{{ user.id }}</td>
         <td class="px-4 py-2 border-b">{{ user.name }}</td>
         <td class="px-4 py-2 border-b">{{ user.email }}</td>
+        <td class="px-4 py-2 border-b">{{ user.role?.name ?? '' }}</td>
         <td class="px-4 py-2 border-b">{{ new Date(user.createdAt).toLocaleString() }}</td>
         <td class="px-4 py-2 border-b">
           <button @click="viewUser(user.id)" class="text-blue-500 hover:underline mr-2" title="Посмотреть">👁️</button>

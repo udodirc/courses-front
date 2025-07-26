@@ -1,18 +1,20 @@
 <script setup lang="ts">
-import {computed, onMounted, ref} from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '../../../store/admin/user/user.store';
 import api from '../../../api';
+
+type ErrorType = string | Record<string, string[]>;
 
 const name = ref('');
 const email = ref('');
 const password = ref('');
 const loading = ref(false);
-const error = ref('');
+const error = ref<ErrorType>('');
 const roles = ref<{ id: number; name: string }[]>([]);
 const selectedRoleId = ref<number | null>(null);
 const selectedRoleName = computed(() => {
-  const role = roles.value.find(r => r.id === selectedRoleId.value);
+  const role = roles.value.find((r) => r.id === selectedRoleId.value);
   return role?.name || null;
 });
 
@@ -32,11 +34,11 @@ async function submitForm() {
   error.value = '';
   loading.value = true;
   try {
-    await userStore.createUser({
+    await userStore.createItem({
       name: name.value,
       email: email.value,
       password: password.value,
-      role: selectedRoleName.value
+      role: selectedRoleName.value,
     });
     router.push('/admin/users');
   } catch (e: any) {
@@ -55,7 +57,15 @@ onMounted(() => {
   <div>
     <h2>Создание пользователя</h2>
 
-    <p v-if="error" class="error">{{ error }}</p>
+    <!-- Объект ошибок от валидации -->
+    <ul v-if="error && typeof error === 'object'" class="text-red-600 mb-4">
+      <li v-for="(messages, field) in error" :key="field">
+        {{ messages[0] }}
+      </li>
+    </ul>
+
+    <!-- Строковая ошибка -->
+    <p v-else-if="error" class="text-red-600 mb-4">{{ error }}</p>
 
     <form @submit.prevent="submitForm">
       <label>
@@ -89,43 +99,5 @@ onMounted(() => {
 </template>
 
 <style scoped>
-form {
-  max-width: 400px;
-  margin-top: 20px;
-}
 
-label {
-  display: block;
-  margin-bottom: 10px;
-}
-
-input {
-  width: 100%;
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-button {
-  margin-top: 10px;
-  padding: 10px 16px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-select {
-  width: 100%;
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-top: 4px;
-}
-
-.error {
-  color: red;
-  margin-top: 12px;
-}
 </style>
