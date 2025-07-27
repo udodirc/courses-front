@@ -19,8 +19,13 @@ const menu = [
     name: 'Роли',
     children: [
       { name: 'Все роли', path: '/admin/roles' },
-      { name: 'Назначить роль', path: '/admin/assign-role' },
-      { name: 'Права доступа', path: '/admin/permissions' },
+      { name: 'Назначить роль', path: '/admin/roles/assign-role' }
+    ],
+  },
+  {
+    name: 'Права доступа',
+    children: [
+      { name: 'Дать доступ', path: '/admin/permissions/give-permissions' },
     ],
   },
   { name: 'Настройки', path: '/admin/settings' },
