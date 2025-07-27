@@ -158,3 +158,42 @@ footer {
     font-weight: 600;
     text-align: center;
 }
+
+form {
+    max-width: 400px;
+    margin-top: 20px;
+}
+
+form * {
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+form label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+form input,
+form select {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 4px;
+}
+
+form button {
+    margin-top: 10px;
+    padding: 10px 16px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

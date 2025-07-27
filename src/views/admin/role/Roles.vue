@@ -1,49 +1,26 @@
 <script setup lang="ts">
 import { onMounted, computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useUserStore } from '../../../store/admin/user/user.store';
+import { useRoleStore } from '../../../store/admin/role/role.store';
 import { PAGINATION } from '../../../config/pagination';
 
 const router = useRouter();
-const userStore = useUserStore();
+const roleStore = useRoleStore();
 
 const currentPage = ref(1);
 const perPage = PAGINATION.userPerPage;
 
-const users = computed(() => userStore.getUserList);
-const loading = computed(() => userStore.loading);
-const error = computed(() => userStore.error);
+const roles = computed(() => roleStore.getRoleList);
+const loading = computed(() => roleStore.loading);
+const error = computed(() => roleStore.error);
 
-const totalUsers = computed(() => users.value.length);
-const totalPages = computed(() => Math.ceil(totalUsers.value / perPage));
+const totalRoles = computed(() => roles.value.length);
+const totalPages = computed(() => Math.ceil(totalRoles.value / perPage));
 
-const paginatedUsers = computed(() => {
+const paginatedRoles = computed(() => {
   const start = (currentPage.value - 1) * perPage;
-  return users.value.slice(start, start + perPage);
+  return roles.value.slice(start, start + perPage);
 });
-
-function viewUser(id: number) {
-  router.push(`/admin/users/${id}`);
-}
-
-function editUser(id: number) {
-  router.push(`/admin/users/${id}/edit`);
-}
-
-async function deleteUser(id: number) {
-  const confirmed = confirm('Удалить пользователя?');
-  if (!confirmed) return;
-
-  try {
-    await userStore.deleteItem(id);
-    // если на текущей странице больше нет данных, вернуться назад
-    if (paginatedUsers.value.length === 0 && currentPage.value > 1) {
-      currentPage.value--;
-    }
-  } catch (_) {
-    alert(userStore.error);
-  }
-}
 
 function nextPage() {
   if (currentPage.value < totalPages.value) {
@@ -57,8 +34,31 @@ function prevPage() {
   }
 }
 
+function viewRole(id: number) {
+  router.push(`/admin/roles/${id}`);
+}
+
+function editRole(id: number) {
+  router.push(`/admin/roles/${id}/edit`);
+}
+
+async function deleteRole(id: number) {
+  const confirmed = confirm('Удалить роль?');
+  if (!confirmed) return;
+
+  try {
+    await roleStore.deleteRole(id);
+    // если на текущей странице больше нет данных, вернуться назад
+    if (paginatedRoles.value.length === 0 && currentPage.value > 1) {
+      currentPage.value--;
+    }
+  } catch (_) {
+    alert(roleStore.error);
+  }
+}
+
 onMounted(() => {
- userStore.fetchList();
+  roleStore.fetchRoleList();
 });
 </script>
 
@@ -70,37 +70,33 @@ onMounted(() => {
     <p v-if="error" class="text-red-600 mb-4">{{ error }}</p>
 
     <router-link
-        to="/admin/users/create"
+        to="/admin/roles/create"
         class="inline-block mb-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded"
     >
-      Создать пользователя
+      Создать роль
     </router-link>
 
     <table
-        v-if="!loading && paginatedUsers.length"
+        v-if="!loading && paginatedRoles.length"
         class="w-full border text-sm border-collapse border-gray-200 rounded overflow-hidden"
     >
       <thead class="bg-gray-100 text-left">
       <tr>
         <th class="px-4 py-2 border-b">ID</th>
         <th class="px-4 py-2 border-b">Имя</th>
-        <th class="px-4 py-2 border-b">Email</th>
-        <th class="px-4 py-2 border-b">Роль</th>
         <th class="px-4 py-2 border-b">Создан</th>
         <th class="px-4 py-2 border-b">Действия</th>
       </tr>
       </thead>
       <tbody>
-      <tr v-for="user in paginatedUsers" :key="user.id" class="hover:bg-gray-50">
-        <td class="px-4 py-2 border-b">{{ user.id }}</td>
-        <td class="px-4 py-2 border-b">{{ user.name }}</td>
-        <td class="px-4 py-2 border-b">{{ user.email }}</td>
-        <td class="px-4 py-2 border-b">{{ user.role?.name ?? '' }}</td>
-        <td class="px-4 py-2 border-b">{{ new Date(user.createdAt).toLocaleString() }}</td>
+      <tr v-for="role in paginatedRoles" :key="role.id" class="hover:bg-gray-50">
+        <td class="px-4 py-2 border-b">{{ role.id }}</td>
+        <td class="px-4 py-2 border-b">{{ role.name }}</td>
+        <td class="px-4 py-2 border-b">{{ new Date(role.createdAt).toLocaleString() }}</td>
         <td class="px-4 py-2 border-b">
-          <button @click="viewUser(user.id)" class="text-blue-500 hover:underline mr-2" title="Посмотреть">👁️</button>
-          <button @click="editUser(user.id)" class="text-yellow-500 hover:underline mr-2" title="Редактировать">✏️</button>
-          <button @click="deleteUser(user.id)" class="text-red-600 hover:underline" title="Удалить">🗑️</button>
+          <button @click="viewRole(role.id)" class="text-blue-500 hover:underline mr-2" title="Посмотреть">👁️</button>
+          <button @click="editRole(role.id)" class="text-yellow-500 hover:underline mr-2" title="Редактировать">✏️</button>
+          <button @click="deleteRole(role.id)" class="text-red-600 hover:underline" title="Удалить">🗑️</button>
         </td>
       </tr>
       </tbody>
