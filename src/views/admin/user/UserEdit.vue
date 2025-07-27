@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useRoles } from '../../../composables/useRoles';
+import { useUser } from '../../../composables/useUser';
+import { useErrorHandler } from '../../../composables/useErrorHandler';
 import api from '../../../api';
 
 const route = useRoute();
@@ -10,35 +13,27 @@ const userId = Number(route.params.id);
 const name = ref('');
 const email = ref('');
 const password = ref('');
-const loading = ref(false);
-const error = ref<Record<string, string[]> | string>('');
-const roles = ref<{ id: number; name: string }[]>([]);
 const selectedRoleId = ref<number | null>(null);
+
+const loading = ref(false);
+
+const { roles, fetchRoles } = useRoles();
+const { error, setError } = useErrorHandler();
+const { user, fetchUser } = useUser();
 
 const selectedRoleName = computed(() => {
   const role = roles.value.find(r => r.id === selectedRoleId.value);
   return role?.name || null;
 });
 
-async function fetchRoles() {
-  try {
-    const response = await api.get('/admin/roles');
-    roles.value = response.data.data;
-  } catch (e) {
-    console.error('Ошибка загрузки ролей');
+// После получения user заполняем форму и устанавливаем роль
+watch(user, (val) => {
+  if (val) {
+    name.value = val.name;
+    email.value = val.email;
+    selectedRoleId.value = val.role?.id ?? null; // <-- здесь ставим роль
   }
-}
-
-async function fetchUser() {
-  try {
-    const response = await api.get(`/admin/users/${userId}`);
-    name.value = response.data.data.name;
-    email.value = response.data.data.email;
-    selectedRoleId.value = response.data.data.role?.id ?? null;
-  } catch (e) {
-    error.value = { general: ['Не удалось загрузить пользователя'] };
-  }
-}
+});
 
 async function save() {
   loading.value = true;
@@ -48,17 +43,12 @@ async function save() {
     await api.put(`/admin/users/${userId}`, {
       name: name.value,
       email: email.value,
-      password: password.value,
+      password: password.value || undefined,
       role: selectedRoleName.value,
     });
     router.push('/admin/users');
   } catch (e: any) {
-    const errors = e?.response?.data?.errors;
-    if (errors && typeof errors === 'object') {
-      error.value = errors;
-    } else {
-      error.value = { general: ['Ошибка при сохранении'] };
-    }
+    setError(e);
   } finally {
     loading.value = false;
   }
