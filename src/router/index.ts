@@ -78,6 +78,11 @@ const routes = [
                 name: 'AdminGivePermissions',
                 component: () => import('../views/admin/permissions/GivePermissions.vue'),
             },
+            {
+                path: 'permissions/create-permissions',
+                name: 'AdminCreatePermissions',
+                component: () => import('../views/admin/permissions/CreatePermissions.vue'),
+            },
         ],
     },
 

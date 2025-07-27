@@ -26,6 +26,7 @@ const menu = [
     name: 'Права доступа',
     children: [
       { name: 'Дать доступ', path: '/admin/permissions/give-permissions' },
+      { name: 'Создать права', path: '/admin/permissions/create-permissions' },
     ],
   },
   { name: 'Настройки', path: '/admin/settings' },
