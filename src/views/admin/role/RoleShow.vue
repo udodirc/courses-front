@@ -4,47 +4,38 @@ import { useRoute } from 'vue-router';
 import { useRoleStore } from '../../../store/admin/role/role.store';
 
 const route = useRoute();
-const roleId = Number(route.params.id);
-
 const roleStore = useRoleStore();
 
-const role = computed(() => roleStore.role);
+const roleId = Number(route.params.id);
+const role = computed(() => roleStore.currentRole);
 const loading = computed(() => roleStore.loading);
 const error = computed(() => roleStore.error);
 
-onMounted(() => {
-  roleStore.fetchRole(roleId);
+onMounted(async () => {
+  if (!isNaN(roleId)) {
+    await roleStore.fetchItem(roleId);
+  } else {
+    roleStore.error = 'Некорректный ID пользователя';
+  }
 });
 </script>
 
 <template>
-  <div>
-    <h2>Роль #{{ roleId }}</h2>
+  <div class="max-w-3xl mx-auto p-6 bg-white rounded shadow">
+    <h2 class="text-xl font-semibold mb-4">Роль #{{ roleId }}</h2>
 
-    <p v-if="loading">Загрузка...</p>
-    <p v-if="error" class="error">{{ error }}</p>
+    <p v-if="loading" class="text-gray-600">Загрузка...</p>
+    <p v-else-if="error" class="text-red-600">{{ error }}</p>
 
-    <div v-if="role && !loading" class="user-details">
+    <div
+        v-else-if="role"
+        class="border border-gray-200 p-4 rounded bg-gray-50 space-y-2"
+    >
       <p><strong>ID:</strong> {{ role.id }}</p>
       <p><strong>Имя:</strong> {{ role.name }}</p>
       <p><strong>Создан:</strong> {{ new Date(role.createdAt).toLocaleString() }}</p>
     </div>
 
-    <p v-if="!role && !loading && !error">Роль не найден.</p>
+    <p v-else class="text-gray-500">Роль не найден.</p>
   </div>
 </template>
-
-<style scoped>
-.user-details {
-  border: 1px solid #ddd;
-  padding: 16px;
-  border-radius: 8px;
-  background: #f9f9f9;
-  margin-top: 16px;
-}
-
-.error {
-  color: red;
-  margin-top: 12px;
-}
-</style>

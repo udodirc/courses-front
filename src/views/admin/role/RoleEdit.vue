@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useRole } from '../../../composables/useRoles';
+import { useErrorHandler } from '../../../composables/useErrorHandler';
 import api from '../../../api';
+import {useUser} from "@/composables/useUser.ts";
 
 const route = useRoute();
 const router = useRouter();
@@ -9,9 +12,12 @@ const roleId = Number(route.params.id);
 
 const name = ref('');
 const loading = ref(false);
-const error = ref('');
 
-async function fetchUser() {
+const { roles, fetchRoles } = useRole();
+const { error, setError } = useErrorHandler();
+const { user, fetchUser } = useUser();
+
+async function fetchRole() {
   try {
     const response = await api.get(`/admin/roles/${roleId}`);
     name.value = response.data.data.name;
@@ -36,7 +42,7 @@ async function save() {
 }
 
 onMounted(() => {
-  fetchUser();
+  fetchRole();
 });
 </script>
 

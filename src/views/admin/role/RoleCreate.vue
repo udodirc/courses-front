@@ -2,24 +2,26 @@
 import {ref} from 'vue';
 import { useRouter } from 'vue-router';
 import { useRoleStore } from '../../../store/admin/role/role.store';
+import { useErrorHandler } from '../../../composables/useErrorHandler';
+
+const router = useRouter();
+const roleStore = useRoleStore();
+const { error, setError } = useErrorHandler();
 
 const name = ref('');
 const loading = ref(false);
-const error = ref('');
-
-const roleStore = useRoleStore();
-const router = useRouter();
 
 async function submitForm() {
   error.value = '';
   loading.value = true;
+
   try {
-    await roleStore.createRole({
-      name: name.value,
+    await roleStore.createItem({
+      name: name.value
     });
     router.push('/admin/roles');
   } catch (e: any) {
-    error.value = roleStore.error;
+    setError(e);
   } finally {
     loading.value = false;
   }
@@ -30,9 +32,14 @@ async function submitForm() {
   <div>
     <h2>Создание роли</h2>
 
-    <p v-if="error" class="text-sm text-red-600 bg-red-50 border border-red-200 p-2 rounded mb-4">
-      {{ error }}
-    </p>
+    <!-- Ошибки -->
+    <ul v-if="error && typeof error === 'object'" class="text-red-600 mb-4">
+      <li v-for="(messages, field) in error" :key="field">
+        {{ messages[0] }}
+      </li>
+    </ul>
+
+    <p v-else-if="error" class="text-red-600 mb-4">{{ error }}</p>
 
     <form @submit.prevent="submitForm">
 
@@ -41,49 +48,13 @@ async function submitForm() {
         <input v-model="name" required />
       </div>
 
-      <button type="submit" :disabled="loading">Создать</button>
+      <button type="submit" :disabled="loading">
+        {{ loading ? 'Создаю...' : 'Создать' }}
+      </button>
     </form>
   </div>
 </template>
 
 <style scoped>
-form {
-  max-width: 400px;
-  margin-top: 20px;
-}
 
-label {
-  display: block;
-  margin-bottom: 10px;
-}
-
-input {
-  width: 100%;
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-button {
-  margin-top: 10px;
-  padding: 10px 16px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-select {
-  width: 100%;
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-top: 4px;
-}
-
-.error {
-  color: red;
-  margin-top: 12px;
-}
 </style>

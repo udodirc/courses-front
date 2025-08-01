@@ -1,26 +1,19 @@
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue';
+import { onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '../../../store/admin/user/user.store';
+import { usePagination } from '../../../composables/usePagination';
 import { PAGINATION } from '../../../config/pagination';
+import type { User } from '../../../types/User.ts';
 
 const router = useRouter();
 const userStore = useUserStore();
-
-const currentPage = ref(1);
 const perPage = PAGINATION.userPerPage;
+const { currentPage, paginatedData, totalPages, nextPage, prevPage } =
+    usePagination<User>(() => userStore.getUserList, perPage);
 
-const users = computed(() => userStore.getUserList);
 const loading = computed(() => userStore.loading);
 const error = computed(() => userStore.error);
-
-const totalUsers = computed(() => users.value.length);
-const totalPages = computed(() => Math.ceil(totalUsers.value / perPage));
-
-const paginatedUsers = computed(() => {
-  const start = (currentPage.value - 1) * perPage;
-  return users.value.slice(start, start + perPage);
-});
 
 function viewUser(id: number) {
   router.push(`/admin/users/${id}`);
@@ -31,35 +24,10 @@ function editUser(id: number) {
 }
 
 async function deleteUser(id: number) {
-  const confirmed = confirm('Удалить пользователя?');
-  if (!confirmed) return;
-
-  try {
-    await userStore.deleteItem(id);
-    // если на текущей странице больше нет данных, вернуться назад
-    if (paginatedUsers.value.length === 0 && currentPage.value > 1) {
-      currentPage.value--;
-    }
-  } catch (_) {
-    alert(userStore.error);
-  }
+  if (!confirm('Удалить пользователя?')) return;
+  await userStore.deleteItem(id);
 }
-
-function nextPage() {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-  }
-}
-
-function prevPage() {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-  }
-}
-
-onMounted(() => {
- userStore.fetchList();
-});
+onMounted(() => userStore.fetchList());
 </script>
 
 <template>
@@ -77,8 +45,8 @@ onMounted(() => {
     </router-link>
 
     <table
-        v-if="!loading && paginatedUsers.length"
-        class="w-full border text-sm border-collapse border-gray-200 rounded overflow-hidden"
+        v-if="!loading && paginatedData.length"
+        class="w-full border text-sm border-collapse border-gray-200"
     >
       <thead class="bg-gray-100 text-left">
       <tr>
@@ -91,16 +59,20 @@ onMounted(() => {
       </tr>
       </thead>
       <tbody>
-      <tr v-for="user in paginatedUsers" :key="user.id" class="hover:bg-gray-50">
+      <tr
+          v-for="user in paginatedData"
+          :key="user.id"
+          class="hover:bg-gray-50"
+      >
         <td class="px-4 py-2 border-b">{{ user.id }}</td>
         <td class="px-4 py-2 border-b">{{ user.name }}</td>
         <td class="px-4 py-2 border-b">{{ user.email }}</td>
-        <td class="px-4 py-2 border-b">{{ user.role?.name ?? '' }}</td>
+        <td class="px-4 py-2 border-b">{{ user.role?.name }}</td>
         <td class="px-4 py-2 border-b">{{ new Date(user.createdAt).toLocaleString() }}</td>
         <td class="px-4 py-2 border-b">
-          <button @click="viewUser(user.id)" class="text-blue-500 hover:underline mr-2" title="Посмотреть">👁️</button>
-          <button @click="editUser(user.id)" class="text-yellow-500 hover:underline mr-2" title="Редактировать">✏️</button>
-          <button @click="deleteUser(user.id)" class="text-red-600 hover:underline" title="Удалить">🗑️</button>
+          <button @click="viewUser(user.id)" class="text-blue-500 mr-2">👁️</button>
+          <button @click="editUser(user.id)" class="text-yellow-500 mr-2">✏️</button>
+          <button @click="deleteUser(user.id)" class="text-red-600">🗑️</button>
         </td>
       </tr>
       </tbody>
@@ -108,31 +80,33 @@ onMounted(() => {
 
     <div
         v-if="!loading && totalPages > 1"
-        class="flex justify-center items-center gap-6 mt-6"
+        class="flex justify-center gap-6 mt-6"
     >
       <button
           @click="prevPage"
           :disabled="currentPage === 1"
-          class="px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
+          class="btn-pagination"
       >
         ← Назад
       </button>
 
-      <div class="flex items-center space-x-1 text-sm text-gray-700">
-        <span>Страница</span>
-        <span class="font-semibold text-gray-900">{{ currentPage }}</span>
-        <span>из</span>
-        <span class="font-semibold text-gray-900">{{ totalPages }}</span>
-      </div>
+      <span class="text-gray-700 text-sm">
+        Страница <strong>{{ currentPage }}</strong> из <strong>{{ totalPages }}</strong>
+      </span>
 
       <button
           @click="nextPage"
           :disabled="currentPage === totalPages"
-          class="px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
+          class="btn-pagination"
       >
         Вперёд →
       </button>
     </div>
-
   </div>
 </template>
+
+<style scoped>
+.btn-pagination {
+  @apply px-4 py-2 rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+</style>

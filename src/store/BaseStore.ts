@@ -1,4 +1,5 @@
 // stores/BaseStore.ts
+import { type UnwrapRef } from 'vue';
 import { defineStore } from 'pinia';
 
 export interface IBaseApi<TCreate, TEntity> {
@@ -61,7 +62,7 @@ export abstract class BaseStore<TCreate, TEntity> {
                     this.loading = true;
                     this.error = '';
                     try {
-                        await api.delete(id); // ✅ тип возвращаемого значения теперь совпадает
+                        await api.delete(id);
                         this.items = this.items.filter((i: any) => i.id !== id);
                     } catch (e: any) {
                         this.error = e?.response?.data?.message || 'Ошибка удаления';
@@ -76,7 +77,7 @@ export abstract class BaseStore<TCreate, TEntity> {
                     this.error = '';
                     try {
                         const res = await api.fetch(id);
-                        this.item = res.data;
+                        this.item = res.data as UnwrapRef<TEntity>;
                     } catch (e: any) {
                         this.error = e?.response?.data?.message || 'Ошибка получения';
                         throw e;

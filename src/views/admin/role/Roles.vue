@@ -1,38 +1,20 @@
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue';
+import { onMounted, computed} from 'vue';
 import { useRouter } from 'vue-router';
 import { useRoleStore } from '../../../store/admin/role/role.store';
+import { usePagination } from '../../../composables/usePagination';
 import { PAGINATION } from '../../../config/pagination';
+import type { Role } from '../../../types/Role.ts';
 
 const router = useRouter();
 const roleStore = useRoleStore();
 
-const currentPage = ref(1);
 const perPage = PAGINATION.userPerPage;
+const { currentPage, paginatedData, totalPages, nextPage, prevPage } =
+    usePagination<Role>(() => roleStore.getRoleList, perPage);
 
-const roles = computed(() => roleStore.getRoleList);
 const loading = computed(() => roleStore.loading);
 const error = computed(() => roleStore.error);
-
-const totalRoles = computed(() => roles.value.length);
-const totalPages = computed(() => Math.ceil(totalRoles.value / perPage));
-
-const paginatedRoles = computed(() => {
-  const start = (currentPage.value - 1) * perPage;
-  return roles.value.slice(start, start + perPage);
-});
-
-function nextPage() {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-  }
-}
-
-function prevPage() {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-  }
-}
 
 function viewRole(id: number) {
   router.push(`/admin/roles/${id}`);
@@ -43,28 +25,16 @@ function editRole(id: number) {
 }
 
 async function deleteRole(id: number) {
-  const confirmed = confirm('Удалить роль?');
-  if (!confirmed) return;
-
-  try {
-    await roleStore.deleteRole(id);
-    // если на текущей странице больше нет данных, вернуться назад
-    if (paginatedRoles.value.length === 0 && currentPage.value > 1) {
-      currentPage.value--;
-    }
-  } catch (_) {
-    alert(roleStore.error);
-  }
+  if (!confirm('Удалить роль?')) return;
+  await roleStore.deleteItem(id);
 }
 
-onMounted(() => {
-  roleStore.fetchRoleList();
-});
+onMounted(() => roleStore.fetchList());
 </script>
 
 <template>
   <div class="max-w-5xl mx-auto p-6 bg-white rounded shadow">
-    <h2 class="text-2xl font-semibold mb-4">Пользователи</h2>
+    <h2 class="text-2xl font-semibold mb-4">Роли</h2>
 
     <p v-if="loading" class="text-gray-600 mb-2">Загрузка...</p>
     <p v-if="error" class="text-red-600 mb-4">{{ error }}</p>
@@ -77,8 +47,8 @@ onMounted(() => {
     </router-link>
 
     <table
-        v-if="!loading && paginatedRoles.length"
-        class="w-full border text-sm border-collapse border-gray-200 rounded overflow-hidden"
+        v-if="!loading && paginatedData.length"
+        class="w-full border text-sm border-collapse border-gray-200"
     >
       <thead class="bg-gray-100 text-left">
       <tr>
@@ -89,7 +59,7 @@ onMounted(() => {
       </tr>
       </thead>
       <tbody>
-      <tr v-for="role in paginatedRoles" :key="role.id" class="hover:bg-gray-50">
+      <tr v-for="role in paginatedData" :key="role.id" class="hover:bg-gray-50">
         <td class="px-4 py-2 border-b">{{ role.id }}</td>
         <td class="px-4 py-2 border-b">{{ role.name }}</td>
         <td class="px-4 py-2 border-b">{{ new Date(role.createdAt).toLocaleString() }}</td>
