@@ -1,4 +1,3 @@
-// composables/useUser.ts
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '../api';

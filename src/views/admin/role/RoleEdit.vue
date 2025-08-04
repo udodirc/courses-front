@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import {ref, onMounted, watch} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useRole } from '../../../composables/useRoles';
+import { useRoleStore } from '../../../store/admin/role/role.store.ts';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
 import api from '../../../api';
-import {useUser} from "@/composables/useUser.ts";
+import {storeToRefs} from "pinia";
 
 const route = useRoute();
 const router = useRouter();
@@ -12,37 +12,35 @@ const roleId = Number(route.params.id);
 
 const name = ref('');
 const loading = ref(false);
-
-const { roles, fetchRoles } = useRole();
 const { error, setError } = useErrorHandler();
-const { user, fetchUser } = useUser();
 
-async function fetchRole() {
-  try {
-    const response = await api.get(`/admin/roles/${roleId}`);
-    name.value = response.data.data.name;
-  } catch (e) {
-    error.value = 'Не удалось загрузить роль';
+const roleStore = useRoleStore();
+const { currentRole } = storeToRefs(roleStore);
+
+watch(currentRole, (val) => {
+  if (val) {
+    name.value = val.name;
   }
-}
+});
 
 async function save() {
   loading.value = true;
   error.value = '';
+
   try {
     await api.put(`/admin/roles/${roleId}`, {
       name: name.value,
     });
     router.push('/admin/roles');
-  } catch (e) {
-    error.value = 'Ошибка при сохранении';
+  } catch (e: any) {
+    setError(e);
   } finally {
     loading.value = false;
   }
 }
 
 onMounted(() => {
-  fetchRole();
+  roleStore.fetchItem(roleId);
 });
 </script>
 
@@ -50,8 +48,14 @@ onMounted(() => {
   <div>
     <h2>Редактировать пользователя</h2>
 
-    <form @submit.prevent="save">
+    <!-- Вывод ошибок -->
+    <ul v-if="error && typeof error === 'object'" class="text-red-600 mb-4">
+      <li v-for="(messages, field) in error" :key="field">
+        {{ messages[0] }}
+      </li>
+    </ul>
 
+    <form @submit.prevent="save">
       <label>
         Имя
         <input v-model="name" required />
@@ -60,50 +64,9 @@ onMounted(() => {
       <button type="submit" :disabled="loading">
         {{ loading ? 'Сохраняю...' : 'Сохранить' }}
       </button>
-
-      <p v-if="error" class="error">{{ error }}</p>
     </form>
   </div>
 </template>
 
 <style scoped>
-form {
-  max-width: 400px;
-  margin-top: 20px;
-}
-
-label {
-  display: block;
-  margin-bottom: 10px;
-}
-
-input {
-  width: 100%;
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-button {
-  margin-top: 10px;
-  padding: 10px 16px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-select {
-  width: 100%;
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-top: 4px;
-}
-
-.error {
-  color: red;
-  margin-top: 12px;
-}
 </style>

@@ -32,7 +32,6 @@ async function submitForm() {
       password: password.value,
       role: selectedRoleName.value,
     });
-
     router.push('/admin/users');
   } catch (e: any) {
     setError(e);

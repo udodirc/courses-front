@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
 import { useRoles } from '../../../composables/useRoles';
-import { useUser } from '../../../composables/useUser';
+import { useUserStore } from '../../../store/admin/user/user.store.ts';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
 import api from '../../../api';
 
@@ -15,29 +16,28 @@ const email = ref('');
 const password = ref('');
 const selectedRoleId = ref<number | null>(null);
 
-const loading = ref(false);
-
 const { roles, fetchRoles } = useRoles();
 const { error, setError } = useErrorHandler();
-const { user, fetchUser } = useUser();
+
+const userStore = useUserStore();
+const { currentUser } = storeToRefs(userStore);
 
 const selectedRoleName = computed(() => {
   const role = roles.value.find(r => r.id === selectedRoleId.value);
   return role?.name || null;
 });
 
-// После получения user заполняем форму и устанавливаем роль
-watch(user, (val) => {
+watch(currentUser, (val) => {
   if (val) {
     name.value = val.name;
     email.value = val.email;
-    selectedRoleId.value = val.role?.id ?? null; // <-- здесь ставим роль
+    selectedRoleId.value = val.role?.id ?? null;
   }
 });
 
 async function save() {
-  loading.value = true;
-  error.value = '';
+  userStore.loading = true;
+  userStore.error = '';
 
   try {
     await api.put(`/admin/users/${userId}`, {
@@ -50,13 +50,13 @@ async function save() {
   } catch (e: any) {
     setError(e);
   } finally {
-    loading.value = false;
+    userStore.loading = false;
   }
 }
 
 onMounted(() => {
   fetchRoles();
-  fetchUser();
+  userStore.fetchItem(userId);
 });
 </script>
 
