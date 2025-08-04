@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useRoles } from '../../../composables/useRoles';
 import api from '../../../api';
 
 const error = ref<Record<string, string[]> | string>('');
 const loading = ref(false);
 const router = useRouter();
 
-const roles = ref<{ id: number; name: string }[]>([]);
+const { roles, fetchRoles } = useRoles();
 const permissions = ref<{ id: number; name: string }[]>([]);
 
 const selectedRoleId = ref<number | ''>('');
@@ -17,15 +18,6 @@ const selectedRoleName = computed(() => {
   const role = roles.value.find(r => r.id === selectedRoleId.value);
   return role?.name || null;
 });
-
-async function fetchRoles() {
-  try {
-    const response = await api.get('/admin/roles');
-    roles.value = response.data.data;
-  } catch (e) {
-    console.error('Ошибка загрузки ролей');
-  }
-}
 
 async function fetchPermissions() {
   try {
