@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import {ref, onMounted, watch} from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useRoleStore } from '../../../store/admin/role/role.store.ts';
+import { useRoleStore } from '../../../store/admin/role/role.store';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
+import { storeToRefs } from 'pinia';
 import api from '../../../api';
-import {storeToRefs} from "pinia";
+
+import BaseInput from '../../../components/ui/BaseInput.vue';
+import BaseForm from '../../../components/ui/BaseForm.vue';
+import FormErrors from '../../../components/ui/FormErrors.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -46,27 +50,10 @@ onMounted(() => {
 
 <template>
   <div>
-    <h2>Редактировать пользователя</h2>
-
-    <!-- Вывод ошибок -->
-    <ul v-if="error && typeof error === 'object'" class="text-red-600 mb-4">
-      <li v-for="(messages, field) in error" :key="field">
-        {{ messages[0] }}
-      </li>
-    </ul>
-
-    <form @submit.prevent="save">
-      <label>
-        Имя
-        <input v-model="name" required />
-      </label>
-
-      <button type="submit" :disabled="loading">
-        {{ loading ? 'Сохраняю...' : 'Сохранить' }}
-      </button>
-    </form>
+    <h2 class="text-2xl mb-4">Редактировать роль</h2>
+    <FormErrors :error="error" />
+    <BaseForm :loading="loading" :onSubmit="save">
+      <BaseInput v-model="name" label="Имя" required />
+    </BaseForm>
   </div>
 </template>
-
-<style scoped>
-</style>
