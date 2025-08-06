@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import {ref} from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useRoleStore } from '../../../store/admin/role/role.store';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
+
+import BaseForm from '../../../components/ui/BaseForm.vue';
+import BaseInput from '../../../components/ui/BaseInput.vue';
+import FormErrors from '../../../components/ui/FormErrors.vue';
 
 const router = useRouter();
 const roleStore = useRoleStore();
@@ -11,13 +15,13 @@ const { error, setError } = useErrorHandler();
 const name = ref('');
 const loading = ref(false);
 
-async function submitForm() {
+async function save() {
   error.value = '';
   loading.value = true;
 
   try {
     await roleStore.createItem({
-      name: name.value
+      name: name.value,
     });
     router.push('/admin/roles');
   } catch (e: any) {
@@ -30,31 +34,14 @@ async function submitForm() {
 
 <template>
   <div>
-    <h2>Создание роли</h2>
+    <h2 class="text-2xl mb-4">Создание роли</h2>
 
-    <!-- Ошибки -->
-    <ul v-if="error && typeof error === 'object'" class="text-red-600 mb-4">
-      <li v-for="(messages, field) in error" :key="field">
-        {{ messages[0] }}
-      </li>
-    </ul>
+    <FormErrors :error="error" />
 
-    <p v-else-if="error" class="text-red-600 mb-4">{{ error }}</p>
-
-    <form @submit.prevent="submitForm">
-
-      <div>
-        <label>Имя:</label>
-        <input v-model="name" required />
-      </div>
-
-      <button type="submit" :disabled="loading">
-        {{ loading ? 'Создаю...' : 'Создать' }}
-      </button>
-    </form>
+    <BaseForm :loading="loading" :onSubmit="save">
+      <BaseInput v-model="name" label="Имя" required />
+    </BaseForm>
   </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

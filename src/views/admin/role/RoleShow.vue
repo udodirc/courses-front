@@ -2,6 +2,7 @@
 import { onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useRoleStore } from '../../../store/admin/role/role.store';
+import BaseShow from '../../../components/BaseShow.vue';
 
 const route = useRoute();
 const roleStore = useRoleStore();
@@ -15,7 +16,7 @@ onMounted(async () => {
   if (!isNaN(roleId)) {
     await roleStore.fetchItem(roleId);
   } else {
-    roleStore.error = 'Некорректный ID пользователя';
+    roleStore.error = 'Некорректный ID роли';
   }
 });
 </script>
@@ -27,15 +28,7 @@ onMounted(async () => {
     <p v-if="loading" class="text-gray-600">Загрузка...</p>
     <p v-else-if="error" class="text-red-600">{{ error }}</p>
 
-    <div
-        v-else-if="role"
-        class="border border-gray-200 p-4 rounded bg-gray-50 space-y-2"
-    >
-      <p><strong>ID:</strong> {{ role.id }}</p>
-      <p><strong>Имя:</strong> {{ role.name }}</p>
-      <p><strong>Создан:</strong> {{ new Date(role.createdAt).toLocaleString() }}</p>
-    </div>
-
-    <p v-else class="text-gray-500">Роль не найден.</p>
+    <!-- ✅ Используем переиспользуемый компонент -->
+    <BaseShow v-else :item="role" :exclude="['updatedAt']" />
   </div>
 </template>
