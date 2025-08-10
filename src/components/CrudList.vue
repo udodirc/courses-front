@@ -22,7 +22,7 @@ const emit = defineEmits(['prev', 'next', 'view', 'edit', 'delete']);
     </template>
 
     <template #body>
-      <tr v-for="item in items" :key="item.id" class="hover:bg-gray-50">
+      <tr v-for="item in (items || [])" :key="item.id" class="hover:bg-gray-50">
         <td v-for="col in columns" :key="col.field" class="px-4 py-2 border-b">
           {{ col.format
             ? col.format(col.field.split('.').reduce((acc, key) => acc?.[key], item), item)

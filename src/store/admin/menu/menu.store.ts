@@ -18,6 +18,6 @@ type MenuStoreState = {
     error: string;
 };
 export const useMenuStore = menuStore.getStore(menuStore.api, {
-    getMenuList: (state: MenuStoreState): Menu[] => state.items,
+    getMenuList: (state: MenuStoreState): Menu[] => Array.isArray(state.items) ? state.items : [],
     currentMenu: (state: MenuStoreState): Menu | null => state.item,
 });

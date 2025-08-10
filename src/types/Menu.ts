@@ -1,4 +1,4 @@
-export interface Menu {
+export interface  Menu {
     id: number;
     parent_id: number;
     name: string;
