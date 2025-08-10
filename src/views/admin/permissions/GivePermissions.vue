@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import { useRoles } from '../../../composables/useRoles';
 import api from '../../../api';
+import { useRouter } from 'vue-router';
+import { useFetchList } from "../../../composables/useFetchList.ts";
 
 const error = ref<Record<string, string[]> | string>('');
 const loading = ref(false);
 const router = useRouter();
 
-const { roles, fetchRoles } = useRoles();
+const { items: roles, fetchItems: fetchRoles } = useFetchList<{ id: number; name: string }>('/admin/roles');
 const permissions = ref<{ id: number; name: string }[]>([]);
 
 const selectedRoleId = ref<number | ''>('');

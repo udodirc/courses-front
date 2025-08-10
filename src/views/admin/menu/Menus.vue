@@ -8,6 +8,7 @@ const menuStore = useMenuStore();
 
 const columns = [
   { label: 'ID', field: 'id' },
+  { label: 'Родительсое меню', field: 'parent_name' },
   { label: 'Имя', field: 'name' }
 ];
 

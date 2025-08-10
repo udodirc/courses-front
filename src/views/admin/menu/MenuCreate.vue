@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {computed, onMounted, ref} from 'vue';
+import {onMounted, ref} from 'vue';
 import { useRouter } from 'vue-router';
 import { useMenuStore } from '../../../store/admin/menu/menu.store';
-import { useMenus } from '../../../composables/useMenus';
+import { useFetchList } from '../../../composables/useFetchList';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
 
 import BaseForm from '../../../components/ui/BaseForm.vue';
@@ -11,7 +11,7 @@ import FormErrors from '../../../components/ui/FormErrors.vue';
 
 const router = useRouter();
 const menuStore = useMenuStore();
-const { menus, fetchMenus } = useMenus();
+const { items: menus, fetchItems: fetchMenus } = useFetchList<{ id: number; name: string }>('/admin/menu');
 const { error, setError } = useErrorHandler();
 
 const name = ref('');
@@ -27,7 +27,7 @@ async function save() {
       parent_id: selectedMenuId.value,
       name: name.value,
     });
-    router.push('/admin/menu');
+    router.push('/admin/menus');
   } catch (e: any) {
     setError(e);
   } finally {

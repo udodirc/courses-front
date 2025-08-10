@@ -3,8 +3,8 @@ import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '../../../store/admin/user/user.store';
-import { useRoles } from '../../../composables/useRoles';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
+import { useFetchList } from "../../../composables/useFetchList.ts";
 import api from '../../../api';
 
 import BaseInput from '../../../components/ui/BaseInput.vue';
@@ -23,7 +23,7 @@ const selectedRoleId = ref<number | null>(null);
 const loading = ref(false);
 
 const { error, setError } = useErrorHandler();
-const { roles, fetchRoles } = useRoles();
+const { items: roles, fetchItems: fetchRoles } = useFetchList<{ id: number; name: string }>('/admin/roles');
 
 const userStore = useUserStore();
 const { currentUser } = storeToRefs(userStore);

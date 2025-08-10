@@ -2,8 +2,8 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '../../../store/admin/user/user.store';
-import { useRoles } from '../../../composables/useRoles';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
+import { useFetchList } from "../../../composables/useFetchList.ts";
 
 import BaseForm from '../../../components/ui/BaseForm.vue';
 import BaseInput from '../../../components/ui/BaseInput.vue';
@@ -11,7 +11,7 @@ import FormErrors from '../../../components/ui/FormErrors.vue';
 
 const router = useRouter();
 const userStore = useUserStore();
-const { roles, fetchRoles } = useRoles();
+const { items: roles, fetchItems: fetchRoles } = useFetchList<{ id: number; name: string }>('/admin/roles');
 const { error, setError } = useErrorHandler();
 
 const name = ref('');
