@@ -29,6 +29,7 @@ const menu = [
       { name: 'Создать права', path: '/admin/permissions/create-permissions' },
     ],
   },
+  { name: 'Меню', path: '/admin/menus' },
   { name: 'Настройки', path: '/admin/settings' },
 ];
 

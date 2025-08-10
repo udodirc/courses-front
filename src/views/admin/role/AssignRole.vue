@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { useRoles } from '../../../composables/useRoles.ts';
-import { useUsers } from '../../../composables/useUsers';
-import { useErrorHandler } from '../../../composables/useErrorHandler';
 import api from '../../../api';
+import { useRouter } from 'vue-router';
+import { useErrorHandler } from '../../../composables/useErrorHandler';
+import { useFetchList } from "../../../composables/useFetchList.ts";
 
 const router = useRouter();
 const loading = ref(false);
@@ -12,8 +11,8 @@ const loading = ref(false);
 const selectedUserId = ref<number | ''>('');
 const selectedRoleId = ref<number | ''>('');
 
-const { roles, fetchRoles } = useRoles();
-const { users, fetchUsers } = useUsers();
+const { items: roles, fetchItems: fetchRoles } = useFetchList<{ id: number; name: string }>('/admin/roles');
+const { items: users, fetchItems: fetchUsers } = useFetchList<{ id: number; name: string }>('/admin/users');
 const { error, setError } = useErrorHandler();
 
 async function save() {

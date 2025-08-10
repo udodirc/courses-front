@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useRoleStore } from '../../../store/admin/role/role.store';
+import { useMenuStore } from '../../../store/admin/menu/menu.store';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
 import { storeToRefs } from 'pinia';
 import api from '../../../api';
@@ -12,16 +12,16 @@ import FormErrors from '../../../components/ui/FormErrors.vue';
 
 const route = useRoute();
 const router = useRouter();
-const roleId = Number(route.params.id);
+const menuId = Number(route.params.id);
 
 const name = ref('');
 const loading = ref(false);
 const { error, setError } = useErrorHandler();
 
-const roleStore = useRoleStore();
-const { currentRole } = storeToRefs(roleStore);
+const menuStore = useMenuStore();
+const { currentMenu } = storeToRefs(menuStore);
 
-watch(currentRole, (val) => {
+watch(currentMenu, (val) => {
   if (val) {
     name.value = val.name;
   }
@@ -32,10 +32,10 @@ async function save() {
   error.value = '';
 
   try {
-    await api.put(`/admin/roles/${roleId}`, {
+    await api.put(`/admin/menu/${menuId}`, {
       name: name.value,
     });
-    router.push('/admin/roles');
+    router.push('/admin/menus');
   } catch (e: any) {
     setError(e);
   } finally {
@@ -44,13 +44,13 @@ async function save() {
 }
 
 onMounted(() => {
-  roleStore.fetchItem(roleId);
+  menuStore.fetchItem(menuId);
 });
 </script>
 
 <template>
   <div>
-    <h2 class="text-2xl mb-4">Редактировать роль</h2>
+    <h2 class="text-2xl mb-4">Редактировать меню</h2>
     <FormErrors :error="error" />
     <BaseForm :loading="loading" :onSubmit="save">
       <BaseInput v-model="name" label="Имя" required />

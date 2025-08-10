@@ -2,18 +2,23 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '../../../store/admin/user/user.store';
-import { useRoles } from '../../../composables/useRoles';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
+import { useFetchList } from "../../../composables/useFetchList.ts";
+
+import BaseForm from '../../../components/ui/BaseForm.vue';
+import BaseInput from '../../../components/ui/BaseInput.vue';
+import FormErrors from '../../../components/ui/FormErrors.vue';
 
 const router = useRouter();
 const userStore = useUserStore();
-const { roles, fetchRoles } = useRoles();
+const { items: roles, fetchItems: fetchRoles } = useFetchList<{ id: number; name: string }>('/admin/roles');
 const { error, setError } = useErrorHandler();
 
 const name = ref('');
 const email = ref('');
 const password = ref('');
 const selectedRoleId = ref<number | null>(null);
+
 const loading = ref(false);
 
 const selectedRoleName = computed(() => {
@@ -21,7 +26,7 @@ const selectedRoleName = computed(() => {
   return role?.name || null;
 });
 
-async function submitForm() {
+async function save() {
   error.value = '';
   loading.value = true;
 
@@ -47,21 +52,14 @@ onMounted(() => {
 
 <template>
   <div>
-    <h2>Создание пользователя</h2>
+    <h2 class="text-2xl mb-4">Создание пользователя</h2>
 
-    <!-- Ошибки -->
-    <ul v-if="error && typeof error === 'object'" class="text-red-600 mb-4">
-      <li v-for="(messages, field) in error" :key="field">
-        {{ messages[0] }}
-      </li>
-    </ul>
+    <FormErrors :error="error" />
 
-    <p v-else-if="error" class="text-red-600 mb-4">{{ error }}</p>
-
-    <form @submit.prevent="submitForm">
-      <label>
-        Роль
-        <select v-model="selectedRoleId" required>
+    <BaseForm :loading="loading" :onSubmit="save">
+      <label class="block mb-4">
+        <span class="block font-medium mb-1">Роль</span>
+        <select v-model="selectedRoleId" required class="w-full border rounded px-3 py-2">
           <option disabled value="">Выберите роль</option>
           <option v-for="role in roles" :key="role.id" :value="role.id">
             {{ role.name }}
@@ -69,28 +67,12 @@ onMounted(() => {
         </select>
       </label>
 
-      <label>
-        Имя
-        <input v-model="name" required />
-      </label>
-
-      <label>
-        Email
-        <input v-model="email" type="email" required />
-      </label>
-
-      <label>
-        Пароль
-        <input v-model="password" type="password" required />
-      </label>
-
-      <button type="submit" :disabled="loading">
-        {{ loading ? 'Создаю...' : 'Создать' }}
-      </button>
-    </form>
+      <BaseInput v-model="name" label="Имя" required />
+      <BaseInput v-model="email" label="Email" type="email" required />
+      <BaseInput v-model="password" label="Пароль" type="password" required />
+    </BaseForm>
   </div>
 </template>
 
 <style scoped>
-
 </style>

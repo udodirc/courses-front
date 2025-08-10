@@ -2,6 +2,7 @@
 import { computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '../../../store/admin/user/user.store';
+import BaseShow from '../../../components/BaseShow.vue';
 
 const route = useRoute();
 const userStore = useUserStore();
@@ -27,16 +28,6 @@ onMounted(async () => {
     <p v-if="loading" class="text-gray-600">Загрузка...</p>
     <p v-else-if="error" class="text-red-600">{{ error }}</p>
 
-    <div
-        v-else-if="user"
-        class="border border-gray-200 p-4 rounded bg-gray-50 space-y-2"
-    >
-      <p><strong>ID:</strong> {{ user.id }}</p>
-      <p><strong>Имя:</strong> {{ user.name }}</p>
-      <p><strong>Email:</strong> {{ user.email }}</p>
-      <p><strong>Создан:</strong> {{ new Date(user.createdAt).toLocaleString() }}</p>
-    </div>
-
-    <p v-else class="text-gray-500">Пользователь не найден.</p>
+    <BaseShow v-else :item="user" :exclude="['updatedAt']"/>
   </div>
 </template>

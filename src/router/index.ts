@@ -83,6 +83,26 @@ const routes = [
                 name: 'AdminCreatePermissions',
                 component: () => import('../views/admin/permissions/CreatePermissions.vue'),
             },
+            {
+                path: 'menus',
+                name: 'AdminMenus',
+                component: () => import('../views/admin/menu/Menus.vue'),
+            },
+            {
+                path: '/admin/menu/:id',
+                name: 'AdminMenuShow',
+                component: () => import('../views/admin/menu/MenuShow.vue'),
+            },
+            {
+                path: '/admin/menu/create',
+                name: 'AdminMenuCreate',
+                component: () => import('../views/admin/menu/MenuCreate.vue'),
+            },
+            {
+                path: 'menu/:id/edit',
+                name: 'AdminMenuEdit',
+                component: () => import('../views/admin/menu/MenuEdit.vue'),
+            },
         ],
     },
 
