@@ -19,6 +19,7 @@ const { currentPage, paginatedData, totalPages, nextPage, prevPage } =
     usePagination(items, props.perPage);
 
 const { view, edit, delete: destroy } = useCrudActions(props.basePath, props.deleteItem);
+console.log(totalPages);
 </script>
 
 <template>

@@ -10,13 +10,9 @@ export interface ApiResponse<T> {
 export abstract class BaseApi<TCreate, TEntity = any> {
     protected abstract resource: string;
 
-    async getList(): Promise<ApiResponse<TEntity[]>> {
-        try {
-            const res: AxiosResponse<ApiResponse<TEntity[]>> = await api.get(`/admin/${this.resource}`);
-            return res.data;
-        } catch (err) {
-            throw err as AxiosError;
-        }
+    async getList(params?: Record<string, any>): Promise<ApiResponse<TEntity[]>> {
+        const res: AxiosResponse<any> = await api.get(`/admin/${this.resource}`, { params });
+        return res.data;
     }
 
     async fetch(id: number): Promise<ApiResponse<TEntity>> {

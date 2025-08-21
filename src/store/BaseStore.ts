@@ -1,9 +1,18 @@
-// stores/BaseStore.ts
-import { type UnwrapRef } from 'vue';
 import { defineStore } from 'pinia';
 
 export interface IBaseApi<TCreate, TEntity> {
-    getList: () => Promise<{ data: TEntity[] }>;
+    getList: (
+        filters?: Record<string, any>
+    ) => Promise<{
+        data: TEntity[];
+        meta?: {
+            last_page?: number;
+            total?: number;
+            current_page?: number;
+            per_page?: number;
+        };
+    }>;
+
     create: (data: TCreate) => Promise<{ data: TEntity }>;
     delete: (id: number) => Promise<{ data: null }>;
     fetch: (id: number) => Promise<{ data: TEntity }>;
@@ -14,28 +23,44 @@ export abstract class BaseStore<TCreate, TEntity> {
 
     public getStore(
         api: IBaseApi<TCreate, TEntity>,
-        customGetters?: Record<string, any>
+        customGetters?: Record<string, any>,
+        options?: { perPage?: number }
     ) {
         return defineStore(this.storeId, {
-            state: (): {
-                items: TEntity[];
-                item: TEntity | null;
-                loading: boolean;
-                error: string;
-            } => ({
-                items: [],
-                item: null,
+            state: () => ({
+                items: [] as TEntity[],
+                item: null as TEntity | null,
                 loading: false,
                 error: '',
+                filters: {} as Record<string, any>,
+                currentPage: 1,
+                totalPages: 1,
+                perPage: options?.perPage ?? 10,
             }),
 
             actions: {
-                async fetchList() {
+                async fetchList(filters: Record<string, any> = {}, page: number = 1) {
                     this.loading = true;
                     this.error = '';
                     try {
-                        const res = await api.getList();
+                        this.filters = { ...filters };
+                        const res = await api.getList({
+                            ...filters,
+                            page,
+                            per_page: this.perPage,
+                        });
+
                         this.items = res.data;
+
+                        if (res.meta) {
+                            this.currentPage = res.meta.current_page ?? page;
+                            this.totalPages = res.meta.last_page ?? 1;
+                            this.perPage = res.meta.per_page ?? this.perPage;
+                        } else {
+                            // если мета нет — оставляем предыдущие значения
+                            this.currentPage = page;
+                            this.totalPages = 1;
+                        }
                     } catch (e: any) {
                         this.error = e?.response?.data?.message || 'Ошибка загрузки';
                         throw e;
@@ -77,13 +102,17 @@ export abstract class BaseStore<TCreate, TEntity> {
                     this.error = '';
                     try {
                         const res = await api.fetch(id);
-                        this.item = res.data as UnwrapRef<TEntity>;
+                        this.item = res.data;
                     } catch (e: any) {
                         this.error = e?.response?.data?.message || 'Ошибка получения';
                         throw e;
                     } finally {
                         this.loading = false;
                     }
+                },
+
+                setPerPage(count: number) {
+                    this.perPage = count;
                 },
             },
 
