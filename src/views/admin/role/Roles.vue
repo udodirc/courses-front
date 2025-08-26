@@ -7,31 +7,29 @@ import Filters from "../../../components/Filters.vue";
 // стор
 const roleStore = useRoleStore();
 
-// фильтры (аналогично пользователям, пока простые)
-const filters = ref([
-  { field: 'name', value: '' },
-  { field: 'created_from', value: '' },
-  { field: 'created_to', value: '' },
-]);
-
-// схема фильтров
-const schema = [
+const schema = ref([
   { field: 'name', label: 'Имя', type: 'text', col: 'left' },
   { field: 'created_from', label: 'Создано с', type: 'date', col: 'middle' },
   { field: 'created_to', label: 'Создано по', type: 'date', col: 'middle' },
-];
+]);
+
+const filters = ref(schema.value.map(f => ({ field: f.field, value: '' })));
 
 // превращаем [{field,value}] → { field: value }
 function toFilterObject(arr: { field: string; value: string }[]) {
   return arr.reduce<Record<string, string>>((acc, f) => {
-    acc[f.field] = f.value;
+    if (f.value) acc[f.field] = f.value;
     return acc;
   }, {});
 }
 
-// применить фильтры
 const applyFilters = () => {
   roleStore.fetchList(toFilterObject(filters.value), 1);
+};
+
+const resetFilters = () => {
+  filters.value = schema.value.map(f => ({ field: f.field, value: '' }));
+  applyFilters();
 };
 
 // пагинация
@@ -64,10 +62,10 @@ const columns = [
 
     <!-- Фильтры -->
     <Filters
-        v-model="filters"
+        v-model:filters="filters"
         :schema="schema"
         @apply="applyFilters"
-        @reset="applyFilters"
+        @reset="resetFilters"
     />
 
     <router-link

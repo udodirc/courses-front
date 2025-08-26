@@ -15,7 +15,7 @@ const { items: menus, fetchItems: fetchMenus } = useFetchList<{ id: number; name
 const { error, setError } = useErrorHandler();
 
 const name = ref('');
-const selectedMenuId = ref<number>(0);
+const selectedMenuId = ref<number | null>(null);
 const loading = ref(false);
 
 async function save() {
@@ -48,9 +48,9 @@ onMounted(() => {
 
     <BaseForm :loading="loading" :onSubmit="save">
       <label class="block mb-4">
-        <span class="block font-medium mb-1">Роль</span>
-        <select v-model="selectedMenuId" required class="w-full border rounded px-3 py-2">
-          <option disabled value="">Выберите роль</option>
+        <span class="block font-medium mb-1">Меню</span>
+        <select v-model="selectedMenuId" class="w-full border rounded px-3 py-2">
+          <option :value="null">— Выберите меню —</option>
           <option v-for="menu in menus" :key="menu.id" :value="menu.id">
             {{ menu.name }}
           </option>
