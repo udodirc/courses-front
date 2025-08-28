@@ -75,33 +75,34 @@ const columns = [
 </script>
 
 <template>
-  <div class="max-w-5xl mx-auto p-6 bg-white rounded shadow">
-    <h2 class="text-2xl font-semibold mb-4">Пользователи</h2>
+  <div class="w-full h-screen overflow-x-hidden border-t flex flex-col">
+    <main class="w-full flex-grow p-6">
+      <h1 class="text-3xl text-black pb-6">Пользователи</h1>
+        <Filters
+            v-model:filters="filters"
+            :schema="schema"
+            @apply="applyFilters"
+            @reset="resetFilters"
+        />
 
-    <Filters
-        v-model:filters="filters"
-        :schema="schema"
-        @apply="applyFilters"
-        @reset="resetFilters"
-    />
+        <router-link
+            to="/admin/users/create"
+            class="inline-block mb-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded"
+        >
+          Создать
+        </router-link>
 
-    <router-link
-        to="/admin/users/create"
-        class="inline-block mb-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded"
-    >
-      Создать
-    </router-link>
-
-    <ItemList
-        :itemsSource="() => userStore.getUserList"
-        :columns="columns"
-        :basePath="'/admin/users'"
-        :deleteItem="userStore.deleteItem"
-        :perPage="userStore.perPage"
-        :currentPage="userStore.currentPage"
-        :totalPages="userStore.totalPages"
-        @next="onNext"
-        @prev="onPrev"
-    />
+        <ItemList
+            :itemsSource="() => userStore.getUserList"
+            :columns="columns"
+            :basePath="'/admin/users'"
+            :deleteItem="userStore.deleteItem"
+            :perPage="userStore.perPage"
+            :currentPage="userStore.currentPage"
+            :totalPages="userStore.totalPages"
+            @next="onNext"
+            @prev="onPrev"
+        />
+      </main>
   </div>
 </template>
