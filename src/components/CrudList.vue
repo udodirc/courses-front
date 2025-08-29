@@ -11,13 +11,16 @@ const { items, columns, currentPage, totalPages } = defineProps<{
   totalPages: number,
 }>();
 
-const emit = defineEmits(['prev', 'next', 'view', 'edit', 'delete']);
+// добавил событие "go"
+const emit = defineEmits(['prev', 'next', 'go', 'view', 'edit', 'delete']);
 </script>
 
 <template>
   <BaseTable>
     <template #head>
-      <th class="w-1/3 text-left py-3 px-4 uppercase font-semibold text-sm" v-for="col in columns" :key="col.field">{{ col.label }}</th>
+      <th class="w-1/3 text-left py-3 px-4 uppercase font-semibold text-sm" v-for="col in columns" :key="col.field">
+        {{ col.label }}
+      </th>
       <th>Действия</th>
     </template>
 
@@ -47,5 +50,6 @@ const emit = defineEmits(['prev', 'next', 'view', 'edit', 'delete']);
       :totalPages="totalPages"
       @prev="$emit('prev')"
       @next="$emit('next')"
+      @go="$emit('go', $event)"
   />
 </template>

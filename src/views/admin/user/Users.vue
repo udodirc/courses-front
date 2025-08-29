@@ -53,6 +53,10 @@ const onPrev = () => {
   }
 };
 
+const goToPage = (page: number) => {
+  userStore.fetchList(toFilterObject(filters.value), page);
+};
+
 // загрузка ролей + установка в schema
 onMounted(async () => {
   await fetchRoles();
@@ -92,17 +96,17 @@ const columns = [
           Создать
         </router-link>
 
-        <ItemList
-            :itemsSource="() => userStore.getUserList"
-            :columns="columns"
-            :basePath="'/admin/users'"
-            :deleteItem="userStore.deleteItem"
-            :perPage="userStore.perPage"
-            :currentPage="userStore.currentPage"
-            :totalPages="userStore.totalPages"
-            @next="onNext"
-            @prev="onPrev"
-        />
-      </main>
+      <ItemList
+          :items="userStore.getUserList"
+          :columns="columns"
+          :basePath="'/admin/users'"
+          :deleteItem="userStore.deleteItem"
+          :currentPage="userStore.currentPage"
+          :totalPages="userStore.totalPages"
+          @next="onNext"
+          @prev="onPrev"
+          @go="goToPage"
+      />
+    </main>
   </div>
 </template>

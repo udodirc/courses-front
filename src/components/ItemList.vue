@@ -1,34 +1,34 @@
-<!-- components/ItemList.vue -->
 <script setup lang="ts">
-import { computed } from 'vue';
 import CrudList from './CrudList.vue';
 import { useCrudActions } from '../composables/useCrudActions';
-import { usePagination } from '../composables/usePagination';
 
 const props = defineProps<{
-  itemsSource: () => any[];
+  items: any[];
   columns: { label: string; field: string }[];
   basePath: string;
   deleteItem: (id: number) => Promise<void>;
-  perPage: number;
+  currentPage: number;
+  totalPages: number;
 }>();
 
-const items = computed(() => props.itemsSource() || []);
-
-const { currentPage, paginatedData, totalPages, nextPage, prevPage } =
-    usePagination(items, props.perPage);
+const emit = defineEmits(['prev', 'next', 'go']);
 
 const { view, edit, delete: destroy } = useCrudActions(props.basePath, props.deleteItem);
+
+const onPrev = () => emit('prev');
+const onNext = () => emit('next');
+const onGo = (page: number) => emit('go', page);
 </script>
 
 <template>
   <CrudList
-      :items="paginatedData"
+      :items="items"
       :columns="columns"
       :currentPage="currentPage"
       :totalPages="totalPages"
-      @prev="prevPage"
-      @next="nextPage"
+      @prev="onPrev"
+      @next="onNext"
+      @go="onGo"
       @view="view"
       @edit="edit"
       @delete="destroy"
