@@ -1,68 +1,65 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import api from '../../../api';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useErrorHandler } from '../../../composables/useErrorHandler';
-import { useFetchList } from "../../../composables/useFetchList.ts";
+import { useFetchList } from '../../../composables/useFetchList';
+import { useEntitySave } from '../../../composables/useEntitySave';
+import BaseForm from '../../../components/ui/BaseForm.vue';
+import BaseSelect from '../../../components/ui/BaseSelect.vue';
+import FormErrors from '../../../components/ui/FormErrors.vue';
 
 const router = useRouter();
-const loading = ref(false);
 
-const selectedUserId = ref<number | ''>('');
-const selectedRoleId = ref<number | ''>('');
-
-const { items: roles, fetchItems: fetchRoles } = useFetchList<{ id: number; name: string }>('/admin/roles');
+// Загружаем список пользователей и ролей
 const { items: users, fetchItems: fetchUsers } = useFetchList<{ id: number; name: string }>('/admin/users');
-const { error, setError } = useErrorHandler();
+const { items: roles, fetchItems: fetchRoles } = useFetchList<{ id: number; name: string }>('/admin/roles');
+
+// Модель формы
+const formModel = ref({
+  userId: null as number | null,
+  roleId: null as number | null,
+});
+
+// Вычисляем имя роли для отправки на API
+const selectedRoleName = computed(() => {
+  const role = roles.value.find(r => r.id === formModel.value.roleId);
+  return role?.name || null;
+});
+
+// Универсальное сохранение
+const { saveEntity, loading, error } = useEntitySave<typeof formModel.value>();
 
 async function save() {
-  loading.value = true;
-  try {
-    await api.post('/admin/roles/assign', {
-      id: selectedUserId.value,
-      role: selectedRoleId.value,
-    });
-    router.push('/admin/users');
-  } catch (e) {
-    setError(e);
-  } finally {
-    loading.value = false;
-  }
+  await saveEntity('/admin/roles/assign', {
+    id: formModel.value.userId,
+    role: selectedRoleName.value,
+  });
+  router.push('/admin/roles');
 }
 
+// Загрузка данных
 onMounted(() => {
-  fetchRoles();
   fetchUsers();
+  fetchRoles();
 });
 </script>
 
 <template>
-  <form @submit.prevent="save" class="space-y-4">
-    <!-- Ошибки -->
-    <div v-if="error && typeof error === 'object'" class="text-red-600 text-sm">
-      <div v-for="(messages, field) in error" :key="field">
-        {{ Array.isArray(messages) ? messages[0] : messages }}
-      </div>
-    </div>
+  <BaseForm label="Назначить роль" :loading="loading" :onSubmit="save">
+    <FormErrors :error="error" />
 
-    <!-- Пользователь -->
-    <select v-model="selectedUserId" required>
-      <option disabled value="">Выберите пользователя</option>
-      <option v-for="user in users" :key="user.id" :value="user.id">
-        {{ user.name }}
-      </option>
-    </select>
+    <BaseSelect
+        v-model="formModel.userId"
+        label="Пользователь"
+        :options="users.map(user => ({ value: user.id, label: user.name }))"
+        required
+    />
 
-    <!-- Роль -->
-    <select v-model="selectedRoleId" required>
-      <option disabled value="">Выберите роль</option>
-      <option v-for="role in roles" :key="role.id" :value="role.name">
-        {{ role.name }}
-      </option>
-    </select>
+    <BaseSelect
+        v-model="formModel.roleId"
+        label="Роль"
+        :options="roles.map(role => ({ value: role.id, label: role.name }))"
+        required
+    />
 
-    <button type="submit" :disabled="loading">
-      {{ loading ? 'Сохраняю...' : 'Сохранить' }}
-    </button>
-  </form>
+  </BaseForm>
 </template>
