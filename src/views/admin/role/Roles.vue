@@ -10,8 +10,8 @@ const roleStore = useRoleStore();
 
 const schema = ref<SchemaItem[]>([
   { field: 'name', label: 'Имя', type: 'text', col: 'left' },
-  { field: 'created_from', label: 'Создано с', type: 'date', col: 'middle' },
-  { field: 'created_to', label: 'Создано по', type: 'date', col: 'middle' },
+  { field: 'created_from', label: 'Создано с', type: 'date', col: 'left' },
+  { field: 'created_to', label: 'Создано по', type: 'date', col: 'left' },
 ]);
 
 // composables

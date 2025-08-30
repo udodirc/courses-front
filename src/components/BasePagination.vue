@@ -1,13 +1,14 @@
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   currentPage: number;
   totalPages: number;
 }>();
-defineEmits(['prev', 'next', 'go']);
+const emit = defineEmits(['prev', 'next', 'go']);
 </script>
 
 <template>
-  <div class="flex items-center justify-center space-x-2 mt-4">
+  <!-- Не показываем, если totalPages <= 1 -->
+  <div v-if="totalPages > 1" class="flex items-center justify-center space-x-2 mt-4">
     <!-- Назад -->
     <button
         class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
