@@ -53,13 +53,16 @@ const onPrev = () => {
   }
 };
 
+const goToPage = (page: number) => {
+  menuStore.fetchList(toFilterObject(filters.value), page);
+};
+
 // загружаем меню и добавляем в schema
 onMounted(async () => {
   await fetchMenus();
   const parentFilter = schema.value.find(s => s.field === 'parent_id');
   if (parentFilter) {
     parentFilter.options = [
-      { label: '— Нет родителя —', value: '' },
       ...menus.value.map(m => ({ label: m.name, value: m.id })),
     ];
   }
@@ -75,34 +78,37 @@ const columns = [
 </script>
 
 <template>
-  <div class="max-w-5xl mx-auto p-6 bg-white rounded shadow">
-    <h2 class="text-2xl font-semibold mb-4">Меню</h2>
+  <div class="w-full h-screen overflow-x-hidden border-t flex flex-col">
+    <main class="w-full flex-grow p-6">
+      <h1 class="text-3xl text-black pb-6">Меню</h1>
 
-    <!-- Фильтры -->
-    <Filters
-        v-model:filters="filters"
-        :schema="schema"
-        @apply="applyFilters"
-        @reset="resetFilters"
-    />
+      <!-- Фильтры -->
+      <Filters
+          v-model:filters="filters"
+          :schema="schema"
+          @apply="applyFilters"
+          @reset="resetFilters"
+      />
 
-    <router-link
-        to="/admin/menu/create"
-        class="inline-block mb-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded"
-    >
-      Создать
-    </router-link>
+      <router-link
+          to="/admin/menu/create"
+          class="inline-block mb-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded"
+      >
+        Создать
+      </router-link>
 
-    <ItemList
-        :itemsSource="() => menuStore.getMenuList"
-        :columns="columns"
-        :basePath="'/admin/menu'"
-        :deleteItem="menuStore.deleteItem"
-        :perPage="menuStore.perPage"
-        :currentPage="menuStore.currentPage"
-        :totalPages="menuStore.totalPages"
-        @next="onNext"
-        @prev="onPrev"
-    />
+      <ItemList
+          :items="menuStore.getMenuList"
+          :columns="columns"
+          :basePath="'/admin/menu'"
+          :deleteItem="menuStore.deleteItem"
+          :currentPage="menuStore.currentPage"
+          :totalPages="menuStore.totalPages"
+          @next="onNext"
+          @prev="onPrev"
+          @go="goToPage"
+      />
+
+    </main>
   </div>
 </template>

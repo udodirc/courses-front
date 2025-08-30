@@ -38,7 +38,7 @@ watch(currentUser, (val) => {
 
 async function save() {
   loading.value = true;
-  error.value = '';
+  error.value = null;
 
   try {
     const selectedRole = roles.value.find(r => r.id === selectedRoleId.value);
@@ -63,7 +63,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <BaseForm :loading="loading" :onSubmit="save">
+  <BaseForm label="Редактировать пользователя" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
     <BaseSelect
         v-model="selectedRoleId"
@@ -71,7 +71,6 @@ onMounted(() => {
         :options="roles.map(role => ({ value: role.id, label: role.name }))"
         required
     />
-
     <BaseInput v-model="name" label="Имя" required />
     <BaseInput v-model="email" label="Email" type="email" required />
     <BaseInput v-model="password" label="Пароль" type="password" />

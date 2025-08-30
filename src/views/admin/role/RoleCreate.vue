@@ -16,7 +16,7 @@ const name = ref('');
 const loading = ref(false);
 
 async function save() {
-  error.value = '';
+  error.value = null;
   loading.value = true;
 
   try {
@@ -31,17 +31,9 @@ async function save() {
   }
 }
 </script>
-
 <template>
-  <div>
-    <h2 class="text-2xl mb-4">Создание роли</h2>
-
+  <BaseForm label="Создание роли" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
-
-    <BaseForm :loading="loading" :onSubmit="save">
-      <BaseInput v-model="name" label="Имя" required />
-    </BaseForm>
-  </div>
+    <BaseInput v-model="name" label="Имя" required />
+  </BaseForm>
 </template>
-
-<style scoped></style>

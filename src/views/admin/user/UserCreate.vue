@@ -27,7 +27,7 @@ const selectedRoleName = computed(() => {
 });
 
 async function save() {
-  error.value = '';
+  error.value = null;
   loading.value = true;
 
   try {
@@ -51,7 +51,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <BaseForm :loading="loading" :onSubmit="save">
+  <BaseForm label="Создание пользователя" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
     <BaseSelect
         v-model="selectedRoleId"

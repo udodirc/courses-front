@@ -8,6 +8,7 @@ import { useErrorHandler } from '../../../composables/useErrorHandler';
 import BaseForm from '../../../components/ui/BaseForm.vue';
 import BaseInput from '../../../components/ui/BaseInput.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
+import BaseSelect from "../../../components/ui/BaseSelect.vue";
 
 const router = useRouter();
 const menuStore = useMenuStore();
@@ -19,7 +20,7 @@ const selectedMenuId = ref<number | null>(null);
 const loading = ref(false);
 
 async function save() {
-  error.value = '';
+  error.value = null;
   loading.value = true;
 
   try {
@@ -41,24 +42,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <h2 class="text-2xl mb-4">Создание меню</h2>
-
+  <BaseForm label="Создание меню" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
-
-    <BaseForm :loading="loading" :onSubmit="save">
-      <label class="block mb-4">
-        <span class="block font-medium mb-1">Меню</span>
-        <select v-model="selectedMenuId" class="w-full border rounded px-3 py-2">
-          <option :value="null">— Выберите меню —</option>
-          <option v-for="menu in menus" :key="menu.id" :value="menu.id">
-            {{ menu.name }}
-          </option>
-        </select>
-      </label>
-      <BaseInput v-model="name" label="Имя" required />
-    </BaseForm>
-  </div>
+    <BaseSelect
+        v-model="selectedMenuId"
+        label="Меню"
+        :options="menus.map(menu => ({ value: menu.id, label: menu.name }))"
+        required
+    />
+    <BaseInput v-model="name" label="Имя" required />
+  </BaseForm>
 </template>
-
-<style scoped></style>
