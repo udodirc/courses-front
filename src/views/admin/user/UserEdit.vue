@@ -3,57 +3,48 @@ import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '../../../store/admin/user/user.store';
-import { useErrorHandler } from '../../../composables/useErrorHandler';
 import { useFetchList } from "../../../composables/useFetchList.ts";
-import api from '../../../api';
-
+import { useEntitySave } from '../../../composables/useEntitySave';
 import BaseInput from '../../../components/ui/BaseInput.vue';
 import BaseSelect from '../../../components/ui/BaseSelect.vue';
 import BaseForm from '../../../components/ui/BaseForm.vue';
-import FormErrors from "@/components/ui/FormErrors.vue";
+import FormErrors from "../../../components/ui/FormErrors.vue";
 
 const route = useRoute();
 const router = useRouter();
 const userId = Number(route.params.id);
 
-const name = ref('');
-const email = ref('');
-const password = ref('');
-const selectedRoleId = ref<number | null>(null);
-const loading = ref(false);
-
-const { error, setError } = useErrorHandler();
-const { items: roles, fetchItems: fetchRoles } = useFetchList<{ id: number; name: string }>('/admin/roles');
-
 const userStore = useUserStore();
 const { currentUser } = storeToRefs(userStore);
 
+// модель формы
+const formModel = ref({
+  name: '',
+  email: '',
+  password: '',
+  role: null as string | null,
+});
+
+// загрузка ролей
+const { items: roles, fetchItems: fetchRoles } = useFetchList<{ id: number; name: string }>('/admin/roles');
+
+// универсальное сохранение
+const { saveEntity, loading, error } = useEntitySave<typeof formModel.value>();
+
+// заполнение формы при изменении currentUser
 watch(currentUser, (val) => {
   if (val) {
-    name.value = val.name;
-    email.value = val.email;
-    selectedRoleId.value = val.role?.id ?? null;
+    formModel.value.name = val.name;
+    formModel.value.email = val.email;
+    formModel.value.role = val.role?.name ?? null;
   }
 });
 
+// сохранение
 async function save() {
-  loading.value = true;
-  error.value = null;
-
-  try {
-    const selectedRole = roles.value.find(r => r.id === selectedRoleId.value);
-    await api.put(`/admin/users/${userId}`, {
-      name: name.value,
-      email: email.value,
-      password: password.value || undefined,
-      role: selectedRole?.name,
-    });
-    router.push('/admin/users');
-  } catch (e: any) {
-    setError(e);
-  } finally {
-    loading.value = false;
-  }
+  const selectedRole = roles.value.find(r => r.name === formModel.value.role);
+  await saveEntity('/admin/users', { ...formModel.value, role: selectedRole?.name }, userId);
+  router.push('/admin/users');
 }
 
 onMounted(() => {
@@ -65,14 +56,16 @@ onMounted(() => {
 <template>
   <BaseForm label="Редактировать пользователя" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
+
     <BaseSelect
-        v-model="selectedRoleId"
+        v-model="formModel.role"
         label="Роль"
-        :options="roles.map(role => ({ value: role.id, label: role.name }))"
+        :options="roles.map(r => ({ value: r.name, label: r.name }))"
         required
     />
-    <BaseInput v-model="name" label="Имя" required />
-    <BaseInput v-model="email" label="Email" type="email" required />
-    <BaseInput v-model="password" label="Пароль" type="password" />
+
+    <BaseInput v-model="formModel.name" label="Имя" required />
+    <BaseInput v-model="formModel.email" label="Email" type="email" required />
+    <BaseInput v-model="formModel.password" label="Пароль" type="password" />
   </BaseForm>
 </template>
