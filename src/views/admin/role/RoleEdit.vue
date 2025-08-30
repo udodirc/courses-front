@@ -2,10 +2,8 @@
 import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useRoleStore } from '../../../store/admin/role/role.store';
-import { useErrorHandler } from '../../../composables/useErrorHandler';
 import { storeToRefs } from 'pinia';
-import api from '../../../api';
-
+import { useEntitySave } from '../../../composables/useEntitySave';
 import BaseInput from '../../../components/ui/BaseInput.vue';
 import BaseForm from '../../../components/ui/BaseForm.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
@@ -14,33 +12,28 @@ const route = useRoute();
 const router = useRouter();
 const roleId = Number(route.params.id);
 
-const name = ref('');
-const loading = ref(false);
-const { error, setError } = useErrorHandler();
-
 const roleStore = useRoleStore();
 const { currentRole } = storeToRefs(roleStore);
 
+// форма
+const formModel = ref({
+  name: '',
+});
+
+// универсальное сохранение
+const { saveEntity, loading, error } = useEntitySave<typeof formModel.value>();
+
+// заполняем форму при загрузке роли
 watch(currentRole, (val) => {
   if (val) {
-    name.value = val.name;
+    formModel.value.name = val.name;
   }
 });
 
+// сохранение
 async function save() {
-  loading.value = true;
-  error.value = '';
-
-  try {
-    await api.put(`/admin/roles/${roleId}`, {
-      name: name.value,
-    });
-    router.push('/admin/roles');
-  } catch (e: any) {
-    setError(e);
-  } finally {
-    loading.value = false;
-  }
+  await saveEntity('/admin/roles', formModel.value, roleId);
+  router.push('/admin/roles');
 }
 
 onMounted(() => {
@@ -49,11 +42,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <h2 class="text-2xl mb-4">Редактировать роль</h2>
+  <BaseForm label="Редактировать роль" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
-    <BaseForm :loading="loading" :onSubmit="save">
-      <BaseInput v-model="name" label="Имя" required />
-    </BaseForm>
-  </div>
+    <BaseInput v-model="formModel.name" label="Имя" required />
+  </BaseForm>
 </template>

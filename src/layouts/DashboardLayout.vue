@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { RouterView, RouterLink, useRoute, useRouter } from 'vue-router';
-import { useAuthStore } from '../store/admin/auth/auth.store';
+import { ref } from "vue";
+import { RouterView, RouterLink, useRoute, useRouter } from "vue-router";
+import { useAuthStore } from "../store/admin/auth/auth.store";
 
 const route = useRoute();
 const router = useRouter();
@@ -9,31 +9,35 @@ const auth = useAuthStore();
 
 function logout() {
   auth.logout();
-  router.push('/admin/login');
+  router.push("/admin/login");
 }
 
+// меню
 const menu = [
-  { name: 'Админ панель', path: '/admin/dashboard' },
-  { name: 'Пользователи', path: '/admin/users' },
+  { name: "Админ панель", path: "/admin/dashboard", icon: "fas fa-tachometer-alt" },
+  { name: "Пользователи", path: "/admin/users", icon: "fas fa-users" },
   {
-    name: 'Роли',
+    name: "Роли",
+    icon: "fas fa-user-shield",
     children: [
-      { name: 'Все роли', path: '/admin/roles' },
-      { name: 'Назначить роль', path: '/admin/roles/assign-role' }
+      { name: "Все роли", path: "/admin/roles" },
+      { name: "Назначить роль", path: "/admin/roles/assign-role" },
     ],
   },
   {
-    name: 'Права доступа',
+    name: "Права доступа",
+    icon: "fas fa-key",
     children: [
-      { name: 'Дать доступ', path: '/admin/permissions/give-permissions' },
-      { name: 'Создать права', path: '/admin/permissions/create-permissions' },
+      { name: "Дать доступ", path: "/admin/permissions/give-permissions" },
+      { name: "Создать права", path: "/admin/permissions/create-permissions" },
     ],
   },
-  { name: 'Меню', path: '/admin/menus' },
-  { name: 'Настройки', path: '/admin/settings' },
+  { name: "Меню", path: "/admin/menus", icon: "fas fa-bars" },
+  { name: "Настройки", path: "/admin/settings", icon: "fas fa-cogs" },
 ];
 
 const expanded = ref<string | null>(null);
+const mobileOpen = ref(false);
 
 function toggleExpand(name: string) {
   expanded.value = expanded.value === name ? null : name;
@@ -41,38 +45,51 @@ function toggleExpand(name: string) {
 </script>
 
 <template>
-  <div class="layout">
+  <div class="bg-gray-100 font-family-karla flex">
     <!-- Sidebar -->
-    <aside>
-      <h2 class="font-bold text-lg mb-4">Меню</h2>
-      <nav>
+    <aside class="relative bg-sidebar h-screen w-64 hidden sm:block shadow-xl">
+      <div class="p-6">
+        <RouterLink
+            to="/admin/dashboard"
+            class="text-white text-3xl font-semibold uppercase hover:text-gray-300"
+        >
+          Админка
+        </RouterLink>
+      </div>
+
+      <nav class="text-white text-base font-semibold pt-3">
         <div v-for="item in menu" :key="item.name">
-          <!-- Обычные пункты -->
+          <!-- Обычный пункт -->
           <RouterLink
               v-if="!item.children"
               :to="item.path"
-              :class="{ 'bg-[#3e5871]': route.path === item.path }"
+              class="flex items-center py-4 pl-6 nav-item opacity-75 hover:opacity-100"
+              :class="{ 'active-nav-link': route.path === item.path }"
           >
+            <i :class="[item.icon, 'mr-3']"></i>
             {{ item.name }}
           </RouterLink>
 
-          <!-- Пункты с подменю -->
+          <!-- Пункт с подменю -->
           <div v-else>
             <div
                 @click="toggleExpand(item.name)"
-                class="cursor-pointer flex justify-between items-center px-2 py-2 rounded hover:bg-[#3e5871]"
-                :class="{ 'bg-[#3e5871] font-semibold': expanded === item.name }"
+                class="flex items-center justify-between py-4 pl-6 cursor-pointer hover:opacity-100"
+                :class="{ 'active-nav-link': expanded === item.name }"
             >
-              <span>{{ item.name }}</span>
-              <span>{{ expanded === item.name ? '▲' : '▼' }}</span>
+              <div class="flex items-center">
+                <i :class="[item.icon, 'mr-3']"></i>
+                {{ item.name }}
+              </div>
+              <span>{{ expanded === item.name ? "▲" : "▼" }}</span>
             </div>
-            <div v-if="expanded === item.name" class="ml-2 mt-1">
+            <div v-if="expanded === item.name" class="ml-6">
               <RouterLink
                   v-for="sub in item.children"
                   :key="sub.path"
                   :to="sub.path"
-                  class="text-sm pl-3 py-1 block rounded hover:bg-[#3e5871]"
-                  :class="{ 'bg-[#3e5871]': route.path === sub.path }"
+                  class="block py-2 pl-3 text-sm opacity-75 hover:opacity-100"
+                  :class="{ 'active-nav-link': route.path === sub.path }"
               >
                 {{ sub.name }}
               </RouterLink>
@@ -80,22 +97,87 @@ function toggleExpand(name: string) {
           </div>
         </div>
       </nav>
+
+      <!-- Logout -->
+      <button
+          @click="logout"
+          class="absolute w-full bottom-0 upgrade-btn text-white flex items-center justify-center py-4"
+      >
+        <i class="fas fa-sign-out-alt mr-3"></i>
+        Выйти
+      </button>
     </aside>
 
-    <!-- Header -->
-    <header class="header">
-      <h1>Админ-панель</h1>
-      <button class="logout-button" @click="logout">Выйти</button>
-    </header>
+    <!-- Content -->
+    <div class="relative w-full flex flex-col h-screen overflow-y-hidden">
+      <!-- Header -->
+      <header class="w-full items-center bg-white py-2 px-6 hidden sm:flex">
+        <h1 class="text-xl font-bold">Админка</h1>
+      </header>
 
-    <!-- Main -->
-    <main>
-      <RouterView />
-    </main>
+      <!-- Mobile Header -->
+      <header class="w-full bg-sidebar py-5 px-6 sm:hidden">
+        <div class="flex items-center justify-between">
+          <RouterLink
+              to="/admin/dashboard"
+              class="text-white text-3xl font-semibold uppercase hover:text-gray-300"
+          >
+            Admin
+          </RouterLink>
+          <button @click="mobileOpen = !mobileOpen" class="text-white text-3xl">
+            <i v-if="!mobileOpen" class="fas fa-bars"></i>
+            <i v-else class="fas fa-times"></i>
+          </button>
+        </div>
 
-    <!-- Footer -->
-    <footer>
-      &copy; Админка
-    </footer>
+        <!-- Mobile Nav -->
+        <nav v-if="mobileOpen" class="flex flex-col pt-4">
+          <RouterLink
+              v-for="item in menu"
+              v-if="!item.children"
+              :key="item.name"
+              :to="item.path"
+              class="flex items-center text-white py-2 pl-4 nav-item"
+              :class="{ 'active-nav-link': route.path === item.path }"
+          >
+            <i :class="[item.icon, 'mr-3']"></i>
+            {{ item.name }}
+          </RouterLink>
+
+          <div v-else :key="item.name" class="pl-4">
+            <div
+                @click="toggleExpand(item.name)"
+                class="flex justify-between items-center py-2 cursor-pointer text-white"
+            >
+              <span>{{ item.name }}</span>
+              <span>{{ expanded === item.name ? "▲" : "▼" }}</span>
+            </div>
+            <div v-if="expanded === item.name" class="ml-4">
+              <RouterLink
+                  v-for="sub in item.children"
+                  :key="sub.path"
+                  :to="sub.path"
+                  class="block text-white py-1 pl-3"
+                  :class="{ 'active-nav-link': route.path === sub.path }"
+              >
+                {{ sub.name }}
+              </RouterLink>
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      <!-- Main -->
+      <div class="w-full h-screen overflow-x-hidden border-t flex flex-col">
+        <main class="w-full flex-grow p-6">
+          <RouterView />
+        </main>
+        <footer class="w-full bg-white text-right p-4">© Admin</footer>
+      </div>
+    </div>
   </div>
 </template>
+
+<style>
+
+</style>

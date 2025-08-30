@@ -1,24 +1,45 @@
 <template>
-  <form @submit.prevent="submit" class="login-form">
-    <h2>Вход в админ-панель</h2>
+  <div class="w-screen h-screen flex items-center justify-center bg-gray-100">
+    <form @submit.prevent="submit" class="w-full max-w-sm bg-white p-8 rounded-xl shadow-lg space-y-6">
+      <h2 class="text-2xl font-semibold text-gray-800 text-center">Вход в админ-панель</h2>
 
-    <label>
-      Email
-      <input v-model="email" type="email" placeholder="Введите email" required />
-    </label>
+      <!-- Email -->
+      <div class="flex flex-col">
+        <label class="mb-1 text-gray-700 font-medium">Email</label>
+        <input
+            v-model="email"
+            type="email"
+            placeholder="Введите email"
+            required
+            class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+        />
+      </div>
 
-    <label>
-      Пароль
-      <input v-model="password" type="password" placeholder="Введите пароль" required />
-    </label>
+      <!-- Пароль -->
+      <div class="flex flex-col">
+        <label class="mb-1 text-gray-700 font-medium">Пароль</label>
+        <input
+            v-model="password"
+            type="password"
+            placeholder="Введите пароль"
+            required
+            class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+        />
+      </div>
 
-    <button type="submit" :disabled="loading">
-      <span v-if="loading">Вход...</span>
-      <span v-else>Войти</span>
-    </button>
+      <!-- Ошибка -->
+      <p v-if="error" class="text-red-600 text-sm text-center">{{ error }}</p>
 
-    <p v-if="error" class="error">{{ error }}</p>
-  </form>
+      <!-- Кнопка -->
+      <button
+          type="submit"
+          :disabled="loading"
+          class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {{ loading ? 'Вход...' : 'Войти' }}
+      </button>
+    </form>
+  </div>
 </template>
 
 <script lang="ts" setup>

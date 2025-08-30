@@ -1,64 +1,50 @@
 <script setup lang="ts">
-import {onMounted, ref} from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useMenuStore } from '../../../store/admin/menu/menu.store';
 import { useFetchList } from '../../../composables/useFetchList';
-import { useErrorHandler } from '../../../composables/useErrorHandler';
-
+import { useEntitySave } from '../../../composables/useEntitySave';
 import BaseForm from '../../../components/ui/BaseForm.vue';
 import BaseInput from '../../../components/ui/BaseInput.vue';
+import BaseSelect from '../../../components/ui/BaseSelect.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
 
 const router = useRouter();
-const menuStore = useMenuStore();
+
+// загрузка меню для селекта родителя
 const { items: menus, fetchItems: fetchMenus } = useFetchList<{ id: number; name: string }>('/admin/menu');
-const { error, setError } = useErrorHandler();
 
-const name = ref('');
-const selectedMenuId = ref<number | null>(null);
-const loading = ref(false);
+// модель формы
+const formModel = ref({
+  name: '',
+  parentId: null as number | null,
+});
 
+// универсальное сохранение
+const { saveEntity, loading, error } = useEntitySave<typeof formModel.value>();
+
+// сохранение
 async function save() {
-  error.value = '';
-  loading.value = true;
-
-  try {
-    await menuStore.createItem({
-      parent_id: selectedMenuId.value,
-      name: name.value,
-    });
-    router.push('/admin/menus');
-  } catch (e: any) {
-    setError(e);
-  } finally {
-    loading.value = false;
-  }
+  await saveEntity('/admin/menu', {
+    name: formModel.value.name,
+    parent_id: formModel.value.parentId,
+  });
+  router.push('/admin/menus');
 }
 
+// загрузка меню
 onMounted(() => {
   fetchMenus();
 });
 </script>
 
 <template>
-  <div>
-    <h2 class="text-2xl mb-4">Создание меню</h2>
-
+  <BaseForm label="Создание меню" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
-
-    <BaseForm :loading="loading" :onSubmit="save">
-      <label class="block mb-4">
-        <span class="block font-medium mb-1">Меню</span>
-        <select v-model="selectedMenuId" class="w-full border rounded px-3 py-2">
-          <option :value="null">— Выберите меню —</option>
-          <option v-for="menu in menus" :key="menu.id" :value="menu.id">
-            {{ menu.name }}
-          </option>
-        </select>
-      </label>
-      <BaseInput v-model="name" label="Имя" required />
-    </BaseForm>
-  </div>
+    <BaseSelect
+        v-model="formModel.parentId"
+        label="Родительское меню"
+        :options="menus.map(menu => ({ value: menu.id, label: menu.name }))"
+    />
+    <BaseInput v-model="formModel.name" label="Имя" required />
+  </BaseForm>
 </template>
-
-<style scoped></style>

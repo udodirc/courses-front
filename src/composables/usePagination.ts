@@ -1,46 +1,27 @@
-import { ref, computed, unref, type Ref, type ComputedRef } from 'vue';
+// composables/usePagination.ts
+import type { Ref } from 'vue';
+import type { FilterItem } from '../composables/useFilterList'; // <- type-only import
 
-export function usePagination<T>(
-    source: T[] | Ref<T[]> | ComputedRef<T[]>,
-    perPage: number
+export function usePagination(
+    store: any,
+    filters: Ref<FilterItem[]>,
+    toFilterObject: (arr: FilterItem[]) => Record<string, any>
 ) {
-    const currentPage = ref(1);
-
-    // Гарантируем массив всегда
-    const items = computed<T[]>(() => {
-        const value = unref(source);
-        return Array.isArray(value) ? value : [];
-    });
-
-    const totalPages = computed(() => {
-        return items.value.length > 0
-            ? Math.ceil(items.value.length / perPage)
-            : 1;
-    });
-
-    const paginatedData = computed(() => {
-        const start = (currentPage.value - 1) * perPage;
-        const end = start + perPage;
-        return items.value.slice(start, end);
-    });
-
-    const nextPage = () => {
-        if (currentPage.value < totalPages.value) {
-            currentPage.value++;
+    const onNext = () => {
+        if (store.currentPage < store.totalPages) {
+            store.fetchList(toFilterObject(filters.value), store.currentPage + 1);
         }
     };
 
-    const prevPage = () => {
-        if (currentPage.value > 1) {
-            currentPage.value--;
+    const onPrev = () => {
+        if (store.currentPage > 1) {
+            store.fetchList(toFilterObject(filters.value), store.currentPage - 1);
         }
     };
 
-    return {
-        currentPage,
-        paginatedData,
-        totalPages,
-        nextPage,
-        prevPage,
+    const goToPage = (page: number) => {
+        store.fetchList(toFilterObject(filters.value), page);
     };
+
+    return { onNext, onPrev, goToPage };
 }

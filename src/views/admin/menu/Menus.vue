@@ -4,64 +4,32 @@ import { useMenuStore } from '../../../store/admin/menu/menu.store';
 import ItemList from '../../../components/ItemList.vue';
 import Filters from '../../../components/Filters.vue';
 import { useFetchList } from '../../../composables/useFetchList';
+import { useFilterList, type SchemaItem } from '../../../composables/useFilterList';
+import { usePagination } from '../../../composables/usePagination';
 
 const menuStore = useMenuStore();
 
 // загрузка всех меню для селекта родителя
 const { items: menus, fetchItems: fetchMenus } = useFetchList<{ id: number; name: string }>('/admin/menu');
 
-// схема фильтров (ref!)
-const schema = ref([
+// схема фильтров
+const schema = ref<SchemaItem[]>([
   { field: 'name', label: 'Имя', type: 'text', col: 'left' },
-  { field: 'parent_id', label: 'Родительское меню', type: 'select', col: 'left', options: [] as { label: string, value: number | string }[] },
-  { field: 'created_from', label: 'Создано с', type: 'date', col: 'middle' },
+  { field: 'parent_id', label: 'Родительское меню', type: 'select', col: 'middle', options: [] },
+  { field: 'created_from', label: 'Создано с', type: 'date', col: 'left' },
   { field: 'created_to', label: 'Создано по', type: 'date', col: 'middle' },
 ]);
 
-// filters (ref!)
-const filters = ref(schema.value.map(f => ({ field: f.field, value: '' })));
+// composables
+const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(menuStore, schema.value);
+const { onNext, onPrev, goToPage } = usePagination(menuStore, filters, toFilterObject);
 
-// превращаем массив фильтров в объект
-function toFilterObject(arr: { field: string; value: string }[]) {
-  return arr.reduce<Record<string, string>>((acc, f) => {
-    if (f.value) acc[f.field] = f.value;
-    return acc;
-  }, {});
-}
-
-// применить фильтры
-const applyFilters = () => {
-  menuStore.fetchList(toFilterObject(filters.value), 1);
-};
-
-// сбросить фильтры
-const resetFilters = () => {
-  filters.value = schema.value.map(f => ({ field: f.field, value: '' }));
-  applyFilters();
-};
-
-// пагинация
-const onNext = () => {
-  if (menuStore.currentPage < menuStore.totalPages) {
-    menuStore.fetchList(toFilterObject(filters.value), menuStore.currentPage + 1);
-  }
-};
-
-const onPrev = () => {
-  if (menuStore.currentPage > 1) {
-    menuStore.fetchList(toFilterObject(filters.value), menuStore.currentPage - 1);
-  }
-};
-
-// загружаем меню и добавляем в schema
+// загрузка меню и добавление в schema
 onMounted(async () => {
   await fetchMenus();
-  const parentFilter = schema.value.find(s => s.field === 'parent_id');
+  const parentFilter = schema.value.find(f => f.field === 'parent_id');
   if (parentFilter) {
-    parentFilter.options = [
-      { label: '— Нет родителя —', value: '' },
-      ...menus.value.map(m => ({ label: m.name, value: m.id })),
-    ];
+    parentFilter.options = menus.value.map(m => ({ label: m.name, value: m.id }));
   }
   applyFilters();
 });
@@ -75,34 +43,36 @@ const columns = [
 </script>
 
 <template>
-  <div class="max-w-5xl mx-auto p-6 bg-white rounded shadow">
-    <h2 class="text-2xl font-semibold mb-4">Меню</h2>
+  <div class="w-full h-screen overflow-x-hidden border-t flex flex-col">
+    <main class="w-full flex-grow p-6">
+      <h1 class="text-3xl text-black pb-6">Меню</h1>
 
-    <!-- Фильтры -->
-    <Filters
-        v-model:filters="filters"
-        :schema="schema"
-        @apply="applyFilters"
-        @reset="resetFilters"
-    />
+      <!-- Фильтры -->
+      <Filters
+          v-model:filters="filters"
+          :schema="schema"
+          @apply="applyFilters"
+          @reset="resetFilters"
+      />
 
-    <router-link
-        to="/admin/menu/create"
-        class="inline-block mb-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded"
-    >
-      Создать
-    </router-link>
+      <router-link
+          to="/admin/menu/create"
+          class="inline-block mb-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded"
+      >
+        Создать
+      </router-link>
 
-    <ItemList
-        :itemsSource="() => menuStore.getMenuList"
-        :columns="columns"
-        :basePath="'/admin/menu'"
-        :deleteItem="menuStore.deleteItem"
-        :perPage="menuStore.perPage"
-        :currentPage="menuStore.currentPage"
-        :totalPages="menuStore.totalPages"
-        @next="onNext"
-        @prev="onPrev"
-    />
+      <ItemList
+          :items="menuStore.getMenuList"
+          :columns="columns"
+          :basePath="'/admin/menu'"
+          :deleteItem="menuStore.deleteItem"
+          :currentPage="menuStore.currentPage"
+          :totalPages="menuStore.totalPages"
+          @next="onNext"
+          @prev="onPrev"
+          @go="goToPage"
+      />
+    </main>
   </div>
 </template>

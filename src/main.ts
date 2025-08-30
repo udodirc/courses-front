@@ -11,10 +11,6 @@ import { useAuthStore } from './store/admin/auth/auth.store';
 import PrimeVue from 'primevue/config';
 import MultiSelect from 'primevue/multiselect';
 
-// import 'primevue/resources/themes/lara-light-blue/theme.css'; // ✅ корректная тема
-// import 'primevue/resources/primevue.min.css';
-// import 'primeicons/primeicons.css';
-
 const app = createApp(App);
 app.use(PrimeVue);
 app.component('MultiSelect', MultiSelect);

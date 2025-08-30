@@ -1,47 +1,31 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useRoleStore } from '../../../store/admin/role/role.store';
-import { useErrorHandler } from '../../../composables/useErrorHandler';
-
+import { useEntitySave } from '../../../composables/useEntitySave';
 import BaseForm from '../../../components/ui/BaseForm.vue';
 import BaseInput from '../../../components/ui/BaseInput.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
 
 const router = useRouter();
-const roleStore = useRoleStore();
-const { error, setError } = useErrorHandler();
 
-const name = ref('');
-const loading = ref(false);
+// модель формы
+const formModel = ref({
+  name: '',
+});
 
+// универсальное сохранение
+const { saveEntity, loading, error } = useEntitySave<typeof formModel.value>();
+
+// сохранение роли
 async function save() {
-  error.value = '';
-  loading.value = true;
-
-  try {
-    await roleStore.createItem({
-      name: name.value,
-    });
-    router.push('/admin/roles');
-  } catch (e: any) {
-    setError(e);
-  } finally {
-    loading.value = false;
-  }
+  await saveEntity('/admin/roles', formModel.value);
+  router.push('/admin/roles');
 }
 </script>
 
 <template>
-  <div>
-    <h2 class="text-2xl mb-4">Создание роли</h2>
-
+  <BaseForm label="Создание роли" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
-
-    <BaseForm :loading="loading" :onSubmit="save">
-      <BaseInput v-model="name" label="Имя" required />
-    </BaseForm>
-  </div>
+    <BaseInput v-model="formModel.name" label="Имя" required />
+  </BaseForm>
 </template>
-
-<style scoped></style>

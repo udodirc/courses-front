@@ -1,14 +1,16 @@
 <template>
-  <table class="w-full border text-sm border-collapse border-gray-200">
-    <thead class="bg-gray-100 text-left">
-    <tr>
-      <slot name="head" />
-    </tr>
-    </thead>
-    <tbody>
-    <slot name="body" />
-    </tbody>
-  </table>
+  <div class="bg-white overflow-auto">
+    <table class="min-w-full bg-white">
+      <thead class="bg-gray-800 text-white">
+        <tr>
+          <slot name="head" />
+        </tr>
+      </thead>
+      <tbody class="text-gray-700">
+        <slot name="body" />
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <style scoped>
