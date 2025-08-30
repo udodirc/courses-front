@@ -2,58 +2,24 @@
 import { ref, onMounted } from 'vue';
 import { useRoleStore } from '../../../store/admin/role/role.store';
 import ItemList from '../../../components/ItemList.vue';
-import Filters from "../../../components/Filters.vue";
+import Filters from '../../../components/Filters.vue';
+import { useFilterList, type SchemaItem } from '../../../composables/useFilterList';
+import { usePagination } from '../../../composables/usePagination';
 
-// стор
 const roleStore = useRoleStore();
 
-const schema = ref([
+const schema = ref<SchemaItem[]>([
   { field: 'name', label: 'Имя', type: 'text', col: 'left' },
   { field: 'created_from', label: 'Создано с', type: 'date', col: 'middle' },
   { field: 'created_to', label: 'Создано по', type: 'date', col: 'middle' },
 ]);
 
-const filters = ref(schema.value.map(f => ({ field: f.field, value: '' })));
+// composables
+const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(roleStore, schema.value);
+const { onNext, onPrev, goToPage } = usePagination(roleStore, filters, toFilterObject);
 
-// превращаем [{field,value}] → { field: value }
-function toFilterObject(arr: { field: string; value: string }[]) {
-  return arr.reduce<Record<string, string>>((acc, f) => {
-    if (f.value) acc[f.field] = f.value;
-    return acc;
-  }, {});
-}
+onMounted(() => applyFilters());
 
-const applyFilters = () => {
-  roleStore.fetchList(toFilterObject(filters.value), 1);
-};
-
-const resetFilters = () => {
-  filters.value = schema.value.map(f => ({ field: f.field, value: '' }));
-  applyFilters();
-};
-
-// пагинация
-const onNext = () => {
-  if (roleStore.currentPage < roleStore.totalPages) {
-    roleStore.fetchList(toFilterObject(filters.value), roleStore.currentPage + 1);
-  }
-};
-
-const onPrev = () => {
-  if (roleStore.currentPage > 1) {
-    roleStore.fetchList(toFilterObject(filters.value), roleStore.currentPage - 1);
-  }
-};
-
-const goToPage = (page: number) => {
-  roleStore.fetchList(toFilterObject(filters.value), page);
-};
-
-onMounted(() => {
-  applyFilters();
-});
-
-// колонки для таблицы
 const columns = [
   { label: 'ID', field: 'id' },
   { label: 'Имя', field: 'name' },

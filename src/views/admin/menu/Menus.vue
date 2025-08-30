@@ -4,67 +4,32 @@ import { useMenuStore } from '../../../store/admin/menu/menu.store';
 import ItemList from '../../../components/ItemList.vue';
 import Filters from '../../../components/Filters.vue';
 import { useFetchList } from '../../../composables/useFetchList';
+import { useFilterList, type SchemaItem } from '../../../composables/useFilterList';
+import { usePagination } from '../../../composables/usePagination';
 
 const menuStore = useMenuStore();
 
 // загрузка всех меню для селекта родителя
 const { items: menus, fetchItems: fetchMenus } = useFetchList<{ id: number; name: string }>('/admin/menu');
 
-// схема фильтров (ref!)
-const schema = ref([
+// схема фильтров
+const schema = ref<SchemaItem[]>([
   { field: 'name', label: 'Имя', type: 'text', col: 'left' },
-  { field: 'parent_id', label: 'Родительское меню', type: 'select', col: 'left', options: [] as { label: string, value: number | string }[] },
+  { field: 'parent_id', label: 'Родительское меню', type: 'select', col: 'left', options: [] },
   { field: 'created_from', label: 'Создано с', type: 'date', col: 'middle' },
   { field: 'created_to', label: 'Создано по', type: 'date', col: 'middle' },
 ]);
 
-// filters (ref!)
-const filters = ref(schema.value.map(f => ({ field: f.field, value: '' })));
+// composables
+const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(menuStore, schema.value);
+const { onNext, onPrev, goToPage } = usePagination(menuStore, filters, toFilterObject);
 
-// превращаем массив фильтров в объект
-function toFilterObject(arr: { field: string; value: string }[]) {
-  return arr.reduce<Record<string, string>>((acc, f) => {
-    if (f.value) acc[f.field] = f.value;
-    return acc;
-  }, {});
-}
-
-// применить фильтры
-const applyFilters = () => {
-  menuStore.fetchList(toFilterObject(filters.value), 1);
-};
-
-// сбросить фильтры
-const resetFilters = () => {
-  filters.value = schema.value.map(f => ({ field: f.field, value: '' }));
-  applyFilters();
-};
-
-// пагинация
-const onNext = () => {
-  if (menuStore.currentPage < menuStore.totalPages) {
-    menuStore.fetchList(toFilterObject(filters.value), menuStore.currentPage + 1);
-  }
-};
-
-const onPrev = () => {
-  if (menuStore.currentPage > 1) {
-    menuStore.fetchList(toFilterObject(filters.value), menuStore.currentPage - 1);
-  }
-};
-
-const goToPage = (page: number) => {
-  menuStore.fetchList(toFilterObject(filters.value), page);
-};
-
-// загружаем меню и добавляем в schema
+// загрузка меню и добавление в schema
 onMounted(async () => {
   await fetchMenus();
-  const parentFilter = schema.value.find(s => s.field === 'parent_id');
+  const parentFilter = schema.value.find(f => f.field === 'parent_id');
   if (parentFilter) {
-    parentFilter.options = [
-      ...menus.value.map(m => ({ label: m.name, value: m.id })),
-    ];
+    parentFilter.options = menus.value.map(m => ({ label: m.name, value: m.id }));
   }
   applyFilters();
 });
@@ -108,7 +73,6 @@ const columns = [
           @prev="onPrev"
           @go="goToPage"
       />
-
     </main>
   </div>
 </template>
