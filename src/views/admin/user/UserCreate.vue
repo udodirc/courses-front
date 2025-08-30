@@ -4,10 +4,10 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '../../../store/admin/user/user.store';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
 import { useFetchList } from "../../../composables/useFetchList.ts";
-
 import BaseForm from '../../../components/ui/BaseForm.vue';
 import BaseInput from '../../../components/ui/BaseInput.vue';
-import FormErrors from '../../../components/ui/FormErrors.vue';
+import BaseSelect from "../../../components/ui/BaseSelect.vue";
+import FormErrors from "../../../components/ui/FormErrors.vue";
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -51,28 +51,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <h2 class="text-2xl mb-4">Создание пользователя</h2>
-
+  <BaseForm :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
-
-    <BaseForm :loading="loading" :onSubmit="save">
-      <label class="block mb-4">
-        <span class="block font-medium mb-1">Роль</span>
-        <select v-model="selectedRoleId" required class="w-full border rounded px-3 py-2">
-          <option disabled value="">Выберите роль</option>
-          <option v-for="role in roles" :key="role.id" :value="role.id">
-            {{ role.name }}
-          </option>
-        </select>
-      </label>
-
-      <BaseInput v-model="name" label="Имя" required />
-      <BaseInput v-model="email" label="Email" type="email" required />
-      <BaseInput v-model="password" label="Пароль" type="password" required />
-    </BaseForm>
-  </div>
+    <BaseSelect
+        v-model="selectedRoleId"
+        label="Роль"
+        :options="roles.map(role => ({ value: role.id, label: role.name }))"
+        required
+    />
+    <BaseInput v-model="name" label="Имя" required />
+    <BaseInput v-model="email" label="Email" type="email" required />
+    <BaseInput v-model="password" label="Пароль" type="password" required />
+  </BaseForm>
 </template>
-
-<style scoped>
-</style>

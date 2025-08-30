@@ -20,13 +20,13 @@ const model = computed({
 </script>
 
 <template>
-  <label class="block mb-4">
-    <span class="block mb-1 font-medium">{{ label }}</span>
+  <div class="">
+    <label class="block text-sm text-gray-600" for="name">{{ label }}</label>
     <input
         v-model="model"
         :type="type || 'text'"
-        class="w-full px-3 py-2 border rounded"
+        class="w-full px-5 py-1 text-gray-700 bg-gray-200 rounded"
         :required="required"
     />
-  </label>
+  </div>
 </template>

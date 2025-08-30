@@ -1,15 +1,17 @@
 import { ref } from 'vue';
 
 export function useErrorHandler() {
-    const error = ref<Record<string, string[]> | string>('');
+    const rawError = ref<Record<string, string[]> | string | null>(null);
+
     const setError = (e: any) => {
         const errors = e?.response?.data?.errors;
         if (errors && typeof errors === 'object') {
-            error.value = errors;
+            rawError.value = errors;
         } else {
-            error.value = { general: ['Произошла ошибка'] };
+            const message = e?.response?.data?.message || 'Произошла ошибка';
+            rawError.value = { general: [message] };
         }
     };
 
-    return { error, setError };
+    return { error: rawError, setError };
 }

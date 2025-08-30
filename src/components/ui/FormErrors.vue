@@ -6,5 +6,7 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{ error: Record<string, string[]> | string | null }>();
+defineProps<{
+  error: string | Record<string, string[]> | null;
+}>();
 </script>
