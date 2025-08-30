@@ -8,12 +8,15 @@ const route = useRoute();
 const userStore = useUserStore();
 
 const userId = Number(route.params.id);
+
+// вычисляемые свойства
 const user = computed(() => userStore.currentUser);
 const loading = computed(() => userStore.loading);
 const error = computed(() => userStore.error);
 
+// загрузка пользователя
 onMounted(async () => {
-  if (!isNaN(userId)) {
+  if (userId && !isNaN(userId)) {
     await userStore.fetchItem(userId);
   } else {
     userStore.error = 'Некорректный ID пользователя';
@@ -22,12 +25,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto p-6 bg-white rounded shadow">
-    <h2 class="text-xl font-semibold mb-4">Пользователь #{{ userId }}</h2>
-
-    <p v-if="loading" class="text-gray-600">Загрузка...</p>
-    <p v-else-if="error" class="text-red-600">{{ error }}</p>
-
-    <BaseShow v-else :item="user" :exclude="['updatedAt']"/>
-  </div>
+  <BaseShow
+      label="Пользователь"
+      :item="user"
+      :itemId="userId"
+      :loading="loading"
+      :error="error"
+      :exclude="['updatedAt']"
+  />
 </template>
