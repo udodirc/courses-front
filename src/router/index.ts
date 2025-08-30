@@ -103,6 +103,11 @@ const routes = [
                 name: 'AdminMenuEdit',
                 component: () => import('../views/admin/menu/MenuEdit.vue'),
             },
+            {
+                path: 'content',
+                name: 'AdminContent',
+                component: () => import('../views/admin/content/Content.vue'),
+            },
         ],
     },
 
