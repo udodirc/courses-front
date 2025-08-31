@@ -118,6 +118,11 @@ const routes = [
                 name: 'AdminContentEdit',
                 component: () => import('../views/admin/content/ContentEdit.vue'),
             },
+            {
+                path: '/admin/content/:id',
+                name: 'AdminContentShow',
+                component: () => import('../views/admin/content/ContentShow.vue'),
+            },
         ],
     },
 
