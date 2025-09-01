@@ -1,6 +1,5 @@
-// composables/useFetchList.ts
-import { ref } from 'vue';
-import api from '../api';
+import { ref } from "vue";
+import api from "../api"; // твой axios instance
 
 export function useFetchList<T>(defaultUrl?: string) {
     const items = ref<T[]>([]);
@@ -15,11 +14,30 @@ export function useFetchList<T>(defaultUrl?: string) {
             items.value = res.data.data;
         } catch (e) {
             console.error(`Ошибка загрузки с ${url || defaultUrl}`, e);
-            error.value = 'Ошибка загрузки данных';
+            error.value = "Ошибка загрузки данных";
         } finally {
             loading.value = false;
         }
     };
 
-    return { items, fetchItems, loading, error };
+    const updateItem = async (id: number | string, payload: Partial<T>) => {
+        loading.value = true;
+        error.value = null;
+        try {
+            await api.put(`${defaultUrl}/${id}`, payload);
+
+            // локально обновляем items
+            const idx = items.value.findIndex((i: any) => i.id === id);
+            if (idx !== -1) {
+                items.value[idx] = { ...items.value[idx], ...payload };
+            }
+        } catch (e) {
+            console.error(`Ошибка обновления ${id}`, e);
+            error.value = "Ошибка сохранения";
+        } finally {
+            loading.value = false;
+        }
+    };
+
+    return { items, fetchItems, updateItem, loading, error };
 }

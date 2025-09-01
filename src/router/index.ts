@@ -51,7 +51,7 @@ const routes = [
             {
                 path: 'settings',
                 name: 'AdminSettings',
-                component: () => import('../views/admin/Settings.vue'),
+                component: () => import('../views/admin/settings/Settings.vue'),
             },
             {
                 path: '/admin/roles/:id',
