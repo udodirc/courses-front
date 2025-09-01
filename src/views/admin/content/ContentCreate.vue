@@ -11,7 +11,7 @@ import FormErrors from '../../../components/ui/FormErrors.vue';
 const router = useRouter();
 
 // список меню
-const { items: menus, fetchItems: fetchMenus } = useFetchList<{ id: number; name: string }>('/admin/menu');
+const { items: menus, fetchItems: fetchMenus } = useFetchList<{ id: number; name: string }>('/admin/menu/parent');
 
 // список подменю (пустой изначально, URL будем менять динамически)
 const { items: submenus, fetchItems: fetchSubmenus } = useFetchList<{ id: number; name: string }>();
