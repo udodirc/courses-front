@@ -103,6 +103,26 @@ const routes = [
                 name: 'AdminMenuEdit',
                 component: () => import('../views/admin/menu/MenuEdit.vue'),
             },
+            {
+                path: 'content',
+                name: 'AdminContent',
+                component: () => import('../views/admin/content/Content.vue'),
+            },
+            {
+                path: '/admin/content/create',
+                name: 'AdminContentCreate',
+                component: () => import('../views/admin/content/ContentCreate.vue'),
+            },
+            {
+                path: 'content/:id/edit',
+                name: 'AdminContentEdit',
+                component: () => import('../views/admin/content/ContentEdit.vue'),
+            },
+            {
+                path: '/admin/content/:id',
+                name: 'AdminContentShow',
+                component: () => import('../views/admin/content/ContentShow.vue'),
+            },
         ],
     },
 

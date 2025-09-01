@@ -17,6 +17,14 @@ const mergedLabels = computed(() => ({
   ...(props.labels || {}),
 }));
 
+// кастомные отображаемые названия для некоторых полей
+const customLabels: Record<string, string> = {
+  parent_name: 'Родительское меню',
+  permissions: 'Права',
+  menu_name: 'Меню',
+  content: 'Контент',
+};
+
 const visibleFields = computed(() => {
   if (!props.item) return {};
   const exclude = props.exclude || [];
@@ -31,21 +39,19 @@ const visibleFields = computed(() => {
     <h2 class="text-xl font-semibold mb-4">{{ label }} #{{ itemId }}</h2>
     <p v-if="loading" class="text-gray-600">Загрузка...</p>
     <p v-else-if="error" class="text-red-600">{{ error }}</p>
-    <div
-        v-if="props.item"
-        class="border border-gray-200 p-4 rounded bg-gray-50 space-y-2"
-    >
-      <div v-for="(value, key) in visibleFields" :key="key">
-        <span v-if="key == 'parent_name'">Родительское меню:</span>
-        <span v-else-if="key == 'permissions'">Права:</span>
-        <span v-else>
-          {{ mergedLabels[key] || key }}:
-        </span>&nbsp;
-        <span v-if="typeof value !== 'object'">
-          {{ key.includes('At') ? new Date(value).toLocaleString() : value }}
+    <div v-if="props.item" class="border border-gray-200 p-4 rounded bg-gray-50 space-y-2">
+      <div v-for="(value, key) in visibleFields" :key="key" class="flex">
+        <span class="font-medium mr-2">
+          {{ customLabels[key] || mergedLabels[key] || key }}:
         </span>
-        <span v-else>
-          {{ value?.name || JSON.stringify(value) }}
+        <span>
+          {{
+            value == null
+                ? ''
+                : typeof value !== 'object'
+                    ? (key.includes('At') ? new Date(value).toLocaleString() : value)
+                    : value?.name || JSON.stringify(value)
+          }}
         </span>
       </div>
     </div>
