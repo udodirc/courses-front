@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { RouterLink, useRoute } from "vue-router";
-import "../../public/styles/front.css";
+import { useFetchList } from "../composables/useFetchList";
 
 const route = useRoute();
 const expanded = ref<string | null>(null);
@@ -10,39 +10,44 @@ const toggleExpand = (name: string) => {
   expanded.value = expanded.value === name ? null : name;
 };
 
-// меню сайта
-const menu = [
-  { name: "О нас", path: "/about" },
-  {
-    name: "Услуги",
-    children: [
-      { name: "Создание сайтов", path: "/services/web" },
-      { name: "Продвижение", path: "/services/seo" },
-      { name: "Поддержка", path: "/services/support" },
-    ],
-  },
-  { name: "Портфолио", path: "/portfolio" },
-  { name: "Контакты", path: "/contacts" },
-];
+// Загружаем меню из API
+const { items: menus, fetchItems: fetchMenus, loading } = useFetchList<{
+  id: number;
+  name: string;
+  url: string;
+  children?: { id: number; name: string; url: string }[];
+}>("/menu/tree");
+
+// Приводим данные к формату для RouterLink (если url пустой → "#")
+const normalizeUrl = (url?: string) => (url && url !== "" ? `/${url}` : "#");
+
+// Загружаем меню при монтировании
+onMounted(async () => {
+  try {
+    await fetchMenus();
+  } catch (e) {
+    console.error("Ошибка загрузки меню", e);
+  }
+});
 </script>
 
 <template>
   <header class="bg-white text-black py-4 px-6 flex justify-center items-center">
     <div class="flex items-center space-x-5">
       <nav>
-        <ul class="flex space-x-6">
-          <li v-for="item in menu" :key="item.name" class="relative">
-            <!-- если пункт без children -->
+        <ul v-if="menus?.length" class="flex space-x-6">
+          <li v-for="item in menus || []" :key="item.id" class="relative">
+            <!-- Если пункт без children -->
             <RouterLink
-                v-if="!item.children"
-                :to="item.path"
+                v-if="!item.children || item.children.length === 0"
+                :to="normalizeUrl(item.url)"
                 class="hover:text-gray-600 transition-colors duration-200"
-                :class="{ 'font-semibold': route.path === item.path }"
+                :class="{ 'font-semibold': route.path === normalizeUrl(item.url) }"
             >
               {{ item.name }}
             </RouterLink>
 
-            <!-- если есть children -->
+            <!-- Если есть children -->
             <div v-else class="group">
               <button
                   @click="toggleExpand(item.name)"
@@ -56,11 +61,11 @@ const menu = [
                   v-show="expanded === item.name"
                   class="absolute top-full mt-2 bg-white text-black py-2 w-48 shadow-lg rounded-md z-10"
               >
-                <li v-for="sub in item.children" :key="sub.path">
+                <li v-for="sub in item.children || []" :key="sub.id">
                   <RouterLink
-                      :to="sub.path"
+                      :to="normalizeUrl(sub.url)"
                       class="block px-4 py-2 hover:bg-gray-100"
-                      :class="{ 'font-semibold': route.path === sub.path }"
+                      :class="{ 'font-semibold': route.path === normalizeUrl(sub.url) }"
                   >
                     {{ sub.name }}
                   </RouterLink>
@@ -69,6 +74,10 @@ const menu = [
             </div>
           </li>
         </ul>
+
+        <!-- Заглушка, пока меню грузится -->
+        <div v-else-if="loading" class="text-gray-500">Загрузка меню...</div>
+        <div v-else class="text-gray-500">Меню не найдено</div>
       </nav>
 
       <RouterLink
