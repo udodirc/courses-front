@@ -13,12 +13,19 @@ const routes = [
         meta: { layout: 'front' },
         children: [
             {
+                path: ':slug',
+                name: 'FrontendPage',
+                component: () => import('../views/front/Page.vue'),
+                props: true, // чтобы slug передавался как prop
+            },
+            {
                 path: '/',
                 name: 'FrontendMain',
                 component: () => import('../views/front/Main.vue'),
             }
         ]
     },
+
 
     // Страницы без авторизации
     {

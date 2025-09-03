@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { RouterLink, useRoute } from "vue-router";
+import {RouterLink, RouterView, useRoute} from "vue-router";
 import { useFetchList } from "../composables/useFetchList";
 
 const route = useRoute();
@@ -90,12 +90,7 @@ onMounted(async () => {
   </header>
 
   <main class="bg-gray-100 py-12 px-6">
-    <div class="max-w-4xl mx-auto text-center">
-      <h1 class="text-4xl font-bold text-black mb-4">Заголовок вашего сайта</h1>
-      <p class="text-lg text-gray-700 leading-relaxed mb-8">
-        Краткое, но ёмкое описание вашей деятельности.
-      </p>
-    </div>
+    <RouterView />
   </main>
 
   <footer class="bg-black text-white py-4 px-6 text-center">
