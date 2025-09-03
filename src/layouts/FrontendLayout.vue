@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import {RouterLink, RouterView, useRoute} from "vue-router";
+import { RouterLink, RouterView, useRoute } from "vue-router";
 import { useFetchList } from "../composables/useFetchList";
+import api from "../api";
 
 const route = useRoute();
 const expanded = ref<string | null>(null);
+const staticContent = ref<Record<string, string>>({});
+const loadingStatic = ref(false);
 
 const toggleExpand = (name: string) => {
   expanded.value = expanded.value === name ? null : name;
 };
 
-// Загружаем меню из API
+// меню
 const { items: menus, fetchItems: fetchMenus, loading } = useFetchList<{
   id: number;
   name: string;
@@ -18,15 +21,37 @@ const { items: menus, fetchItems: fetchMenus, loading } = useFetchList<{
   children?: { id: number; name: string; url: string }[];
 }>("/menu/tree");
 
-// Приводим данные к формату для RouterLink (если url пустой → "#")
 const normalizeUrl = (url?: string) => (url && url !== "" ? `/${url}` : "#");
 
-// Загружаем меню при монтировании
+// загрузка статичного контента
+const fetchStaticContent = async () => {
+  loadingStatic.value = true;
+  try {
+    const response = await api.post("/static_content", {
+      names: [{ name: "main" }, { name: "social_networks" }, { name: "rights" }],
+    });
+
+    // нормализуем массив в объект { name: content }
+    staticContent.value = response.data.data.reduce(
+        (acc: Record<string, string>, item: { name: string; content: string }) => {
+          acc[item.name] = item.content;
+          return acc;
+        },
+        {}
+    );
+  } catch (e) {
+    console.error("Ошибка загрузки статического контента", e);
+  } finally {
+    loadingStatic.value = false;
+  }
+};
+
 onMounted(async () => {
   try {
     await fetchMenus();
+    await fetchStaticContent();
   } catch (e) {
-    console.error("Ошибка загрузки меню", e);
+    console.error("Ошибка загрузки", e);
   }
 });
 </script>
@@ -37,7 +62,6 @@ onMounted(async () => {
       <nav>
         <ul v-if="menus?.length" class="flex space-x-6">
           <li v-for="item in menus || []" :key="item.id" class="relative">
-            <!-- Если пункт без children -->
             <RouterLink
                 v-if="!item.children || item.children.length === 0"
                 :to="normalizeUrl(item.url)"
@@ -47,7 +71,6 @@ onMounted(async () => {
               {{ item.name }}
             </RouterLink>
 
-            <!-- Если есть children -->
             <div v-else class="group">
               <button
                   @click="toggleExpand(item.name)"
@@ -74,8 +97,6 @@ onMounted(async () => {
             </div>
           </li>
         </ul>
-
-        <!-- Заглушка, пока меню грузится -->
         <div v-else-if="loading" class="text-gray-500">Загрузка меню...</div>
         <div v-else class="text-gray-500">Меню не найдено</div>
       </nav>
@@ -90,18 +111,32 @@ onMounted(async () => {
   </header>
 
   <main class="bg-gray-100 py-12 px-6">
-    <RouterView />
+    <!-- если главная -->
+    <div
+        v-if="route.path === '/' && staticContent.main"
+        v-html="staticContent.main"
+        class="prose"
+    ></div>
+
+    <!-- если не главная -->
+    <RouterView v-else />
   </main>
 
   <footer class="bg-black text-white py-4 px-6 text-center">
     <div class="max-w-4xl mx-auto">
-      <div class="flex justify-center space-x-4 mb-2">
-        <a href="#" class="text-white hover:text-gray-400">Социальная сеть 1</a>
-        <a href="#" class="text-white hover:text-gray-400">Социальная сеть 2</a>
-      </div>
-      <p class="text-sm text-gray-400">
-        &copy; 2024 Ваша компания. Все права защищены.
-      </p>
+      <!-- соцсети -->
+      <div v-if="staticContent.social_networks" v-html="staticContent.social_networks"></div>
+
+      <!-- права -->
+      <div v-if="staticContent.rights" v-html="staticContent.rights"></div>
     </div>
   </footer>
 </template>
+
+<style scoped>
+.prose {
+  line-height: 1.7;
+  font-size: 1rem;
+  color: #333;
+}
+</style>
