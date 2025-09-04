@@ -5,5 +5,6 @@ export interface User {
     role?: {
         name: string;
     };
+    status: boolean;
     createdAt: string; // или Date
 }

@@ -23,6 +23,7 @@ const customLabels: Record<string, string> = {
   permissions: 'Права',
   menu_name: 'Меню',
   content: 'Контент',
+  status: 'Статус',
 };
 
 const visibleFields = computed(() => {
@@ -44,18 +45,25 @@ const visibleFields = computed(() => {
         <span class="font-medium mr-2">
           {{ customLabels[key] || mergedLabels[key] || key }}:
         </span>
-        <span>
-          {{
-            value == null
-                ? ''
-                : typeof value !== 'object'
-                    ? (key.includes('At') ? new Date(value).toLocaleString() : value)
-                    : value?.name || JSON.stringify(value)
-          }}
+              <span>
+          <!-- если поле статус -->
+          <template v-if="key === 'status'">
+            {{ value == 1 ? 'Активный' : 'Неактивный' }}
+          </template>
+
+                <!-- если не статус -->
+          <template v-else>
+            {{
+              value == null
+                  ? ''
+                  : typeof value !== 'object'
+                      ? (key.includes('At') ? new Date(value).toLocaleString() : value)
+                      : value?.name || JSON.stringify(value)
+            }}
+          </template>
         </span>
       </div>
     </div>
-
     <p v-else class="text-gray-500">Данные не найдены.</p>
   </div>
 </template>

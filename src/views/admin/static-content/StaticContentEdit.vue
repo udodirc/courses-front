@@ -1,32 +1,35 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useContentStore } from '../../../store/admin/content/content.store';
+import { useStaticContentStore } from '../../../store/admin/static-content/static-content.store';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
 import { storeToRefs } from 'pinia';
 
 import BaseForm from '../../../components/ui/BaseForm.vue';
 import BaseTextArea from '../../../components/ui/BaseTextArea.vue';
+import BaseInput from '../../../components/ui/BaseInput.vue';
+import BaseToggle from '../../../components/ui/BaseToggle.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
 import api from "../../../api";
-import BaseToggle from "@/components/ui/BaseToggle.vue";
 
 const route = useRoute();
 const router = useRouter();
 const contentId = Number(route.params.id);
 
-const contentStore = useContentStore();
-const { currentContent } = storeToRefs(contentStore);
+const staticContentStore = useStaticContentStore();
+const { currentStaticContent } = storeToRefs(staticContentStore);
 const { error, setError } = useErrorHandler();
 
 const loading = ref(false);
 const formModel = ref({
+  name: '',
   content: '',
   status: 1,
 });
 
-watch(currentContent, (val) => {
+watch(currentStaticContent, (val) => {
   if (val) {
+    formModel.value.name = val.name;
     formModel.value.content = val.content;
     formModel.value.status = val.status ?? 1;
   }
@@ -37,12 +40,12 @@ async function save() {
   error.value = null;
 
   try {
-    await api.put(`/admin/content/${contentId}`, {
+    await api.put(`/admin/static_content/${contentId}`, {
+      name: formModel.value.name,
       content: formModel.value.content,
-      menu_id: currentContent.value?.menu_id,
       status: formModel.value.status,
     });
-    router.push('/admin/content');
+    router.push('/admin/static-content');
   } catch (e: any) {
     setError(e);
   } finally {
@@ -51,7 +54,7 @@ async function save() {
 }
 
 onMounted(async () => {
-  await contentStore.fetchItem(contentId);
+  await staticContentStore.fetchItem(contentId);
 });
 </script>
 
@@ -59,10 +62,7 @@ onMounted(async () => {
   <BaseForm label="Редактировать контент" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
 
-    <div class="mb-4">
-      <label class="font-semibold">Меню:</label>
-      <p>{{ currentContent?.menu_name }}</p>
-    </div>
+    <BaseInput v-model="formModel.name" label="Имя" required />
 
     <BaseTextArea
         v-model="formModel.content"

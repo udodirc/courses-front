@@ -1,22 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useUserStore } from '../../../store/admin/user/user.store.js';
+import { useStaticContentStore } from '../../../store/admin/static-content/static-content.store';
 import ItemList from '../../../components/ItemList.vue';
 import Filters from '../../../components/Filters.vue';
-import { useFetchList } from "../../../composables/useFetchList.ts";
 import { useFilterList, type SchemaItem } from '../../../composables/useFilterList';
 import { usePagination } from '../../../composables/usePagination';
 
-const userStore = useUserStore();
-
-// роли (для селекта)
-const { items: roles, fetchItems: fetchRoles } = useFetchList<{ id: number; name: string }>('/admin/roles');
+const staticContentStore = useStaticContentStore();
 
 // схема фильтров
 const schema = ref<SchemaItem[]>([
   { field: 'name', label: 'Имя', type: 'text', col: 'left' },
-  { field: 'email', label: 'Email', type: 'email', col: 'middle' },
-  { field: 'role', label: 'Роль', type: 'select', col: 'left', options: [] },
   { field: 'status', label: 'Статус', type: 'select', col: 'middle', options: [
       { label: 'Активный', value: 1 },
       { label: 'Неактивный', value: 0 },
@@ -26,33 +20,27 @@ const schema = ref<SchemaItem[]>([
 ]);
 
 // composables
-const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(userStore, schema.value);
-const { onNext, onPrev, goToPage } = usePagination(userStore, filters, toFilterObject);
+const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(staticContentStore, schema.value);
+const { onNext, onPrev, goToPage } = usePagination(staticContentStore, filters, toFilterObject);
 
-// загрузка ролей + установка в schema
+// загрузка меню и добавление в schema
 onMounted(async () => {
-  await fetchRoles();
-  const roleFilter = schema.value.find(s => s.field === 'role');
-  if (roleFilter) {
-    roleFilter.options = roles.value.map(r => ({ label: r.name, value: r.name }));
-  }
   applyFilters();
 });
 
-// колонки таблицы
+// колонки для таблицы
 const columns = [
   { label: 'ID', field: 'id' },
   { label: 'Имя', field: 'name' },
-  { label: 'Email', field: 'email' },
-  { label: 'Роль', field: 'role.name' },
 ];
 </script>
 
 <template>
   <div class="w-full h-screen overflow-x-hidden border-t flex flex-col">
     <main class="w-full flex-grow p-6">
-      <h1 class="text-3xl text-black pb-6">Пользователи</h1>
+      <h1 class="text-3xl text-black pb-6">Статичный контент</h1>
 
+      <!-- Фильтры -->
       <Filters
           v-model:filters="filters"
           :schema="schema"
@@ -61,19 +49,19 @@ const columns = [
       />
 
       <router-link
-          to="/admin/users/create"
+          to="/admin/static_content/create"
           class="inline-block mb-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded"
       >
         Создать
       </router-link>
 
       <ItemList
-          :items="userStore.getUserList"
+          :items="staticContentStore.getStaticContentList"
           :columns="columns"
-          :basePath="'/admin/users'"
-          :deleteItem="userStore.deleteItem"
-          :currentPage="userStore.currentPage"
-          :totalPages="userStore.totalPages"
+          :basePath="'/admin/static_content'"
+          :deleteItem="staticContentStore.deleteItem"
+          :currentPage="staticContentStore.currentPage"
+          :totalPages="staticContentStore.totalPages"
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"
