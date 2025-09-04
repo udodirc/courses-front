@@ -17,6 +17,12 @@ type ContentStoreState = {
     error: string;
 };
 export const useContentStore = contentStore.getStore(contentStore.api, {
-    getContentList: (state: ContentStoreState): Content[] => Array.isArray(state.items) ? state.items : [],
+    getContentList: (state: ContentStoreState): Content[] =>
+        Array.isArray(state.items)
+            ? state.items.map(item => ({
+                ...item,
+                canToggleStatus: true
+            }))
+            : [],
     currentContent: (state: ContentStoreState): Content | null => state.item,
 });
