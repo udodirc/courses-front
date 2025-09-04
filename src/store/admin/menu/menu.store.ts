@@ -18,6 +18,12 @@ type MenuStoreState = {
     error: string;
 };
 export const useMenuStore = menuStore.getStore(menuStore.api, {
-    getMenuList: (state: MenuStoreState): Menu[] => Array.isArray(state.items) ? state.items : [],
+    getMenuList: (state: MenuStoreState): Menu[] =>
+        Array.isArray(state.items)
+            ? state.items.map(item => ({
+                ...item,
+                canToggleStatus: true
+            }))
+            : [],
     currentMenu: (state: MenuStoreState): Menu | null => state.item,
 });
