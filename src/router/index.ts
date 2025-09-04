@@ -2,9 +2,26 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../store/admin/auth/auth.store';
 
 // Layout
+import FrontendLayout from '../layouts/FrontendLayout.vue';
 import DashboardLayout from '../layouts/DashboardLayout.vue';
 
 const routes = [
+
+    {
+        path: '/',
+        component: FrontendLayout,
+        meta: { layout: 'front' },
+        children: [
+            {
+                path: ':slug',
+                name: 'FrontendPage',
+                component: () => import('../views/front/Page.vue'),
+                props: true, // чтобы slug передавался как prop
+            }
+        ]
+    },
+
+
     // Страницы без авторизации
     {
         path: '/admin/login',
@@ -16,7 +33,7 @@ const routes = [
     {
         path: '/admin',
         component: DashboardLayout,
-        meta: { requiresAuth: true },
+        meta: { layout: 'admin', requiresAuth: true },
         children: [
             {
                 path: 'dashboard',

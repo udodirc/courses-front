@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { RouterView, RouterLink, useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "../store/admin/auth/auth.store";
+import '../../public/styles/admin.css';
 
 const route = useRoute();
 const router = useRouter();

@@ -11,9 +11,9 @@ const props = defineProps<{
   totalPages: number;
 }>();
 
-const emit = defineEmits(['prev', 'next', 'go']);
+const emit = defineEmits(['prev', 'next', 'go', 'refresh']);
 
-const { view, edit, delete: destroy } = useCrudActions(props.basePath, props.deleteItem);
+const { view, edit, toggleStatus, delete: destroy } = useCrudActions(props.basePath, props.deleteItem);
 
 const onPrev = () => emit('prev');
 const onNext = () => emit('next');
@@ -31,6 +31,7 @@ const onGo = (page: number) => emit('go', page);
       @go="onGo"
       @view="view"
       @edit="edit"
+      @toggleStatus="async (id) => { await toggleStatus(id); emit('refresh'); }"
       @delete="destroy"
   />
 </template>
