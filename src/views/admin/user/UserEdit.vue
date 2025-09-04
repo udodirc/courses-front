@@ -5,10 +5,12 @@ import { storeToRefs } from 'pinia';
 import { useUserStore } from '../../../store/admin/user/user.store';
 import { useFetchList } from "../../../composables/useFetchList.ts";
 import { useEntitySave } from '../../../composables/useEntitySave';
+
 import BaseInput from '../../../components/ui/BaseInput.vue';
 import BaseSelect from '../../../components/ui/BaseSelect.vue';
 import BaseForm from '../../../components/ui/BaseForm.vue';
 import FormErrors from "../../../components/ui/FormErrors.vue";
+import BaseToggle from "../../../components/ui/BaseToggle.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -23,6 +25,7 @@ const formModel = ref({
   email: '',
   password: '',
   role: null as string | null,
+  status: 1, // по умолчанию активный
 });
 
 // загрузка ролей
@@ -37,13 +40,24 @@ watch(currentUser, (val) => {
     formModel.value.name = val.name;
     formModel.value.email = val.email;
     formModel.value.role = val.role?.name ?? null;
+    formModel.value.status = val.status ?? 1;
   }
 });
 
 // сохранение
 async function save() {
   const selectedRole = roles.value.find(r => r.name === formModel.value.role);
-  await saveEntity('/admin/users', { ...formModel.value, role: selectedRole?.name }, userId);
+
+  await saveEntity(
+      '/admin/users',
+      {
+        ...formModel.value,
+        role: selectedRole?.name,
+        status: formModel.value.status,
+      },
+      userId
+  );
+
   router.push('/admin/users');
 }
 
@@ -67,5 +81,12 @@ onMounted(() => {
     <BaseInput v-model="formModel.name" label="Имя" required />
     <BaseInput v-model="formModel.email" label="Email" type="email" required />
     <BaseInput v-model="formModel.password" label="Пароль" type="password" />
+
+    <BaseToggle
+        v-model="formModel.status"
+        label="Статус"
+        :activeLabel="'Активный'"
+        :inactiveLabel="'Неактивный'"
+    />
   </BaseForm>
 </template>

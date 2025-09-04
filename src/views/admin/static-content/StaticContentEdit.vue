@@ -24,7 +24,7 @@ const loading = ref(false);
 const formModel = ref({
   name: '',
   content: '',
-  status: 1, // по умолчанию активный
+  status: 1,
 });
 
 watch(currentStaticContent, (val) => {
@@ -70,7 +70,6 @@ onMounted(async () => {
         required
     />
 
-    <!-- Переключатель статуса -->
     <BaseToggle
         v-model="formModel.status"
         label="Статус"

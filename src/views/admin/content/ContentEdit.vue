@@ -9,6 +9,7 @@ import BaseForm from '../../../components/ui/BaseForm.vue';
 import BaseTextArea from '../../../components/ui/BaseTextArea.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
 import api from "../../../api";
+import BaseToggle from "@/components/ui/BaseToggle.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -21,11 +22,13 @@ const { error, setError } = useErrorHandler();
 const loading = ref(false);
 const formModel = ref({
   content: '',
+  status: 1,
 });
 
 watch(currentContent, (val) => {
   if (val) {
     formModel.value.content = val.content;
+    formModel.value.status = val.status ?? 1;
   }
 });
 
@@ -36,7 +39,8 @@ async function save() {
   try {
     await api.put(`/admin/content/${contentId}`, {
       content: formModel.value.content,
-      menu_id: currentContent.value?.menu_id, // оставляем menu_id как есть
+      menu_id: currentContent.value?.menu_id,
+      status: formModel.value.status,
     });
     router.push('/admin/content');
   } catch (e: any) {
@@ -64,6 +68,13 @@ onMounted(async () => {
         v-model="formModel.content"
         label="Контент"
         required
+    />
+
+    <BaseToggle
+        v-model="formModel.status"
+        label="Статус"
+        :activeLabel="'Активный'"
+        :inactiveLabel="'Неактивный'"
     />
   </BaseForm>
 </template>

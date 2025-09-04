@@ -2,7 +2,7 @@ import { UserApi } from '../../../api/admin/user/user.api';
 import type { User } from '../../../types/User';
 import type { CreateUserDto } from '../../../dto/user.dto.ts';
 import { BaseStore } from '../../BaseStore';
-import type { BaseState } from '../../../types/BaseState.ts'; // <-- подключаем общий тип
+import type { BaseState } from '../../../types/BaseState.ts';
 class UserStore extends BaseStore<CreateUserDto, User> {
     public storeId = 'admin-user';
     public api = new UserApi();
@@ -12,7 +12,13 @@ const userStore = new UserStore();
 
 export const useUserStore = userStore.getStore(
     userStore.api, {
-        getUserList: (state: BaseState<User>): User[] => state.items,
+        getUserList: (state: BaseState<User>): User[] =>
+            Array.isArray(state.items)
+                ? state.items.map(item => ({
+                    ...item,
+                    canToggleStatus: true
+                }))
+                : [],
         currentUser: (state: BaseState<User>): User | null => state.item,
     },
 );
