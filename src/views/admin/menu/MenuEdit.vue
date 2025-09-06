@@ -24,12 +24,14 @@ const { currentMenu } = storeToRefs(menuStore);
 // единый formModel
 const formModel = ref({
   name: '',
+  url: '',
   status: 1,
 });
 
 watch(currentMenu, (val) => {
   if (val) {
     formModel.value.name = val.name;
+    formModel.value.url = val.url;
     formModel.value.status = val.status ?? 1;
   }
 });
@@ -41,6 +43,7 @@ async function save() {
   try {
     await api.put(`/admin/menu/${menuId}`, {
       name: formModel.value.name,
+      url: formModel.value.url,
       status: formModel.value.status,
     });
     router.push('/admin/menus');
@@ -60,6 +63,7 @@ onMounted(() => {
   <BaseForm label="Редактировать меню" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
     <BaseInput v-model="formModel.name" label="Имя" required />
+    <BaseInput v-model="formModel.url" label="URL"/>
     <BaseToggle
         v-model="formModel.status"
         label="Статус"
