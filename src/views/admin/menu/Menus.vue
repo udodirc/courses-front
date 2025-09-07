@@ -43,6 +43,7 @@ const columns = [
   { label: 'ID', field: 'id' },
   { label: 'Родительское меню', field: 'parent_name' },
   { label: 'Имя', field: 'name' },
+  { label: 'URL', field: 'url' },
 ];
 </script>
 
