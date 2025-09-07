@@ -47,17 +47,14 @@ export abstract class BaseStore<TCreate, TEntity> {
                         const res = await api.getList({
                             ...filters,
                             page,
-                            per_page: this.perPage,
                         });
 
                         this.items = res.data;
-
                         if (res.meta) {
                             this.currentPage = res.meta.current_page ?? page;
                             this.totalPages = res.meta.last_page ?? 1;
                             this.perPage = res.meta.per_page ?? this.perPage;
                         } else {
-                            // если мета нет — оставляем предыдущие значения
                             this.currentPage = page;
                             this.totalPages = 1;
                         }
