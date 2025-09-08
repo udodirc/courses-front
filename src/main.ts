@@ -1,4 +1,5 @@
 import { createApp } from 'vue';
+//import { createHead } from '@vueuse/head';
 import App from './App.vue';
 
 import pinia from './store';
@@ -11,7 +12,9 @@ import PrimeVue from 'primevue/config';
 import MultiSelect from 'primevue/multiselect';
 
 const app = createApp(App);
+//const head = createHead();
 app.use(PrimeVue);
+//app.use(head);
 app.component('MultiSelect', MultiSelect);
 pinia.use(piniaPersistedstate);
 app.use(pinia);
