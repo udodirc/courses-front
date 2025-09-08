@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, defineEmits } from 'vue';
+import { useRouter } from 'vue-router';
 import BaseForm from '../components/ui/BaseForm.vue';
 import BaseInput from '../components/ui/BaseInput.vue';
 import FormErrors from '../components/ui/FormErrors.vue';
@@ -7,6 +8,8 @@ import BaseTextArea from "../components/ui/BaseTextArea.vue";
 import {useEntitySave} from "../composables/useEntitySave.ts";
 
 const emit = defineEmits(['close']);
+
+const router = useRouter();
 
 const closeModal = () => {
   emit('close');
@@ -28,8 +31,11 @@ async function save() {
       message: formModel.value.message,
     };
 
-    await saveEntity('', payload);
+    await saveEntity('/contacts', payload);
+
+    closeModal();
     router.push('/');
+
   } catch (e) {
     console.error('Ошибка при отправке сообщения:', e);
   }
@@ -42,7 +48,8 @@ async function save() {
         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
         @click.self="closeModal"
     >
-      <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg w-full max-w-md">
+      <!-- Увеличена ширина контейнера с `max-w-md` на `max-w-xl` -->
+      <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg w-full max-w-xl">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-bold">Связаться с нами</h2>
           <button @click="closeModal" class="text-gray-500 hover:text-gray-700">
