@@ -10,6 +10,7 @@ import BaseTextArea from '../../../components/ui/BaseTextArea.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
 import api from "../../../api";
 import BaseToggle from "@/components/ui/BaseToggle.vue";
+import BaseInput from "@/components/ui/BaseInput.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -23,12 +24,35 @@ const loading = ref(false);
 const formModel = ref({
   content: '',
   status: 1,
+  title: '',
+  meta_description: '',
+  meta_keywords: '',
+  og_title: '',
+  og_description: '',
+  og_keywords: '',
+  og_description: '',
+  og_image: '',
+  og_type: 'og_type',
+  og_url: '',
+  canonical_url: '',
+  robots: 'index, follow',
 });
 
 watch(currentContent, (val) => {
   if (val) {
     formModel.value.content = val.content;
     formModel.value.status = val.status ?? 1;
+    formModel.value.title = val.title;
+    formModel.value.content = val.content;
+    formModel.value.meta_description = val.meta_description;
+    formModel.value.meta_keywords = val.meta_keywords;
+    formModel.value.og_title = val.og_title;
+    formModel.value.og_description = val.og_description;
+    formModel.value.og_image = val.og_image;
+    formModel.value.og_type = val.og_type;
+    formModel.value.og_url = val.og_url;
+    formModel.value.canonical_url = val.canonical_url;
+    formModel.value.robots = val.robots;
   }
 });
 
@@ -41,6 +65,18 @@ async function save() {
       content: formModel.value.content,
       menu_id: currentContent.value?.menu_id,
       status: formModel.value.status,
+      title: formModel.value.title,
+      meta_description: formModel.value.meta_description,
+      meta_keywords: formModel.value.meta_keywords,
+      og_title: formModel.value.og_title,
+      og_description: formModel.value.og_description,
+      og_keywords: formModel.value.og_keywords,
+      og_description: formModel.value.og_description,
+      og_image: formModel.value.og_image,
+      og_type: formModel.value.og_type,
+      og_url: formModel.value.og_url,
+      canonical_url: formModel.value.canonical_url,
+      robots: formModel.value.robots,
     });
     router.push('/admin/content');
   } catch (e: any) {
@@ -76,5 +112,15 @@ onMounted(async () => {
         :activeLabel="'Активный'"
         :inactiveLabel="'Неактивный'"
     />
+
+    <BaseInput v-model="formModel.title" label="Seo title"/>
+    <BaseInput v-model="formModel.meta_description" label="Meta description"/>
+    <BaseInput v-model="formModel.meta_keywords" label="Meta keywords"/>
+    <BaseInput v-model="formModel.og_title" label="Og title"/>
+    <BaseInput v-model="formModel.og_description" label="Og description"/>
+    <BaseInput v-model="formModel.og_image" label="Og image"/>
+    <BaseInput v-model="formModel.og_type" label="Og type"/>
+    <BaseInput v-model="formModel.canonical_url" label="Canonical url"/>
+    <BaseInput v-model="formModel.robots" label="Robots"/>
   </BaseForm>
 </template>

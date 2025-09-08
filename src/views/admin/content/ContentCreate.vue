@@ -7,6 +7,7 @@ import BaseForm from '../../../components/ui/BaseForm.vue';
 import BaseTextArea from '../../../components/ui/BaseTextArea.vue';
 import BaseSelect from '../../../components/ui/BaseSelect.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
+import BaseInput from "@/components/ui/BaseInput.vue";
 
 const router = useRouter();
 
@@ -21,6 +22,18 @@ const formModel = ref({
   content: '',
   menuId: null as number | null,
   submenuId: null as number | null,
+  title: '',
+  meta_description: '',
+  meta_keywords: '',
+  og_title: '',
+  og_description: '',
+  og_keywords: '',
+  og_description: '',
+  og_image: '',
+  og_type: 'og_type',
+  og_url: '',
+  canonical_url: '',
+  robots: 'index, follow',
 });
 
 // универсальное сохранение
@@ -31,7 +44,19 @@ async function save() {
   try {
     const payload = {
       content: formModel.value.content,
-      menu_id: formModel.value.submenuId || formModel.value.menuId, // submenuId приоритет
+      menu_id: formModel.value.submenuId || formModel.value.menuId,
+      title: formModel.value.title,
+      meta_description: formModel.value.meta_description,
+      meta_keywords: formModel.value.meta_keywords,
+      og_title: formModel.value.og_title,
+      og_description: formModel.value.og_description,
+      og_keywords: formModel.value.og_keywords,
+      og_description: formModel.value.og_description,
+      og_image: formModel.value.og_image,
+      og_type: formModel.value.og_type,
+      og_url: formModel.value.og_url,
+      canonical_url: formModel.value.canonical_url,
+      robots: formModel.value.robots,
     };
 
     await saveEntity('/admin/content', payload);
@@ -80,5 +105,14 @@ watch(
     />
 
     <BaseTextArea v-model="formModel.content" label="Контент" required />
+    <BaseInput v-model="formModel.title" label="Seo title"/>
+    <BaseInput v-model="formModel.meta_description" label="Meta description"/>
+    <BaseInput v-model="formModel.meta_keywords" label="Meta keywords"/>
+    <BaseInput v-model="formModel.og_title" label="Og title"/>
+    <BaseInput v-model="formModel.og_description" label="Og description"/>
+    <BaseInput v-model="formModel.og_image" label="Og image"/>
+    <BaseInput v-model="formModel.og_type" label="Og type" required/>
+    <BaseInput v-model="formModel.canonical_url" label="Canonical url"/>
+    <BaseInput v-model="formModel.robots" label="Robots" required/>
   </BaseForm>
 </template>
