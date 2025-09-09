@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import { RouterLink, RouterView, useRoute } from "vue-router";
 import { useFetchList } from "../composables/useFetchList";
 import api from "../api";
@@ -7,23 +7,36 @@ import ContactModal from "../components/ContactModal.vue";
 
 const route = useRoute();
 const expanded = ref<string | null>(null);
+const showModal = ref(false);
 const staticContent = ref<Record<string, string>>({});
 const loadingStatic = ref(false);
-const showModal = ref(false);
-const staticContentError = ref<string | null>(null); // Новое состояние для ошибки
+const staticContentError = ref<string | null>(null);
 
+// Открыть/закрыть подменю
 const toggleExpand = (name: string) => {
   expanded.value = expanded.value === name ? null : name;
 };
 
-const openModal = () => {
-  showModal.value = true;
+// Закрытие подменю при клике вне
+const handleClickOutside = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  if (!target.closest(".menu-item")) {
+    expanded.value = null;
+  }
 };
 
-const closeModal = () => {
-  showModal.value = false;
-};
+onMounted(() => {
+  document.addEventListener("click", handleClickOutside);
+});
 
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleClickOutside);
+});
+
+const openModal = () => (showModal.value = true);
+const closeModal = () => (showModal.value = false);
+
+// Меню с API
 const { items: menus, fetchItems: fetchMenus, loading } = useFetchList<{
   id: number;
   name: string;
@@ -31,16 +44,22 @@ const { items: menus, fetchItems: fetchMenus, loading } = useFetchList<{
   children?: { id: number; name: string; url: string }[];
 }>("/menu/tree");
 
+// Нормализация url
 const normalizeUrl = (url?: string) => (url && url !== "" ? `/${url}` : "#");
 
+// Статический контент
 const fetchStaticContent = async () => {
   loadingStatic.value = true;
-  staticContentError.value = null; // Сброс ошибки перед каждым запросом
+  staticContentError.value = null;
   try {
     const response = await api.post("/static_content", {
-      names: [{ name: "main" }, { name: "social_networks" }, { name: "rights" }, {name: "messenger_icons"}],
+      names: [
+        { name: "main" },
+        { name: "social_networks" },
+        { name: "rights" },
+        { name: "messenger_icons" }
+      ]
     });
-
     staticContent.value = response.data.data.reduce(
         (acc: Record<string, string>, item: { name: string; content: string }) => {
           acc[item.name] = item.content;
@@ -49,11 +68,16 @@ const fetchStaticContent = async () => {
         {}
     );
   } catch (e) {
-    staticContentError.value = "Не удалось загрузить контент. Пожалуйста, попробуйте позже.";
+    staticContentError.value = "Не удалось загрузить контент. Попробуйте позже.";
   } finally {
     loadingStatic.value = false;
   }
 };
+
+// Подсветка активного маршрута
+const isActive = (url?: string) => route.path === normalizeUrl(url);
+const isChildActive = (children?: { url: string }[]) =>
+    children?.some((sub) => route.path === normalizeUrl(sub.url));
 
 onMounted(async () => {
   try {
@@ -66,49 +90,55 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col">
-    <header class="bg-white text-black py-4 px-6 flex justify-center items-center">
-      <div class="flex-grow"></div>
-      <div class="flex items-center space-x-5">
-        <nav>
-          <ul v-if="menus?.length" class="flex space-x-6">
-            <li v-for="item in menus || []" :key="item.id" class="relative">
+  <div class="min-h-screen flex flex-col font-sans">
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+      <div class="container mx-auto flex items-center justify-between px-6 py-4">
+        <!-- Логотип -->
+        <RouterLink to="/" class="text-xl font-bold text-gray-800">MyLogo</RouterLink>
+
+        <!-- Desktop Menu -->
+        <nav class="hidden md:flex space-x-6">
+          <ul class="flex space-x-4">
+            <li v-for="item in menus || []" :key="item.id" class="relative menu-item">
+              <!-- Если нет дочерних -->
               <RouterLink
                   v-if="!item.children || item.children.length === 0"
                   :to="normalizeUrl(item.url)"
                   class="px-3 py-2 rounded-md transition-colors duration-200"
                   :class="{
-                'bg-gray-200 text-black font-semibold': route.path === normalizeUrl(item.url),
-                'hover:bg-gray-100': route.path !== normalizeUrl(item.url)
-              }"
+                  'bg-gray-200 text-black font-semibold': isActive(item.url),
+                  'hover:bg-gray-100': !isActive(item.url)
+                }"
               >
                 {{ item.name }}
               </RouterLink>
 
-              <div v-else class="group">
+              <!-- С дочерними -->
+              <div v-else class="relative">
                 <button
-                    @click="toggleExpand(item.name)"
+                    @click.stop="toggleExpand(item.name)"
                     class="px-3 py-2 rounded-md transition-colors duration-200"
                     :class="{
-                  'bg-gray-200 text-black font-semibold': item.children?.some(sub => route.path === normalizeUrl(sub.url)),
-                  'hover:bg-gray-100': !item.children?.some(sub => route.path === normalizeUrl(sub.url))
-                }"
+                    'bg-gray-200 text-black font-semibold': isChildActive(item.children),
+                    'hover:bg-gray-100': !isChildActive(item.children)
+                  }"
                 >
                   {{ item.name }}
                 </button>
 
                 <ul
                     v-show="expanded === item.name"
-                    class="absolute top-full mt-2 bg-white text-black py-2 w-48 shadow-lg rounded-md z-10"
+                    class="absolute top-full mt-2 bg-white shadow-lg rounded-md w-48 z-20"
                 >
                   <li v-for="sub in item.children || []" :key="sub.id">
                     <RouterLink
                         :to="normalizeUrl(sub.url)"
                         class="block px-4 py-2 rounded-md transition-colors duration-200"
                         :class="{
-                      'bg-gray-200 text-black font-semibold': route.path === normalizeUrl(sub.url),
-                      'hover:bg-gray-100': route.path !== normalizeUrl(sub.url)
-                    }"
+                        'bg-gray-200 text-black font-semibold': isActive(sub.url),
+                        'hover:bg-gray-100': !isActive(sub.url)
+                      }"
                     >
                       {{ sub.name }}
                     </RouterLink>
@@ -117,43 +147,46 @@ onMounted(async () => {
               </div>
             </li>
           </ul>
-          <div v-else-if="loading" class="text-gray-500">Загрузка меню...</div>
-          <div v-else class="text-gray-500">Меню не найдено</div>
         </nav>
-      </div>
 
-      <div class="flex items-center space-x-4">
-        <button
-            @click="openModal"
-            class="bg-black text-white px-6 py-3 rounded-md font-semibold hover:bg-gray-800 transition-colors duration-200"
-        >
-          Связаться
-        </button>
-        <div v-if="staticContent.messenger_icons" v-html="staticContent.messenger_icons"></div>
+        <!-- Right Section -->
+        <div class="flex items-center space-x-4">
+          <button
+              @click="openModal"
+              class="bg-black text-white px-5 py-2 rounded-md font-semibold hover:bg-gray-800 transition-colors duration-200"
+          >
+            Связаться
+          </button>
+
+          <!-- Messenger Icons -->
+          <div v-if="staticContent.messenger_icons" v-html="staticContent.messenger_icons"></div>
+        </div>
       </div>
     </header>
 
-    <main class="max-w-6xl mx-auto py-12 px-6">
-      <!-- Блок для отображения ошибки -->
-      <div v-if="staticContentError" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-        <span class="block sm:inline">{{ staticContentError }}</span>
+    <!-- Main Content -->
+    <main class="flex-1 max-w-6xl mx-auto px-6 py-12 w-full">
+      <div
+          v-if="staticContentError"
+          class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6"
+      >
+        {{ staticContentError }}
       </div>
 
-      <div
-          v-if="route.path === '/' && staticContent.main"
-          v-html="staticContent.main"
-          class="prose"
-      ></div>
+      <div v-if="route.path === '/' && staticContent.main" v-html="staticContent.main" class="prose"></div>
 
       <RouterView v-else />
     </main>
 
-    <footer class="bg-black text-white py-4 px-6 text-center mt-auto">
-      <div class="max-w-4xl mx-auto">
+    <!-- Footer -->
+    <footer class="bg-black text-white py-6 px-6 text-center mt-auto">
+      <div class="max-w-4xl mx-auto space-y-2">
         <div v-if="staticContent.social_networks" v-html="staticContent.social_networks"></div>
         <div v-if="staticContent.rights" v-html="staticContent.rights"></div>
       </div>
     </footer>
+
+    <!-- Contact Modal -->
     <ContactModal v-if="showModal" @close="closeModal" />
   </div>
 </template>
