@@ -9,7 +9,8 @@ const route = useRoute();
 const expanded = ref<string | null>(null);
 const staticContent = ref<Record<string, string>>({});
 const loadingStatic = ref(false);
-const showModal = ref(false); // Состояние для модального окна
+const showModal = ref(false);
+const staticContentError = ref<string | null>(null); // Новое состояние для ошибки
 
 const toggleExpand = (name: string) => {
   expanded.value = expanded.value === name ? null : name;
@@ -23,7 +24,6 @@ const closeModal = () => {
   showModal.value = false;
 };
 
-// меню
 const { items: menus, fetchItems: fetchMenus, loading } = useFetchList<{
   id: number;
   name: string;
@@ -33,15 +33,14 @@ const { items: menus, fetchItems: fetchMenus, loading } = useFetchList<{
 
 const normalizeUrl = (url?: string) => (url && url !== "" ? `/${url}` : "#");
 
-// загрузка статичного контента
 const fetchStaticContent = async () => {
   loadingStatic.value = true;
+  staticContentError.value = null; // Сброс ошибки перед каждым запросом
   try {
     const response = await api.post("/static_content", {
       names: [{ name: "main" }, { name: "social_networks" }, { name: "rights" }, {name: "messenger_icons"}],
     });
 
-    // нормализуем массив в объект { name: content }
     staticContent.value = response.data.data.reduce(
         (acc: Record<string, string>, item: { name: string; content: string }) => {
           acc[item.name] = item.content;
@@ -50,7 +49,7 @@ const fetchStaticContent = async () => {
         {}
     );
   } catch (e) {
-    console.error("Ошибка загрузки статического контента", e);
+    staticContentError.value = "Не удалось загрузить контент. Пожалуйста, попробуйте позже.";
   } finally {
     loadingStatic.value = false;
   }
@@ -67,12 +66,9 @@ onMounted(async () => {
 </script>
 
 <template>
-  <!-- обертка для sticky-footer -->
   <div class="min-h-screen flex flex-col">
-    <!-- header -->
     <header class="bg-white text-black py-4 px-6 flex justify-center items-center">
       <div class="flex-grow"></div>
-
       <div class="flex items-center space-x-5">
         <nav>
           <ul v-if="menus?.length" class="flex space-x-6">
@@ -133,31 +129,28 @@ onMounted(async () => {
         >
           Связаться
         </button>
-
         <div v-if="staticContent.messenger_icons" v-html="staticContent.messenger_icons"></div>
       </div>
     </header>
 
-    <!-- main -->
-    <main class="bg-gray-100 py-12 px-6 flex-1">
-      <!-- если главная -->
+    <main class="max-w-6xl mx-auto py-12 px-6">
+      <!-- Блок для отображения ошибки -->
+      <div v-if="staticContentError" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <span class="block sm:inline">{{ staticContentError }}</span>
+      </div>
+
       <div
           v-if="route.path === '/' && staticContent.main"
           v-html="staticContent.main"
           class="prose"
       ></div>
 
-      <!-- если не главная -->
       <RouterView v-else />
     </main>
 
-    <!-- footer -->
     <footer class="bg-black text-white py-4 px-6 text-center mt-auto">
       <div class="max-w-4xl mx-auto">
-        <!-- соцсети -->
         <div v-if="staticContent.social_networks" v-html="staticContent.social_networks"></div>
-
-        <!-- права -->
         <div v-if="staticContent.rights" v-html="staticContent.rights"></div>
       </div>
     </footer>
