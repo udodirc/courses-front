@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useContentStore } from '../../../store/admin/content/content.store';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
@@ -9,8 +9,8 @@ import BaseForm from '../../../components/ui/BaseForm.vue';
 import BaseTextArea from '../../../components/ui/BaseTextArea.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
 import api from "../../../api";
-import BaseToggle from "@/components/ui/BaseToggle.vue";
-import BaseInput from "@/components/ui/BaseInput.vue";
+import BaseToggle from "../../../components/ui/BaseToggle.vue";
+import BaseInput from "../../../components/ui/BaseInput.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -21,7 +21,7 @@ const { currentContent } = storeToRefs(contentStore);
 const { error, setError } = useErrorHandler();
 
 const loading = ref(false);
-const formModel = ref({
+const formModel = reactive({
   content: '',
   status: 1,
   title: '',
@@ -30,7 +30,6 @@ const formModel = ref({
   og_title: '',
   og_description: '',
   og_keywords: '',
-  og_description: '',
   og_image: '',
   og_type: 'og_type',
   og_url: '',
@@ -40,19 +39,19 @@ const formModel = ref({
 
 watch(currentContent, (val) => {
   if (val) {
-    formModel.value.content = val.content;
-    formModel.value.status = val.status ?? 1;
-    formModel.value.title = val.title;
-    formModel.value.content = val.content;
-    formModel.value.meta_description = val.meta_description;
-    formModel.value.meta_keywords = val.meta_keywords;
-    formModel.value.og_title = val.og_title;
-    formModel.value.og_description = val.og_description;
-    formModel.value.og_image = val.og_image;
-    formModel.value.og_type = val.og_type;
-    formModel.value.og_url = val.og_url;
-    formModel.value.canonical_url = val.canonical_url;
-    formModel.value.robots = val.robots;
+    formModel.content = val.content;
+    formModel.status = val.status ?? 1;
+    formModel.title = val.title;
+    formModel.meta_description = val.meta_description;
+    formModel.meta_keywords = val.meta_keywords;
+    formModel.og_title = val.og_title;
+    formModel.og_description = val.og_description;
+    formModel.og_image = val.og_image;
+    formModel.og_keywords = val.og_keywords;
+    formModel.og_type = val.og_type;
+    formModel.og_url = val.og_url;
+    formModel.canonical_url = val.canonical_url;
+    formModel.robots = val.robots;
   }
 });
 
@@ -62,21 +61,20 @@ async function save() {
 
   try {
     await api.put(`/admin/content/${contentId}`, {
-      content: formModel.value.content,
+      content: formModel.content,
       menu_id: currentContent.value?.menu_id,
-      status: formModel.value.status,
-      title: formModel.value.title,
-      meta_description: formModel.value.meta_description,
-      meta_keywords: formModel.value.meta_keywords,
-      og_title: formModel.value.og_title,
-      og_description: formModel.value.og_description,
-      og_keywords: formModel.value.og_keywords,
-      og_description: formModel.value.og_description,
-      og_image: formModel.value.og_image,
-      og_type: formModel.value.og_type,
-      og_url: formModel.value.og_url,
-      canonical_url: formModel.value.canonical_url,
-      robots: formModel.value.robots,
+      status: formModel.status,
+      title: formModel.title,
+      meta_description: formModel.meta_description,
+      meta_keywords: formModel.meta_keywords,
+      og_title: formModel.og_title,
+      og_description: formModel.og_description,
+      og_keywords: formModel.og_keywords,
+      og_image: formModel.og_image,
+      og_type: formModel.og_type,
+      og_url: formModel.og_url,
+      canonical_url: formModel.canonical_url,
+      robots: formModel.robots,
     });
     router.push('/admin/content');
   } catch (e: any) {
@@ -90,7 +88,6 @@ onMounted(async () => {
   await contentStore.fetchItem(contentId);
 });
 </script>
-
 <template>
   <BaseForm label="Редактировать контент" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
