@@ -71,7 +71,7 @@ function resetFilters() {
 </script>
 
 <template>
-  <div class="bg-white p-4 rounded-2xl shadow mb-6">
+  <div class="bg-white p-4 rounded-2xl shadow" style="margin-bottom: 100px;">
     <div class="grid grid-cols-2 gap-4 mb-4">
       <!-- Левая колонка -->
       <div class="flex flex-col gap-4">

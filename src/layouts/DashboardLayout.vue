@@ -77,7 +77,7 @@ function toggleExpand(name: string) {
           <div v-else>
             <div
                 @click="toggleExpand(item.name)"
-                class="flex items-center justify-between py-4 pl-6 cursor-pointer hover:opacity-100"
+                class="flex items-center justify-between py-4 pl-6 pr-4 cursor-pointer hover:opacity-100"
                 :class="{ 'active-nav-link': expanded === item.name }"
             >
               <div class="flex items-center">
