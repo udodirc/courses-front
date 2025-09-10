@@ -4,7 +4,7 @@ import { computed } from 'vue';
 
 const props = defineProps<{
   label: string;
-  modelValue: string;
+  modelValue: string | null | undefined;
   type?: string;
   required?: boolean;
 }>();
@@ -14,7 +14,7 @@ const emit = defineEmits<{
 }>();
 
 const model = computed({
-  get: () => props.modelValue,
+  get: () => props.modelValue ?? '',
   set: (value: string) => emit('update:modelValue', value),
 });
 </script>

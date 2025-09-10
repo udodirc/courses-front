@@ -160,6 +160,26 @@ const routes = [
                 name: 'AdminStaticContentShow',
                 component: () => import('../views/admin/static-content/StaticContentShow.vue'),
             },
+            {
+                path: 'projects',
+                name: 'AdminProject',
+                component: () => import('../views/admin/project/Projects.vue'),
+            },
+            {
+                path: '/admin/project/create',
+                name: 'AdminProjectCreate',
+                component: () => import('../views/admin/project/ProjectCreate.vue'),
+            },
+            {
+                path: 'project/:id/edit',
+                name: 'AdminProjectEdit',
+                component: () => import('../views/admin/project/ProjectEdit.vue'),
+            },
+            {
+                path: '/admin/project/:id',
+                name: 'AdminProjectShow',
+                component: () => import('../views/admin/project/ProjectShow.vue'),
+            },
         ],
     },
 

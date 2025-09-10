@@ -36,6 +36,7 @@ const menu = [
   { name: "Меню", path: "/admin/menus", icon: "fas fa-bars" },
   { name: "Контент", path: "/admin/content", icon: "fas fa-bars" },
   { name: "Статичный контент", path: "/admin/static-content", icon: "fas fa-bars" },
+  { name: "Проекты", path: "/admin/projects", icon: "fas fa-bars" },
   { name: "Настройки", path: "/admin/settings", icon: "fas fa-cogs" },
 ];
 

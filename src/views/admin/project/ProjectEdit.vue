@@ -3,7 +3,7 @@ import { ref, onMounted, reactive, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 
-import { useContentStore } from '../../../store/admin/content/content.store';
+import { useProjectStore } from '../../../store/admin/project/project.store';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
 
 import BaseForm from '../../../components/ui/BaseForm.vue';
@@ -15,16 +15,17 @@ import api from '../../../api';
 
 const route = useRoute();
 const router = useRouter();
-const contentId = Number(route.params.id);
+const projectId = Number(route.params.id);
 
-const contentStore = useContentStore();
-const { currentContent } = storeToRefs(contentStore);
+const projectStore = useProjectStore();
+const { currentProject } = storeToRefs(projectStore);
 const { error, setError } = useErrorHandler();
 
 const loading = ref(false);
 
 // реактивная модель формы
 const formModel = reactive({
+  name: '',
   content: '',
   status: 1,
   title: '',
@@ -41,10 +42,11 @@ const formModel = reactive({
 });
 
 // при загрузке контента заполняем модель
-watch(currentContent, (val) => {
+watch(currentProject, (val) => {
   if (!val) return;
   Object.assign(formModel, {
-    content: val.content,
+    name: val.name ?? '',
+    content: val.content ?? '',
     status: val.status ?? 1,
     title: val.title ?? '',
     meta_description: val.meta_description ?? '',
@@ -57,7 +59,7 @@ watch(currentContent, (val) => {
     og_url: val.og_url ?? '',
     canonical_url: val.canonical_url ?? '',
     robots: val.robots ?? 'index, follow',
-  });
+  })
 });
 
 // сохранение
@@ -66,11 +68,10 @@ const save = async () => {
   error.value = null;
 
   try {
-    await api.put(`/admin/content/${contentId}`, {
-      ...formModel,
-      menu_id: currentContent.value?.menu_id,
+    await api.put(`/admin/project/${projectId}`, {
+      ...formModel
     });
-    router.push('/admin/content');
+    router.push('/admin/projects');
   } catch (e: any) {
     setError(e);
   } finally {
@@ -78,19 +79,14 @@ const save = async () => {
   }
 };
 
-// загрузка контента при монтировании
-onMounted(() => contentStore.fetchItem(contentId));
+onMounted(() => projectStore.fetchItem(projectId));
 </script>
 
 <template>
-  <BaseForm label="Редактировать контент" :loading="loading" :onSubmit="save">
+  <BaseForm label="Редактировать проект" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
 
-    <!-- Меню -->
-    <div class="mb-4">
-      <label class="font-semibold">Меню:</label>
-      <p>{{ currentContent?.menu_name }}</p>
-    </div>
+    <BaseInput v-model="formModel.name" label="Имя" class="mb-2"/>
 
     <!-- Основной контент -->
     <BaseTextArea

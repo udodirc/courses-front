@@ -1,4 +1,4 @@
-export interface  Content {
+export interface  Project {
     id: number;
     menu_id: number;
     content: string;
