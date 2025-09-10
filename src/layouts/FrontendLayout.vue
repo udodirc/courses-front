@@ -94,18 +94,35 @@ onMounted(async () => {
     <!-- Header -->
     <header class="bg-white shadow-md">
       <div class="container mx-auto flex items-center justify-between px-6 py-4">
-        <!-- Логотип -->
-        <RouterLink to="/" class="text-xl font-bold text-gray-800">MyLogo</RouterLink>
+        <!-- Левый блок: логотип или пустое место -->
+        <div class="flex-shrink-0 w-32 flex items-center justify-start">
+          <!-- Можно вставить логотип сюда, сейчас пусто -->
+        </div>
 
-        <!-- Desktop Menu -->
-        <nav class="hidden md:flex space-x-6">
-          <ul class="flex space-x-4">
+        <!-- Меню -->
+        <nav class="flex-1 flex justify-center">
+          <ul class="flex space-x-4 items-center">
+            <!-- Статическая Главная -->
+            <li class="relative menu-item flex items-center">
+              <RouterLink
+                  to="/"
+                  class="px-3 py-2 rounded-md transition-colors duration-200 flex items-center"
+                  :class="{
+                    'bg-gray-200 text-black font-semibold': isActive('/'),
+                    'hover:bg-gray-100': !isActive('/')
+                  }"
+              >
+                Главная
+              </RouterLink>
+            </li>
+
+            <!-- Динамическое меню -->
             <li v-for="item in menus || []" :key="item.id" class="relative menu-item">
               <!-- Если нет дочерних -->
               <RouterLink
                   v-if="!item.children || item.children.length === 0"
                   :to="normalizeUrl(item.url)"
-                  class="px-3 py-2 rounded-md transition-colors duration-200"
+                  class="px-3 py-2 rounded-md transition-colors duration-200 flex items-center"
                   :class="{
                   'bg-gray-200 text-black font-semibold': isActive(item.url),
                   'hover:bg-gray-100': !isActive(item.url)
@@ -118,7 +135,7 @@ onMounted(async () => {
               <div v-else class="relative">
                 <button
                     @click.stop="toggleExpand(item.name)"
-                    class="px-3 py-2 rounded-md transition-colors duration-200"
+                    class="px-3 py-2 rounded-md transition-colors duration-200 flex items-center"
                     :class="{
                     'bg-gray-200 text-black font-semibold': isChildActive(item.children),
                     'hover:bg-gray-100': !isChildActive(item.children)
@@ -149,7 +166,7 @@ onMounted(async () => {
           </ul>
         </nav>
 
-        <!-- Right Section -->
+        <!-- Правый блок: кнопки и иконки -->
         <div class="flex items-center space-x-4">
           <button
               @click="openModal"
