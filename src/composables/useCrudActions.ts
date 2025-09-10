@@ -1,7 +1,10 @@
 import { useRouter } from 'vue-router';
 import api from '../api';
 
-export function useCrudActions(baseRoute: string, deleteFn: (id: number) => Promise<void>) {
+export function useCrudActions(
+    baseRoute: string,
+    deleteFn: (id: number) => Promise<void>
+) {
     const router = useRouter();
 
     const view = (id: number) => router.push(`${baseRoute}/${id}`);
@@ -18,9 +21,20 @@ export function useCrudActions(baseRoute: string, deleteFn: (id: number) => Prom
         }
     };
 
+    const changeOrder = async (id: number, direction: 'up' | 'down') => {
+        try {
+            await api.post(`${baseRoute}/order/${id}/${direction}`);
+            return id;
+        } catch (error) {
+            console.error('Ошибка обновления порядка:', error);
+            alert('Не удалось обновить порядок');
+            return null;
+        }
+    };
+
     const destroy = async (id: number) => {
         if (confirm('Удалить?')) await deleteFn(id);
     };
 
-    return { view, edit, toggleStatus, delete: destroy };
+    return { view, edit, toggleStatus, changeOrder, delete: destroy };
 }

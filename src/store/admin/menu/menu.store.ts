@@ -22,7 +22,8 @@ export const useMenuStore = menuStore.getStore(menuStore.api, {
         Array.isArray(state.items)
             ? state.items.map(item => ({
                 ...item,
-                canToggleStatus: true
+                canToggleStatus: true,
+                canChangeOrder: true,
             }))
             : [],
     currentMenu: (state: MenuStoreState): Menu | null => state.item,

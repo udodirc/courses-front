@@ -85,7 +85,6 @@ onUnmounted(() => {
     <div v-else-if="error" class="text-red-500 text-center">{{ error }}</div>
 
     <div v-else-if="content">
-      <h1 class="text-3xl font-bold mb-6">{{ content.menu_name }}</h1>
       <div class="prose" v-html="content.content"></div>
     </div>
 

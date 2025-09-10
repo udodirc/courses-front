@@ -28,6 +28,16 @@ const schema = ref<SchemaItem[]>([
 const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(menuStore, schema.value);
 const { onNext, onPrev, goToPage } = usePagination(menuStore, filters, toFilterObject);
 
+const moveUp = async (id: number) => {
+  await menuStore.moveOrderUp(id);
+  applyFilters(); // чтобы обновить фильтры и список
+};
+
+const moveDown = async (id: number) => {
+  await menuStore.moveOrderDown(id);
+  applyFilters();
+};
+
 // загрузка меню и добавление в schema
 onMounted(async () => {
   await fetchMenus();
@@ -77,6 +87,8 @@ const columns = [
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"
+          @order-up="moveUp"
+          @order-down="moveDown"
           @refresh="applyFilters"
       />
     </main>

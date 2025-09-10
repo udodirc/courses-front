@@ -7,7 +7,7 @@ import BaseForm from '../../../components/ui/BaseForm.vue';
 import BaseTextArea from '../../../components/ui/BaseTextArea.vue';
 import BaseSelect from '../../../components/ui/BaseSelect.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
-import BaseInput from "@/components/ui/BaseInput.vue";
+import BaseInput from "../../../components/ui/BaseInput.vue";
 
 const router = useRouter();
 
@@ -28,7 +28,6 @@ const formModel = ref({
   og_title: '',
   og_description: '',
   og_keywords: '',
-  og_description: '',
   og_image: '',
   og_type: 'og_type',
   og_url: '',
@@ -51,7 +50,6 @@ async function save() {
       og_title: formModel.value.og_title,
       og_description: formModel.value.og_description,
       og_keywords: formModel.value.og_keywords,
-      og_description: formModel.value.og_description,
       og_image: formModel.value.og_image,
       og_type: formModel.value.og_type,
       og_url: formModel.value.og_url,
