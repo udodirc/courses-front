@@ -13,11 +13,8 @@ const props = defineProps<{
 
 const emit = defineEmits(['prev', 'next', 'go', 'refresh']);
 
-const { view, edit, toggleStatus, delete: destroy } = useCrudActions(props.basePath, props.deleteItem);
-
-const onPrev = () => emit('prev');
-const onNext = () => emit('next');
-const onGo = (page: number) => emit('go', page);
+const { view, edit, toggleStatus, changeOrder, delete: destroy } =
+    useCrudActions(props.basePath, props.deleteItem);
 </script>
 
 <template>
@@ -26,12 +23,14 @@ const onGo = (page: number) => emit('go', page);
       :columns="columns"
       :currentPage="currentPage"
       :totalPages="totalPages"
-      @prev="onPrev"
-      @next="onNext"
-      @go="onGo"
+      @prev="$emit('prev')"
+      @next="$emit('next')"
+      @go="$emit('go', $event)"
       @view="view"
       @edit="edit"
       @toggleStatus="async (id) => { await toggleStatus(id); emit('refresh'); }"
+      @changeOrderUp="async (id) => { await changeOrder(id, 'up'); emit('refresh'); }"
+      @changeOrderDown="async (id) => { await changeOrder(id, 'down'); emit('refresh'); }"
       @delete="destroy"
   />
 </template>
