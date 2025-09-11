@@ -6,15 +6,23 @@ export function useEntitySave<TForm extends Record<string, any>>() {
     const loading = ref(false);
     const { error, setError } = useErrorHandler();
 
-    async function saveEntity(url: string, form: TForm, id?: number) {
+    async function saveEntity(
+        url: string,
+        form: FormData,
+        options?: { id?: number | string; headers?: Record<string, string> }
+    ) {
         loading.value = true;
         error.value = null;
 
         try {
-            if (id) {
-                await api.put(`${url}/${id}`, form);
+            if (options?.id) {
+                await api.put(`${url}/${options.id}`, form, {
+                    headers: options.headers || { 'Content-Type': 'multipart/form-data' }
+                });
             } else {
-                await api.post(url, form);
+                await api.post(url, form, {
+                    headers: options?.headers || { 'Content-Type': 'multipart/form-data' }
+                });
             }
         } catch (e: any) {
             setError(e);
