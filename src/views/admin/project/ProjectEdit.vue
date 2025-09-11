@@ -41,6 +41,7 @@ const formModel = reactive({
   robots: 'index, follow',
   images: [] as File[],           // новые загружаемые файлы
   imagesFolderUrl: '',            // путь к папке на сервере
+  imagesDir: '',            // путь к папке на сервере
   existingImages: [] as string[], // список файлов с сервера
 });
 
@@ -64,7 +65,8 @@ watch(currentProject, (val) => {
     canonical_url: val.canonical_url ?? '',
     robots: val.robots ?? 'index, follow',
     imagesFolderUrl: val.image_url ?? '',
-    existingImages: val.images ?? [], // реальные имена файлов с бэка
+    imagesDir: val.image_dir ?? '',
+    existingImages: val.images ?? [],
   });
 });
 
@@ -73,6 +75,20 @@ const onFilesChange = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (!target.files) return;
   formModel.images = Array.from(target.files);
+};
+console.log(formModel.imagesDir);
+// удаление существующего файла
+const deleteImage = async (filename: string) => {
+  try {
+    await api.delete(`/admin/files/${formModel.imagesDir}/${projectId}`, {
+      data: { filename }
+    });
+
+    // локально обновляем список
+    formModel.existingImages = formModel.existingImages.filter(img => img !== filename);
+  } catch (e) {
+    console.error('Ошибка при удалении файла', e);
+  }
 };
 
 // сохранение формы
@@ -83,14 +99,12 @@ const save = async () => {
   try {
     const payload = new FormData();
 
-    // добавляем обычные поля
     for (const key in formModel) {
-      if (key === 'images' || key === 'existingImages' || key === 'imagesFolderUrl') continue;
+      if (['images', 'existingImages', 'imagesFolderUrl'].includes(key)) continue;
       const value = formModel[key as keyof typeof formModel];
       if (value !== undefined && value !== null) payload.append(key, String(value));
     }
 
-    // добавляем новые файлы
     formModel.images.forEach(file => {
       payload.append('images[]', file);
     });
@@ -116,10 +130,8 @@ onMounted(() => projectStore.fetchItem(projectId));
 
     <BaseInput v-model="formModel.name" label="Имя" class="mb-2" />
 
-    <!-- Основной контент -->
     <BaseTextArea v-model="formModel.content" label="Контент" required class="mb-4" />
 
-    <!-- Статус -->
     <BaseToggle
         v-model="formModel.status"
         label="Статус"
@@ -128,7 +140,6 @@ onMounted(() => projectStore.fetchItem(projectId));
         class="mb-4"
     />
 
-    <!-- SEO / Open Graph -->
     <BaseInput v-model="formModel.title" label="SEO title" class="mb-2" />
     <BaseInput v-model="formModel.meta_description" label="Meta description" class="mb-2" />
     <BaseInput v-model="formModel.meta_keywords" label="Meta keywords" class="mb-2" />
@@ -153,13 +164,24 @@ onMounted(() => projectStore.fetchItem(projectId));
     <!-- Существующие изображения -->
     <div v-if="formModel.existingImages.length" class="mt-4">
       <h3 class="text-sm font-medium text-gray-700 mb-2">Существующие изображения</h3>
-      <div class="flex flex-wrap gap-2">
-        <div v-for="img in formModel.existingImages" :key="img">
+      <div class="flex flex-wrap gap-4">
+        <div
+            v-for="img in formModel.existingImages"
+            :key="img"
+            class="relative group w-48 h-48"
+        >
           <img
               :src="`${formModel.imagesFolderUrl}/${img}`"
               alt="Project image"
               class="w-48 h-48 object-cover rounded border"
           />
+          <button
+              type="button"
+              class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
+              @click="deleteImage(img)"
+          >
+            ✕
+          </button>
         </div>
       </div>
     </div>
