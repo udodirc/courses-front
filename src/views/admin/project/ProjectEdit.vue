@@ -183,7 +183,7 @@ onMounted(() => projectStore.fetchItem(projectId));
         <div
             v-for="(src, idx) in formModel.previews"
             :key="idx"
-            class="relative group w-24 h-24 border rounded overflow-hidden"
+            class="relative group w-48 h-48 border rounded overflow-hidden"
         >
           <img :src="src" class="w-full h-full object-cover" />
           <button

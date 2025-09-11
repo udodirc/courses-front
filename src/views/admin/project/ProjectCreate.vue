@@ -103,24 +103,32 @@ async function save() {
     <BaseInput v-model="formModel.robots" label="Robots" required/>
 
     <!-- Поле для загрузки файлов -->
+    <!-- Поле для загрузки файлов -->
     <div class="mt-4">
       <label class="block text-sm text-gray-600 mb-1">Изображения</label>
-      <input
-          ref="fileInputRef"
-          type="file"
-          multiple
-          @change="handleFileChange"
-          class="mb-2"
-      />
+
+      <!-- Красивая кнопка выбора -->
+      <label
+          class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg shadow cursor-pointer hover:bg-blue-700 transition"
+      >
+        <span>Выбрать файлы</span>
+        <input
+            ref="fileInputRef"
+            type="file"
+            multiple
+            @change="handleFileChange"
+            class="hidden"
+        />
+      </label>
 
       <!-- Превью выбранных файлов -->
-      <div class="flex flex-wrap gap-2 mt-2">
+      <div v-if="formModel.previews.length" class="flex flex-wrap gap-2 mt-2">
         <div
             v-for="(src, idx) in formModel.previews"
             :key="idx"
-            class="relative group w-24 h-24 border rounded overflow-hidden"
+            class="relative group w-48 h-48 border rounded overflow-hidden"
         >
-          <img :src="src" class="w-full h-full object-cover" />
+          <img :src="src" class="w-full h-full object-cover"  alt=""/>
           <button
               type="button"
               class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"

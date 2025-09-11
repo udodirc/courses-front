@@ -22,12 +22,32 @@ onMounted(async () => {
 </script>
 
 <template>
-  <BaseShow
-      label="Проект"
-      :item="project"
-      :itemId="projectId"
-      :loading="loading"
-      :error="error"
-      :exclude="['updatedAt']"
-  />
+  <div>
+    <BaseShow
+        label="Проект"
+        :item="project"
+        :itemId="projectId"
+        :loading="loading"
+        :error="error"
+        :exclude="['updatedAt', 'image_url', 'images', 'image_dir']"
+    />
+
+    <!-- Блок картинок -->
+    <div v-if="project?.images?.length" class="mt-6 flex justify-center">
+      <div class="max-w-3xl p-6 bg-white rounded shadow flex flex-wrap gap-4 justify-center">
+        <h3 class="w-full text-sm font-medium text-gray-700 mb-4">Изображения</h3>
+        <div
+            v-for="img in project.images"
+            :key="img"
+            class="w-48 h-48"
+        >
+          <img
+              :src="`${project.image_url}/${img}`"
+              alt="Project image"
+              class="w-48 h-48 object-cover rounded border"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
