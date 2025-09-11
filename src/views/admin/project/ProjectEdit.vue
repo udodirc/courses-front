@@ -22,6 +22,7 @@ const { currentProject } = storeToRefs(projectStore);
 const { error, setError } = useErrorHandler();
 
 const loading = ref(false);
+const fileInputRef = ref<HTMLInputElement | null>(null);
 
 // реактивная модель формы
 const formModel = reactive({
@@ -40,8 +41,9 @@ const formModel = reactive({
   canonical_url: '',
   robots: 'index, follow',
   images: [] as File[],           // новые загружаемые файлы
+  previews: [] as string[],       // превью новых файлов
   imagesFolderUrl: '',            // путь к папке на сервере
-  imagesDir: '',            // путь к папке на сервере
+  imagesDir: '',                  // относительный путь (для API)
   existingImages: [] as string[], // список файлов с сервера
 });
 
@@ -74,17 +76,31 @@ watch(currentProject, (val) => {
 const onFilesChange = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (!target.files) return;
-  formModel.images = Array.from(target.files);
+
+  const files = Array.from(target.files);
+  formModel.images = files;
+  formModel.previews = files.map(file => URL.createObjectURL(file));
 };
-console.log(formModel.imagesDir);
-// удаление существующего файла
+
+// удаление нового файла (до отправки)
+const removeNewImage = (index: number) => {
+  formModel.images.splice(index, 1);
+
+  URL.revokeObjectURL(formModel.previews[index]);
+  formModel.previews.splice(index, 1);
+
+  if (formModel.images.length === 0 && fileInputRef.value) {
+    fileInputRef.value.value = '';
+  }
+};
+
+// удаление существующего файла (через API)
 const deleteImage = async (filename: string) => {
   try {
     await api.delete(`/admin/files/${formModel.imagesDir}/${projectId}`, {
       data: { filename }
     });
 
-    // локально обновляем список
     formModel.existingImages = formModel.existingImages.filter(img => img !== filename);
   } catch (e) {
     console.error('Ошибка при удалении файла', e);
@@ -100,7 +116,7 @@ const save = async () => {
     const payload = new FormData();
 
     for (const key in formModel) {
-      if (['images', 'existingImages', 'imagesFolderUrl'].includes(key)) continue;
+      if (['images', 'previews', 'existingImages', 'imagesFolderUrl', 'imagesDir'].includes(key)) continue;
       const value = formModel[key as keyof typeof formModel];
       if (value !== undefined && value !== null) payload.append(key, String(value));
     }
@@ -129,7 +145,6 @@ onMounted(() => projectStore.fetchItem(projectId));
     <FormErrors :error="error" />
 
     <BaseInput v-model="formModel.name" label="Имя" class="mb-2" />
-
     <BaseTextArea v-model="formModel.content" label="Контент" required class="mb-4" />
 
     <BaseToggle
@@ -154,10 +169,31 @@ onMounted(() => projectStore.fetchItem(projectId));
 
     <!-- Загрузка новых картинок -->
     <div class="mb-4">
-      <label class="block text-sm text-gray-600">Загрузить новые изображения</label>
-      <input type="file" multiple @change="onFilesChange" class="mt-1" />
-      <div v-if="formModel.images.length" class="mt-2 text-sm text-gray-700">
-        <div v-for="file in formModel.images" :key="file.name">{{ file.name }}</div>
+      <label class="block text-sm text-gray-600 mb-2">Загрузить новые изображения</label>
+      <label
+          class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg shadow cursor-pointer hover:bg-blue-700 transition"
+          style="margin-top:20px; margin-bottom:20px"
+      >
+        <span>Выбрать файлы</span>
+        <input ref="fileInputRef" type="file" multiple class="hidden" @change="onFilesChange" />
+      </label>
+
+      <!-- Превью новых файлов -->
+      <div v-if="formModel.previews.length" class="flex flex-wrap gap-2 mt-2">
+        <div
+            v-for="(src, idx) in formModel.previews"
+            :key="idx"
+            class="relative group w-24 h-24 border rounded overflow-hidden"
+        >
+          <img :src="src" class="w-full h-full object-cover" />
+          <button
+              type="button"
+              class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
+              @click="removeNewImage(idx)"
+          >
+            ✕
+          </button>
+        </div>
       </div>
     </div>
 

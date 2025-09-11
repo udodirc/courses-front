@@ -9,6 +9,8 @@ import FormErrors from '../../../components/ui/FormErrors.vue';
 
 const router = useRouter();
 
+const fileInputRef = ref<HTMLInputElement | null>(null);
+
 // модель формы
 const formModel = ref({
   name: '',
@@ -43,6 +45,19 @@ function handleFileChange(event: Event) {
   }
 }
 
+// удаление картинки из массива и превью
+function removeImage(index: number) {
+  formModel.value.images.splice(index, 1);
+
+  URL.revokeObjectURL(formModel.value.previews[index]);
+  formModel.value.previews.splice(index, 1);
+
+  // если удалили все картинки → сбрасываем input
+  if (formModel.value.images.length === 0 && fileInputRef.value) {
+    fileInputRef.value.value = '';
+  }
+}
+
 async function save() {
   try {
     const payload = new FormData();
@@ -69,7 +84,6 @@ async function save() {
     console.error('Ошибка при сохранении проектов:', e);
   }
 }
-
 </script>
 
 <template>
@@ -91,12 +105,29 @@ async function save() {
     <!-- Поле для загрузки файлов -->
     <div class="mt-4">
       <label class="block text-sm text-gray-600 mb-1">Изображения</label>
-      <input type="file" multiple @change="handleFileChange" class="mb-2" />
+      <input
+          ref="fileInputRef"
+          type="file"
+          multiple
+          @change="handleFileChange"
+          class="mb-2"
+      />
 
       <!-- Превью выбранных файлов -->
       <div class="flex flex-wrap gap-2 mt-2">
-        <div v-for="(src, idx) in formModel.previews" :key="idx" class="w-24 h-24 border rounded overflow-hidden">
+        <div
+            v-for="(src, idx) in formModel.previews"
+            :key="idx"
+            class="relative group w-24 h-24 border rounded overflow-hidden"
+        >
           <img :src="src" class="w-full h-full object-cover" />
+          <button
+              type="button"
+              class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
+              @click="removeImage(idx)"
+          >
+            ✕
+          </button>
         </div>
       </div>
     </div>
