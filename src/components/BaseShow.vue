@@ -42,10 +42,10 @@ const visibleFields = computed(() => {
     <p v-else-if="error" class="text-red-600">{{ error }}</p>
     <div v-if="props.item" class="border border-gray-200 p-4 rounded bg-gray-50 space-y-2">
       <div v-for="(value, key) in visibleFields" :key="key" class="flex">
-        <span class="font-medium mr-2">
+        <span class="font-bold mr-2">
           {{ customLabels[key] || mergedLabels[key] || key }}:
         </span>
-              <span>
+        <span>
           <!-- если поле статус -->
           <template v-if="key === 'status'">
             {{ value == 1 ? 'Активный' : 'Неактивный' }}

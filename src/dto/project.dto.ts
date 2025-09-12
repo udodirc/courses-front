@@ -1,8 +1,8 @@
-export interface  Content {
-    id: number;
+export interface CreateProjectDto {
     menu_id: number;
     content: string;
     status: boolean;
+    url: string;
     title: string;
     meta_description: string;
     meta_keywords: string;
@@ -14,5 +14,4 @@ export interface  Content {
     og_url: string;
     canonical_url: string;
     robots: string;
-    createdAt: string;
 }

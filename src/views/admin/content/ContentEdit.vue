@@ -46,17 +46,17 @@ watch(currentContent, (val) => {
   Object.assign(formModel, {
     content: val.content,
     status: val.status ?? 1,
-    title: val.title,
-    meta_description: val.meta_description,
-    meta_keywords: val.meta_keywords,
-    og_title: val.og_title,
-    og_description: val.og_description,
-    og_keywords: val.og_keywords,
-    og_image: val.og_image,
-    og_type: val.og_type,
-    og_url: val.og_url,
-    canonical_url: val.canonical_url,
-    robots: val.robots,
+    title: val.title ?? '',
+    meta_description: val.meta_description ?? '',
+    meta_keywords: val.meta_keywords ?? '',
+    og_title: val.og_title ?? '',
+    og_description: val.og_description ?? '',
+    og_keywords: val.og_keywords ?? '',
+    og_image: val.og_image ?? '',
+    og_type: val.og_type ?? '',
+    og_url: val.og_url ?? '',
+    canonical_url: val.canonical_url ?? '',
+    robots: val.robots ?? 'index, follow',
   });
 });
 
