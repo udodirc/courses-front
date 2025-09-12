@@ -15,6 +15,7 @@ const fileInputRef = ref<HTMLInputElement | null>(null);
 const formModel = ref({
   name: '',
   content: '',
+  url: '',
   title: '',
   meta_description: '',
   meta_keywords: '',
@@ -64,6 +65,7 @@ async function save() {
     payload.append('name', formModel.value.name);
     payload.append('content', formModel.value.content);
     payload.append('title', formModel.value.title);
+    payload.append('url', formModel.value.url);
     payload.append('meta_description', formModel.value.meta_description);
     payload.append('meta_keywords', formModel.value.meta_keywords);
     payload.append('og_title', formModel.value.og_title);
@@ -91,6 +93,7 @@ async function save() {
     <FormErrors :error="error" />
     <BaseInput v-model="formModel.name" label="Имя"/>
     <BaseTextArea v-model="formModel.content" label="Контент" required />
+    <BaseInput v-model="formModel.url" label="URL" required />
     <BaseInput v-model="formModel.title" label="Seo title"/>
     <BaseInput v-model="formModel.meta_description" label="Meta description"/>
     <BaseInput v-model="formModel.meta_keywords" label="Meta keywords"/>

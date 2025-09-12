@@ -29,6 +29,7 @@ const formModel = reactive({
   name: '',
   content: '',
   status: 1,
+  url: '',
   title: '',
   meta_description: '',
   meta_keywords: '',
@@ -54,6 +55,7 @@ watch(currentProject, (val) => {
   Object.assign(formModel, {
     name: val.name ?? '',
     content: val.content ?? '',
+    url: val.url ?? '',
     status: val.status ?? 1,
     title: val.title ?? '',
     meta_description: val.meta_description ?? '',
@@ -146,6 +148,7 @@ onMounted(() => projectStore.fetchItem(projectId));
 
     <BaseInput v-model="formModel.name" label="Имя" class="mb-2" />
     <BaseTextArea v-model="formModel.content" label="Контент" required class="mb-4" />
+    <BaseInput v-model="formModel.url" label="URL" required />
 
     <BaseToggle
         v-model="formModel.status"

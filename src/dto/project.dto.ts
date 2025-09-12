@@ -2,6 +2,7 @@ export interface CreateProjectDto {
     menu_id: number;
     content: string;
     status: boolean;
+    url: string;
     title: string;
     meta_description: string;
     meta_keywords: string;

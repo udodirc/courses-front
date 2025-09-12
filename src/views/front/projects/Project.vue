@@ -6,6 +6,7 @@ interface Project {
   id: number;
   name: string;
   content: string;
+  url: string;
   image_url: string; // базовый путь
   images: string[];  // массив файлов
   createdAt: string;
@@ -55,7 +56,7 @@ const getProjectImage = (project: Project) => {
         <router-link
             v-for="project in projects"
             :key="project.id"
-            :to="`/projects/${project.id}`"
+            :to="`/projects/${project.url}`"
             class="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition"
         >
           <img
