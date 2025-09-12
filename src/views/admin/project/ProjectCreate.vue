@@ -8,10 +8,8 @@ import BaseInput from "../../../components/ui/BaseInput.vue";
 import FormErrors from '../../../components/ui/FormErrors.vue';
 
 const router = useRouter();
-
 const fileInputRef = ref<HTMLInputElement | null>(null);
 
-// модель формы
 const formModel = ref({
   name: '',
   content: '',
@@ -28,32 +26,33 @@ const formModel = ref({
   canonical_url: '',
   robots: 'index, follow',
   images: [] as File[],
-  previews: [] as string[], // для локальных URL превью
+  previews: [] as string[],
+  main_page: null as number | null, // индекс главного изображения
 });
 
-// универсальное сохранение
 const { saveEntity, loading, error } = useEntitySave<FormData>();
 
-// обработка выбора файлов
 function handleFileChange(event: Event) {
   const target = event.target as HTMLInputElement;
   if (target.files) {
     const files = Array.from(target.files);
     formModel.value.images = files;
-
-    // создаем превью
     formModel.value.previews = files.map(file => URL.createObjectURL(file));
+    formModel.value.main_page = null; // сбрасываем при новой загрузке
   }
 }
 
-// удаление картинки из массива и превью
 function removeImage(index: number) {
   formModel.value.images.splice(index, 1);
-
   URL.revokeObjectURL(formModel.value.previews[index]);
   formModel.value.previews.splice(index, 1);
 
-  // если удалили все картинки → сбрасываем input
+  if (formModel.value.main_page === index) {
+    formModel.value.main_page = null;
+  } else if (formModel.value.main_page !== null && formModel.value.main_page > index) {
+    formModel.value.main_page--; // сдвигаем индекс
+  }
+
   if (formModel.value.images.length === 0 && fileInputRef.value) {
     fileInputRef.value.value = '';
   }
@@ -76,7 +75,12 @@ async function save() {
     payload.append('og_url', formModel.value.og_url);
     payload.append('canonical_url', formModel.value.canonical_url);
     payload.append('robots', formModel.value.robots);
+
     formModel.value.images.forEach(file => payload.append('images[]', file));
+
+    if (formModel.value.main_page !== null) {
+      payload.append('main_page', String(formModel.value.main_page));
+    }
 
     await saveEntity('/admin/project', payload, {
       headers: { 'Content-Type': 'multipart/form-data' }
@@ -105,12 +109,8 @@ async function save() {
     <BaseInput v-model="formModel.canonical_url" label="Canonical url"/>
     <BaseInput v-model="formModel.robots" label="Robots" required/>
 
-    <!-- Поле для загрузки файлов -->
-    <!-- Поле для загрузки файлов -->
     <div class="mt-4">
       <label class="block text-sm text-gray-600 mb-1">Изображения</label>
-
-      <!-- Красивая кнопка выбора -->
       <label
           class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg shadow cursor-pointer hover:bg-blue-700 transition"
       >
@@ -124,14 +124,13 @@ async function save() {
         />
       </label>
 
-      <!-- Превью выбранных файлов -->
       <div v-if="formModel.previews.length" class="flex flex-wrap gap-2 mt-2">
         <div
             v-for="(src, idx) in formModel.previews"
             :key="idx"
             class="relative group w-48 h-48 border rounded overflow-hidden"
         >
-          <img :src="src" class="w-full h-full object-cover"  alt=""/>
+          <img :src="src" class="w-full h-full object-cover" alt=""/>
           <button
               type="button"
               class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
@@ -139,6 +138,17 @@ async function save() {
           >
             ✕
           </button>
+
+          <!-- Чекбокс/радио для выбора главного -->
+          <label class="absolute bottom-1 left-1 bg-white px-2 py-1 rounded text-xs flex items-center gap-1 cursor-pointer">
+            <input
+                type="radio"
+                name="mainPage"
+                :value="idx"
+                v-model="formModel.main_page"
+            />
+            Главное
+          </label>
         </div>
       </div>
     </div>

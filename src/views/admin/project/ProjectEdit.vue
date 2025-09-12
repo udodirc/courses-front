@@ -24,7 +24,6 @@ const { error, setError } = useErrorHandler();
 const loading = ref(false);
 const fileInputRef = ref<HTMLInputElement | null>(null);
 
-// реактивная модель формы
 const formModel = reactive({
   name: '',
   content: '',
@@ -41,14 +40,15 @@ const formModel = reactive({
   og_url: '',
   canonical_url: '',
   robots: 'index, follow',
-  images: [] as File[],           // новые загружаемые файлы
-  previews: [] as string[],       // превью новых файлов
-  imagesFolderUrl: '',            // путь к папке на сервере
-  imagesDir: '',                  // относительный путь (для API)
-  existingImages: [] as string[], // список файлов с сервера
+  images: [] as File[],
+  previews: [] as string[],
+  imagesFolderUrl: '',
+  imagesDir: '',
+  existingImages: [] as string[],
+  main_page: '',
 });
 
-// заполняем форму при загрузке данных
+// заполнение формы при загрузке данных
 watch(currentProject, (val) => {
   if (!val) return;
 
@@ -71,10 +71,11 @@ watch(currentProject, (val) => {
     imagesFolderUrl: val.image_url ?? '',
     imagesDir: val.image_dir ?? '',
     existingImages: val.images ?? [],
+    main_page: val.main_page ?? '',
   });
 });
 
-// обработка выбора файлов
+// новые файлы
 const onFilesChange = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (!target.files) return;
@@ -82,21 +83,30 @@ const onFilesChange = (event: Event) => {
   const files = Array.from(target.files);
   formModel.images = files;
   formModel.previews = files.map(file => URL.createObjectURL(file));
+
+  if (!formModel.main_page && files.length > 0) {
+    formModel.main_page = 'new-0';
+  }
 };
 
-// удаление нового файла (до отправки)
 const removeNewImage = (index: number) => {
   formModel.images.splice(index, 1);
-
   URL.revokeObjectURL(formModel.previews[index]);
   formModel.previews.splice(index, 1);
+
+  if (formModel.main_page === `new-${index}`) {
+    formModel.main_page = '';
+  }
+
+  if (formModel.images.length > 0 && !formModel.main_page) {
+    formModel.main_page = 'new-0';
+  }
 
   if (formModel.images.length === 0 && fileInputRef.value) {
     fileInputRef.value.value = '';
   }
 };
 
-// удаление существующего файла (через API)
 const deleteImage = async (filename: string) => {
   try {
     await api.delete(`/admin/files/${formModel.imagesDir}/${projectId}`, {
@@ -104,12 +114,15 @@ const deleteImage = async (filename: string) => {
     });
 
     formModel.existingImages = formModel.existingImages.filter(img => img !== filename);
+
+    if (formModel.main_page === filename) {
+      formModel.main_page = '';
+    }
   } catch (e) {
     console.error('Ошибка при удалении файла', e);
   }
 };
 
-// сохранение формы
 const save = async () => {
   loading.value = true;
   error.value = null;
@@ -123,9 +136,7 @@ const save = async () => {
       if (value !== undefined && value !== null) payload.append(key, String(value));
     }
 
-    formModel.images.forEach(file => {
-      payload.append('images[]', file);
-    });
+    formModel.images.forEach(file => payload.append('images[]', file));
 
     await api.post(`/admin/project/${projectId}`, payload, {
       headers: { 'Content-Type': 'multipart/form-data' }
@@ -170,18 +181,15 @@ onMounted(() => projectStore.fetchItem(projectId));
     <BaseInput v-model="formModel.canonical_url" label="Canonical url" class="mb-2" />
     <BaseInput v-model="formModel.robots" label="Robots" class="mb-2" />
 
-    <!-- Загрузка новых картинок -->
     <div class="mb-4">
       <label class="block text-sm text-gray-600 mb-2">Загрузить новые изображения</label>
       <label
           class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg shadow cursor-pointer hover:bg-blue-700 transition"
-          style="margin-top:20px; margin-bottom:20px"
       >
         <span>Выбрать файлы</span>
         <input ref="fileInputRef" type="file" multiple class="hidden" @change="onFilesChange" />
       </label>
 
-      <!-- Превью новых файлов -->
       <div v-if="formModel.previews.length" class="flex flex-wrap gap-2 mt-2">
         <div
             v-for="(src, idx) in formModel.previews"
@@ -189,6 +197,13 @@ onMounted(() => projectStore.fetchItem(projectId));
             class="relative group w-48 h-48 border rounded overflow-hidden"
         >
           <img :src="src" class="w-full h-full object-cover" />
+          <input
+              type="radio"
+              name="main_page"
+              class="absolute bottom-1 left-1"
+              :value="`new-${idx}`"
+              v-model="formModel.main_page"
+          />
           <button
               type="button"
               class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
@@ -200,7 +215,6 @@ onMounted(() => projectStore.fetchItem(projectId));
       </div>
     </div>
 
-    <!-- Существующие изображения -->
     <div v-if="formModel.existingImages.length" class="mt-4">
       <h3 class="text-sm font-medium text-gray-700 mb-2">Существующие изображения</h3>
       <div class="flex flex-wrap gap-4">
@@ -213,6 +227,13 @@ onMounted(() => projectStore.fetchItem(projectId));
               :src="`${formModel.imagesFolderUrl}/${img}`"
               alt="Project image"
               class="w-48 h-48 object-cover rounded border"
+          />
+          <input
+              type="radio"
+              name="main_page"
+              class="absolute bottom-1 left-1"
+              :value="img"
+              v-model="formModel.main_page"
           />
           <button
               type="button"
