@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { RouterView, RouterLink, useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "../store/admin/auth/auth.store";
 import '../../public/styles/admin.css';
@@ -13,13 +13,14 @@ function logout() {
   router.push("/admin/login");
 }
 
-// меню
-const menu = [
-  { name: "Админ панель", path: "/admin/dashboard", icon: "fas fa-tachometer-alt" },
-  { name: "Пользователи", path: "/admin/users", icon: "fas fa-users" },
+// Полное меню
+const allMenu = [
+  { name: "Профиль", path: "/admin/profile", icon: "fas fa-tachometer-alt" },
+  { name: "Пользователи", path: "/admin/users", icon: "fas fa-users", superadmin: true },
   {
     name: "Роли",
     icon: "fas fa-user-shield",
+    superadmin: true,
     children: [
       { name: "Все роли", path: "/admin/roles" },
       { name: "Назначить роль", path: "/admin/roles/assign-role" },
@@ -28,6 +29,7 @@ const menu = [
   {
     name: "Права доступа",
     icon: "fas fa-key",
+    superadmin: true,
     children: [
       { name: "Дать доступ", path: "/admin/permissions/give-permissions" },
       { name: "Создать права", path: "/admin/permissions/create-permissions" },
@@ -46,6 +48,22 @@ const mobileOpen = ref(false);
 function toggleExpand(name: string) {
   expanded.value = expanded.value === name ? null : name;
 }
+
+// Фильтрация меню для обычных админов
+const menu = computed(() => {
+  return allMenu.filter(item => {
+    if (item.superadmin && !auth.user?.is_superadmin) return false;
+    // Для подменю тоже фильтруем
+    if (item.children) {
+      item.children = item.children.filter(sub => {
+        // Подменю наследует superadmin от родителя
+        if (item.superadmin && !auth.user?.is_superadmin) return false;
+        return true;
+      });
+    }
+    return true;
+  });
+});
 </script>
 
 <template>
@@ -53,10 +71,7 @@ function toggleExpand(name: string) {
     <!-- Sidebar -->
     <aside class="relative bg-sidebar h-screen w-64 hidden sm:block shadow-xl">
       <div class="p-6">
-        <RouterLink
-            to="/admin/dashboard"
-            class="text-white text-3xl font-semibold uppercase hover:text-gray-300"
-        >
+        <RouterLink to="/admin/dashboard" class="text-white text-3xl font-semibold uppercase hover:text-gray-300">
           Админка
         </RouterLink>
       </div>
@@ -122,10 +137,7 @@ function toggleExpand(name: string) {
       <!-- Mobile Header -->
       <header class="w-full bg-sidebar py-5 px-6 sm:hidden">
         <div class="flex items-center justify-between">
-          <RouterLink
-              to="/admin/dashboard"
-              class="text-white text-3xl font-semibold uppercase hover:text-gray-300"
-          >
+          <RouterLink to="/admin/dashboard" class="text-white text-3xl font-semibold uppercase hover:text-gray-300">
             Admin
           </RouterLink>
           <button @click="mobileOpen = !mobileOpen" class="text-white text-3xl">
@@ -181,7 +193,3 @@ function toggleExpand(name: string) {
     </div>
   </div>
 </template>
-
-<style>
-
-</style>
