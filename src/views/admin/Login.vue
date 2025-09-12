@@ -60,7 +60,7 @@ async function submit() {
   error.value = '';
   try {
     await auth.login(email.value, password.value);
-    router.push('/admin/dashboard');
+    router.push('/admin/content');
   } catch {
     error.value = 'Ошибка авторизации. Проверьте email и пароль.';
   } finally {

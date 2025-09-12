@@ -4,6 +4,7 @@ interface User {
     id: number;
     name: string;
     email: string;
+    is_superadmin: boolean;
 }
 
 export const useAuthStore = defineStore('auth', {
