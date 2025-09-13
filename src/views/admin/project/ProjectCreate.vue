@@ -79,9 +79,9 @@ async function save() {
     formModel.value.images.forEach(file => payload.append('images[]', file));
 
     if (formModel.value.main_page !== null) {
-      payload.append('main_page', String(formModel.value.main_page));
+      payload.append('main_page', String('new-' + formModel.value.main_page));
     }
-
+    console.log(String('new-' + formModel.value.main_page));
     await saveEntity('/admin/project', payload, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });

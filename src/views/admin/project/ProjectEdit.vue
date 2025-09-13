@@ -137,7 +137,7 @@ const save = async () => {
     }
 
     formModel.images.forEach(file => payload.append('images[]', file));
-
+    console.log(formModel.main_page);
     await api.post(`/admin/project/${projectId}`, payload, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
