@@ -23,6 +23,7 @@ const { error, setError } = useErrorHandler();
 
 const loading = ref(false);
 const fileInputRef = ref<HTMLInputElement | null>(null);
+const ogFileInputRef = ref<HTMLInputElement | null>(null);
 
 const formModel = reactive({
   name: '',
@@ -35,7 +36,8 @@ const formModel = reactive({
   og_title: '',
   og_description: '',
   og_keywords: '',
-  og_image: '',
+  og_image: '' as File | string | null,
+  og_preview: '' as string,
   og_type: '',
   og_url: '',
   canonical_url: '',
@@ -44,6 +46,7 @@ const formModel = reactive({
   previews: [] as string[],
   imagesFolderUrl: '',
   imagesDir: '',
+  image_all_dir: '',
   existingImages: [] as string[],
   main_page: '',
 });
@@ -64,12 +67,14 @@ watch(currentProject, (val) => {
     og_description: val.og_description ?? '',
     og_keywords: val.og_keywords ?? '',
     og_image: val.og_image ?? '',
+    og_preview: val.og_image ? `${val.image_og_url}/${val.og_image}` : '',
     og_type: val.og_type ?? '',
     og_url: val.og_url ?? '',
     canonical_url: val.canonical_url ?? '',
     robots: val.robots ?? 'index, follow',
     imagesFolderUrl: val.image_url ?? '',
     imagesDir: val.image_dir ?? '',
+    image_all_dir: val.image_all_dir ?? '',
     existingImages: val.images ?? [],
     main_page: val.main_page ?? '',
   });
@@ -107,10 +112,33 @@ const removeNewImage = (index: number) => {
   }
 };
 
-const deleteImage = async (filename: string) => {
+const handleOgFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files[0]) {
+    const file = target.files[0];
+    formModel.og_image = file;
+    formModel.og_preview = URL.createObjectURL(file);
+  }
+};
+
+const removeOgImage = () => {
+  if (formModel.og_preview) {
+    URL.revokeObjectURL(formModel.og_preview);
+  }
+  formModel.og_image = null;
+  formModel.og_preview = '';
+  if (ogFileInputRef.value) {
+    ogFileInputRef.value.value = '';
+  }
+};
+
+const deleteImage = async (dir: string, filename: string) => {
   try {
     await api.delete(`/admin/files/${formModel.imagesDir}/${projectId}`, {
-      data: { filename }
+      data: {
+        dir,
+        filename
+      }
     });
 
     formModel.existingImages = formModel.existingImages.filter(img => img !== filename);
@@ -131,13 +159,24 @@ const save = async () => {
     const payload = new FormData();
 
     for (const key in formModel) {
-      if (['images', 'previews', 'existingImages', 'imagesFolderUrl', 'imagesDir'].includes(key)) continue;
+      if (['images', 'previews', 'existingImages', 'imagesFolderUrl', 'imagesDir', 'og_preview'].includes(key)) continue;
+
       const value = formModel[key as keyof typeof formModel];
+
+      if (key === 'og_image') {
+        if (value instanceof File) {
+          payload.append('og_image', value);
+        } else if (typeof value === 'string' && value !== '') {
+          payload.append('og_image', value);
+        }
+        continue;
+      }
+
       if (value !== undefined && value !== null) payload.append(key, String(value));
     }
 
     formModel.images.forEach(file => payload.append('images[]', file));
-    console.log(formModel.main_page);
+
     await api.post(`/admin/project/${projectId}`, payload, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
@@ -175,12 +214,40 @@ onMounted(() => projectStore.fetchItem(projectId));
     <BaseInput v-model="formModel.og_title" label="Og title" class="mb-2" />
     <BaseInput v-model="formModel.og_description" label="Og description" class="mb-2" />
     <BaseInput v-model="formModel.og_keywords" label="Og keywords" class="mb-2" />
-    <BaseInput v-model="formModel.og_image" label="Og image" class="mb-2" />
     <BaseInput v-model="formModel.og_type" label="Og type" class="mb-2" />
     <BaseInput v-model="formModel.og_url" label="Og url" class="mb-2" />
     <BaseInput v-model="formModel.canonical_url" label="Canonical url" class="mb-2" />
     <BaseInput v-model="formModel.robots" label="Robots" class="mb-2" />
 
+    <!-- OG IMAGE UPLOAD -->
+    <div class="mb-4">
+      <label class="block text-sm text-gray-600 mb-1">OG Image</label>
+      <label
+          class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg shadow cursor-pointer hover:bg-green-700 transition"
+      >
+        <span>Выбрать файл</span>
+        <input
+            ref="ogFileInputRef"
+            type="file"
+            accept="image/*"
+            class="hidden"
+            @change="handleOgFileChange"
+        />
+      </label>
+
+      <div v-if="formModel.og_preview" class="relative group w-48 h-48 border rounded overflow-hidden mt-2">
+        <img :src="formModel.og_preview" class="w-full h-full object-cover" alt="og_image"/>
+        <button
+            type="button"
+            class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
+            @click="removeOgImage"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- NEW IMAGES -->
     <div class="mb-4">
       <label class="block text-sm text-gray-600 mb-2">Загрузить новые изображения</label>
       <label
@@ -215,6 +282,7 @@ onMounted(() => projectStore.fetchItem(projectId));
       </div>
     </div>
 
+    <!-- EXISTING IMAGES -->
     <div v-if="formModel.existingImages.length" class="mt-4">
       <h3 class="text-sm font-medium text-gray-700 mb-2">Существующие изображения</h3>
       <div class="flex flex-wrap gap-4">
@@ -238,7 +306,7 @@ onMounted(() => projectStore.fetchItem(projectId));
           <button
               type="button"
               class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
-              @click="deleteImage(img)"
+              @click="deleteImage(formModel.image_all_dir, img)"
           >
             ✕
           </button>
