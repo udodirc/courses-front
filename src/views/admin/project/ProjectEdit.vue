@@ -47,6 +47,7 @@ const formModel = reactive({
   imagesFolderUrl: '',
   imagesDir: '',
   image_all_dir: '',
+  image_og_dir: '',
   existingImages: [] as string[],
   main_page: '',
 });
@@ -75,6 +76,7 @@ watch(currentProject, (val) => {
     imagesFolderUrl: val.image_url ?? '',
     imagesDir: val.image_dir ?? '',
     image_all_dir: val.image_all_dir ?? '',
+    image_og_dir:  val.image_og_dir ?? '',
     existingImages: val.images ?? [],
     main_page: val.main_page ?? '',
   });
@@ -121,14 +123,32 @@ const handleOgFileChange = (event: Event) => {
   }
 };
 
-const removeOgImage = () => {
-  if (formModel.og_preview) {
-    URL.revokeObjectURL(formModel.og_preview);
-  }
-  formModel.og_image = null;
-  formModel.og_preview = '';
-  if (ogFileInputRef.value) {
-    ogFileInputRef.value.value = '';
+// ✅ новый вариант удаления OG Image
+const removeOgImage = async () => {
+  try {
+    // если og_image уже сохранена на сервере
+    if (typeof formModel.og_image === 'string' && formModel.og_image !== '') {
+      await api.delete(`/admin/files/${formModel.imagesDir}/${projectId}`, {
+        data: {
+          dir: formModel.image_og_dir,
+          filename: formModel.og_image
+        }
+      });
+    }
+
+    // освобождаем blob preview
+    if (formModel.og_preview && formModel.og_preview.startsWith('blob:')) {
+      URL.revokeObjectURL(formModel.og_preview);
+    }
+
+    formModel.og_image = null;
+    formModel.og_preview = '';
+
+    if (ogFileInputRef.value) {
+      ogFileInputRef.value.value = '';
+    }
+  } catch (e) {
+    console.error('Ошибка при удалении og_image', e);
   }
 };
 
