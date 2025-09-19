@@ -11,6 +11,7 @@ const router = useRouter();
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const ogFileInputRef = ref<HTMLInputElement | null>(null);
 
+// Тип формы
 interface FormModel {
   name: string;
   content: string;
@@ -22,7 +23,6 @@ interface FormModel {
   og_description: string;
   og_keywords: string;
   og_image: File | string | null;
-  og_preview: string;
   og_type: string;
   og_url: string;
   canonical_url: string;
@@ -32,7 +32,7 @@ interface FormModel {
   main_page: number | null;
 }
 
-// Инициализация с пустыми значениями
+// Инициализация формы
 const formModel = ref<FormModel>({
   name: '',
   content: '',
@@ -44,7 +44,6 @@ const formModel = ref<FormModel>({
   og_description: '',
   og_keywords: '',
   og_image: null,
-  og_preview: '',
   og_type: 'og_type',
   og_url: '',
   canonical_url: '',
@@ -54,11 +53,14 @@ const formModel = ref<FormModel>({
   main_page: null,
 });
 
+// OG preview отдельно
+const ogPreview = ref<string>('');
+
 const { saveEntity, loading, error } = useEntitySave<FormData>();
 
-// Заполняем formModel из ответа бэкенда
+// Загрузка данных из бэкенда
 onMounted(() => {
-  const data = window['initialProjectData']; // передавай JSON с бэкенда
+  const data = window['initialProjectData'];
   if (data) {
     formModel.value = {
       name: data.name,
@@ -71,7 +73,6 @@ onMounted(() => {
       og_description: data.og_description,
       og_keywords: data.og_keywords,
       og_image: data.og_image || null,
-      og_preview: data.og_image ? `${data.image_og_url}/${data.og_image}` : '',
       og_type: data.og_type,
       og_url: data.og_url,
       canonical_url: data.canonical_url,
@@ -80,9 +81,11 @@ onMounted(() => {
       previews: (data.images || []).map((f: string) => `${data.image_url}/${f}`),
       main_page: data.main_page,
     };
+    ogPreview.value = data.og_image ? `${data.image_og_url}/${data.og_image}` : '';
   }
 });
 
+// Загрузка обычных изображений
 function handleFileChange(event: Event) {
   const target = event.target as HTMLInputElement;
   if (target.files) {
@@ -111,29 +114,31 @@ function removeImage(index: number) {
   }
 }
 
+// Загрузка OG изображения
 function handleOgFileChange(event: Event) {
   const target = event.target as HTMLInputElement;
   if (target.files && target.files[0]) {
     const file = target.files[0];
-    if (formModel.value.og_preview) {
-      URL.revokeObjectURL(formModel.value.og_preview);
+    if (ogPreview.value.startsWith('blob:')) {
+      URL.revokeObjectURL(ogPreview.value);
     }
     formModel.value.og_image = file;
-    formModel.value.og_preview = URL.createObjectURL(file);
+    ogPreview.value = URL.createObjectURL(file);
   }
 }
 
 function removeOgImage() {
-  if (formModel.value.og_preview) {
-    URL.revokeObjectURL(formModel.value.og_preview);
+  if (ogPreview.value.startsWith('blob:')) {
+    URL.revokeObjectURL(ogPreview.value);
   }
   formModel.value.og_image = null;
-  formModel.value.og_preview = '';
+  ogPreview.value = '';
   if (ogFileInputRef.value) {
     ogFileInputRef.value.value = '';
   }
 }
 
+// Сохранение формы
 async function save() {
   try {
     const payload = new FormData();
@@ -182,6 +187,7 @@ async function save() {
 <template>
   <BaseForm label="Создание контента" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
+
     <BaseInput v-model="formModel.name" label="Имя"/>
     <BaseTextArea v-model="formModel.content" label="Контент" required />
     <BaseInput v-model="formModel.url" label="URL" required />
@@ -211,8 +217,8 @@ async function save() {
         />
       </label>
 
-      <div v-if="formModel.og_preview" class="relative group w-48 h-48 border rounded overflow-hidden mt-2">
-        <img :src="formModel.og_preview" class="w-full h-full object-cover" alt="og_image"/>
+      <div v-if="ogPreview" class="relative group w-48 h-48 border rounded overflow-hidden mt-2">
+        <img :src="ogPreview" class="w-full h-full object-cover" alt="og_image"/>
         <button
             type="button"
             class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
