@@ -37,7 +37,6 @@ const formModel = reactive({
   og_description: '',
   og_keywords: '',
   og_image: '' as File | string | null,
-  og_preview: '' as string,
   og_type: '',
   og_url: '',
   canonical_url: '',
@@ -45,6 +44,9 @@ const formModel = reactive({
   imagesDir: '',
   image_og_dir: '',
 });
+
+// отдельный ref для превью нового файла
+const ogPreview = ref<string>('');
 
 // при загрузке контента заполняем модель
 watch(currentContent, (val) => {
@@ -59,25 +61,32 @@ watch(currentContent, (val) => {
     og_description: val.og_description ?? '',
     og_keywords: val.og_keywords ?? '',
     og_image: val.og_image ?? '',
-    og_preview: val.og_image ? `${val.image_og_url}/${val.og_image}` : '',
+    ogPreview: val.og_image ? `${val.image_og_url}/${val.og_image}` : '',
     og_type: val.og_type ?? '',
     og_url: val.og_url ?? '',
     canonical_url: val.canonical_url ?? '',
     robots: val.robots ?? 'index, follow',
     imagesDir: val.image_dir ?? '',
-    image_og_dir:  val.image_og_dir ?? '',
+    image_og_dir: val.image_og_dir ?? '',
   });
+
+  // заполняем превью из API, если есть сохранённая картинка
+  if (val.og_image) {
+    ogPreview.value = `${val.image_og_url}/${val.og_image}`;
+  }
 });
 
+// обработка выбора нового файла
 const handleOgFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target.files && target.files[0]) {
     const file = target.files[0];
     formModel.og_image = file;
-    formModel.og_preview = URL.createObjectURL(file);
+    ogPreview.value = URL.createObjectURL(file);
   }
 };
 
+// удаление OG изображения
 const removeOgImage = async () => {
   try {
     // если og_image уже сохранена на сервере
@@ -91,16 +100,13 @@ const removeOgImage = async () => {
     }
 
     // освобождаем blob preview
-    if (formModel.og_preview && formModel.og_preview.startsWith('blob:')) {
-      URL.revokeObjectURL(formModel.og_preview);
+    if (ogPreview.value.startsWith('blob:')) {
+      URL.revokeObjectURL(ogPreview.value);
     }
 
     formModel.og_image = null;
-    formModel.og_preview = '';
-
-    if (ogFileInputRef.value) {
-      ogFileInputRef.value.value = '';
-    }
+    ogPreview.value = '';
+    if (ogFileInputRef.value) ogFileInputRef.value.value = '';
   } catch (e) {
     console.error('Ошибка при удалении og_image', e);
   }
@@ -115,8 +121,7 @@ const save = async () => {
     const payload = new FormData();
 
     for (const key in formModel) {
-      if (['imagesDir', 'og_preview'].includes(key)) continue;
-
+      if (['imagesDir'].includes(key)) continue;
       const value = formModel[key as keyof typeof formModel];
 
       if (key === 'og_image') {
@@ -158,12 +163,7 @@ onMounted(() => contentStore.fetchItem(contentId));
     </div>
 
     <!-- Основной контент -->
-    <BaseTextArea
-        v-model="formModel.content"
-        label="Контент"
-        required
-        class="mb-4"
-    />
+    <BaseTextArea v-model="formModel.content" label="Контент" required class="mb-4"/>
 
     <!-- Статус -->
     <BaseToggle
@@ -189,14 +189,17 @@ onMounted(() => contentStore.fetchItem(contentId));
     <!-- OG IMAGE UPLOAD -->
     <div class="mb-4">
       <label class="block text-sm text-gray-600 mb-1">Загрузить OG изображение</label>
+
       <BaseFileUpload
           v-model="formModel.og_image"
           label="Выбрать OG Image"
           accept="image/*"
+          @change="handleOgFileChange"
+          ref="ogFileInputRef"
       />
 
       <BaseImagePreview
-          :src="formModel.og_preview"
+          :src="ogPreview"
           alt="og_image"
           @remove="removeOgImage"
       />

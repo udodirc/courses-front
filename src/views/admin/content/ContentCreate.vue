@@ -3,11 +3,14 @@ import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useFetchList } from '../../../composables/useFetchList';
 import { useEntitySave } from '../../../composables/useEntitySave';
+
 import BaseForm from '../../../components/ui/BaseForm.vue';
 import BaseTextArea from '../../../components/ui/BaseTextArea.vue';
 import BaseSelect from '../../../components/ui/BaseSelect.vue';
+import BaseInput from '../../../components/ui/BaseInput.vue';
+import BaseFileUpload from '../../../components/ui/BaseFileUpload.vue';
+import BaseImagePreview from '../../../components/ui/BaseImagePreview.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
-import BaseInput from "../../../components/ui/BaseInput.vue";
 
 const router = useRouter();
 
@@ -28,12 +31,16 @@ const formModel = ref({
   og_title: '',
   og_description: '',
   og_keywords: '',
-  og_image: '',
+  og_image: '' as File | string | null,
   og_type: 'og_type',
   og_url: '',
   canonical_url: '',
   robots: 'index, follow',
 });
+
+// OG Image preview
+const ogPreview = ref<string>('');
+const ogFileInputRef = ref<HTMLInputElement | null>(null);
 
 // универсальное сохранение
 const { saveEntity, loading, error } = useEntitySave<typeof formModel.value>();
@@ -41,21 +48,24 @@ const { saveEntity, loading, error } = useEntitySave<typeof formModel.value>();
 // сохранение
 async function save() {
   try {
-    const payload = {
-      content: formModel.value.content,
-      menu_id: formModel.value.submenuId || formModel.value.menuId,
-      title: formModel.value.title,
-      meta_description: formModel.value.meta_description,
-      meta_keywords: formModel.value.meta_keywords,
-      og_title: formModel.value.og_title,
-      og_description: formModel.value.og_description,
-      og_keywords: formModel.value.og_keywords,
-      og_image: formModel.value.og_image,
-      og_type: formModel.value.og_type,
-      og_url: formModel.value.og_url,
-      canonical_url: formModel.value.canonical_url,
-      robots: formModel.value.robots,
-    };
+    const payload = new FormData();
+
+    for (const key in formModel.value) {
+      const value = formModel.value[key as keyof typeof formModel.value];
+
+      if (key === 'og_image') {
+        if (value instanceof File) {
+          payload.append('og_image', value);
+        } else if (typeof value === 'string' && value !== '') {
+          payload.append('og_image', value);
+        }
+      } else if (value !== undefined && value !== null) {
+        payload.append(key, String(value));
+      }
+    }
+
+    // menu_id берём из подменю, если выбрано
+    payload.set('menu_id', String(formModel.value.submenuId || formModel.value.menuId));
 
     await saveEntity('/admin/content', payload);
     router.push('/admin/content');
@@ -81,6 +91,23 @@ watch(
       }
     }
 );
+
+// OG Image handlers
+const handleOgFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files[0]) {
+    const file = target.files[0];
+    formModel.value.og_image = file;
+    ogPreview.value = URL.createObjectURL(file);
+  }
+};
+
+const removeOgImage = () => {
+  formModel.value.og_image = '';
+  if (ogPreview.value.startsWith('blob:')) URL.revokeObjectURL(ogPreview.value);
+  ogPreview.value = '';
+  if (ogFileInputRef.value) ogFileInputRef.value.value = '';
+};
 </script>
 
 <template>
@@ -102,15 +129,36 @@ watch(
         :options="submenus.map(sub => ({ value: sub.id, label: sub.name }))"
     />
 
+    <!-- Основной контент -->
     <BaseTextArea v-model="formModel.content" label="Контент" required />
     <BaseInput v-model="formModel.title" label="Seo title"/>
     <BaseInput v-model="formModel.meta_description" label="Meta description"/>
     <BaseInput v-model="formModel.meta_keywords" label="Meta keywords"/>
     <BaseInput v-model="formModel.og_title" label="Og title"/>
     <BaseInput v-model="formModel.og_description" label="Og description"/>
-    <BaseInput v-model="formModel.og_image" label="Og image"/>
+    <BaseInput v-model="formModel.og_keywords" label="Og keywords"/>
     <BaseInput v-model="formModel.og_type" label="Og type" required/>
+    <BaseInput v-model="formModel.og_url" label="Og url"/>
     <BaseInput v-model="formModel.canonical_url" label="Canonical url"/>
     <BaseInput v-model="formModel.robots" label="Robots" required/>
+
+    <!-- OG IMAGE UPLOAD -->
+    <div class="mb-4">
+      <label class="block text-sm text-gray-600 mb-1">Загрузить OG изображение</label>
+
+      <BaseFileUpload
+          v-model="formModel.og_image"
+          label="Выбрать OG Image"
+          accept="image/*"
+          @change="handleOgFileChange"
+          ref="ogFileInputRef"
+      />
+
+      <BaseImagePreview
+          :src="ogPreview"
+          alt="og_image"
+          @remove="removeOgImage"
+      />
+    </div>
   </BaseForm>
 </template>
