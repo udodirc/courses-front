@@ -172,7 +172,7 @@ async function save() {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
 
-    //router.push('/admin/projects');
+    router.push('/admin/projects');
   } catch (e) {
     console.error('Ошибка при сохранении проектов:', e);
   }
