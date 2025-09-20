@@ -5,7 +5,7 @@ import { useFetchList } from '../../../composables/useFetchList';
 import { useEntitySave } from '../../../composables/useEntitySave';
 
 import BaseForm from '../../../components/ui/BaseForm.vue';
-import BaseTextArea from '../../../components/ui/BaseTextArea.vue';
+import BaseTextArea from '../../../components/ui/BaseTextAreaWithEditor.vue';
 import BaseSelect from '../../../components/ui/BaseSelect.vue';
 import BaseInput from '../../../components/ui/BaseInput.vue';
 import BaseFileUpload from '../../../components/ui/BaseFileUpload.vue';

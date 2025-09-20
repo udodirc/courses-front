@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useEntitySave } from '../../../composables/useEntitySave';
 import BaseForm from '../../../components/ui/BaseForm.vue';
-import BaseTextArea from '../../../components/ui/BaseTextArea.vue';
+import BaseTextArea from '../../../components/ui/BaseTextAreaWithEditor.vue';
 import BaseInput from "../../../components/ui/BaseInput.vue";
 import FormErrors from '../../../components/ui/FormErrors.vue';
 

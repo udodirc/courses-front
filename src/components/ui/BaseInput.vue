@@ -25,7 +25,7 @@ const model = computed({
     <input
         v-model="model"
         :type="type || 'text'"
-        class="w-full px-5 py-1 text-gray-700 bg-gray-200 rounded"
+        class="w-full px-5 py-1 text-gray-700 bg-gray-200 rounded mb-2.5"
         :required="required"
     />
   </div>

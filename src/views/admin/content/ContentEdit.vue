@@ -7,7 +7,7 @@ import { useContentStore } from '../../../store/admin/content/content.store';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
 
 import BaseForm from '../../../components/ui/BaseForm.vue';
-import BaseTextArea from '../../../components/ui/BaseTextArea.vue';
+import BaseTextAreaWithEditor from '../../../components/ui/BaseTextAreaWithEditor.vue';
 import BaseInput from '../../../components/ui/BaseInput.vue';
 import BaseToggle from '../../../components/ui/BaseToggle.vue';
 import BaseFileUpload from '../../../components/ui/BaseFileUpload.vue';
@@ -51,29 +51,25 @@ const ogPreview = ref<string>('');
 // при загрузке контента заполняем модель
 watch(currentContent, (val) => {
   if (!val) return;
-  Object.assign(formModel, {
-    content: val.content,
-    status: val.status ?? 1,
-    title: val.title ?? '',
-    meta_description: val.meta_description ?? '',
-    meta_keywords: val.meta_keywords ?? '',
-    og_title: val.og_title ?? '',
-    og_description: val.og_description ?? '',
-    og_keywords: val.og_keywords ?? '',
-    og_image: val.og_image ?? '',
-    ogPreview: val.og_image ? `${val.image_og_url}/${val.og_image}` : '',
-    og_type: val.og_type ?? '',
-    og_url: val.og_url ?? '',
-    canonical_url: val.canonical_url ?? '',
-    robots: val.robots ?? 'index, follow',
-    imagesDir: val.image_dir ?? '',
-    image_og_dir: val.image_og_dir ?? '',
-  });
 
-  // заполняем превью из API, если есть сохранённая картинка
-  if (val.og_image) {
-    ogPreview.value = `${val.image_og_url}/${val.og_image}`;
-  }
+  formModel.content = val.content ?? '';
+  formModel.status = val.status ?? 1;
+  formModel.title = val.title ?? '';
+  formModel.meta_description = val.meta_description ?? '';
+  formModel.meta_keywords = val.meta_keywords ?? '';
+  formModel.og_title = val.og_title ?? '';
+  formModel.og_description = val.og_description ?? '';
+  formModel.og_keywords = val.og_keywords ?? '';
+  formModel.og_image = val.og_image ?? '';
+  formModel.og_type = val.og_type ?? '';
+  formModel.og_url = val.og_url ?? '';
+  formModel.canonical_url = val.canonical_url ?? '';
+  formModel.robots = val.robots ?? 'index, follow';
+  formModel.imagesDir = val.image_dir ?? '';
+  formModel.image_og_dir = val.image_og_dir ?? '';
+
+  // OG preview
+  ogPreview.value = val.og_image ? `${val.image_og_url}/${val.og_image}` : '';
 });
 
 // обработка выбора нового файла
@@ -163,15 +159,19 @@ onMounted(() => contentStore.fetchItem(contentId));
     </div>
 
     <!-- Основной контент -->
-    <BaseTextArea v-model="formModel.content" label="Контент" required class="mb-4"/>
+    <BaseTextAreaWithEditor
+        v-model="formModel.content"
+        label="Контент"
+        required
+        class="w-full mb-4"
+    />
 
-    <!-- Статус -->
     <BaseToggle
         v-model="formModel.status"
         label="Статус"
         :activeLabel="'Активный'"
         :inactiveLabel="'Неактивный'"
-        class="mb-4"
+        class="w-full mb-4"
     />
 
     <!-- SEO / Open Graph -->
