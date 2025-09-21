@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import api from '../../../api';
+import BasePagination from '../../../components/BasePagination.vue';
 
 interface Project {
   id: number;
@@ -8,7 +9,7 @@ interface Project {
   content: string;
   url: string;
   image_url: string; // базовый путь
-  images: string[];  // массив файлов
+  images: string[];
   createdAt: string;
 }
 
@@ -16,13 +17,21 @@ const projects = ref<Project[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
 
-const fetchProjects = async () => {
+// состояние пагинации
+const currentPage = ref(1);
+const totalPages = ref(1);
+
+const fetchProjects = async (page = 1) => {
   loading.value = true;
   error.value = null;
 
   try {
-    const response = await api.get('/projects');
+    const response = await api.get(`/projects?page=${page}`);
     projects.value = response.data.data;
+
+    // сохраняем инфу из meta
+    currentPage.value = response.data.meta.current_page;
+    totalPages.value = response.data.meta.last_page;
   } catch (err: any) {
     error.value = err.response?.data?.message || 'Ошибка загрузки проектов';
   } finally {
@@ -34,12 +43,21 @@ onMounted(() => {
   fetchProjects();
 });
 
-// Функция для получения полной ссылки на первую картинку
+// обработчики пагинации
+const goToPage = (page: number) => {
+  if (page >= 1 && page <= totalPages.value) {
+    fetchProjects(page);
+  }
+};
+const prevPage = () => goToPage(currentPage.value - 1);
+const nextPage = () => goToPage(currentPage.value + 1);
+
+// функция для получения полной ссылки на первую картинку
 const getProjectImage = (project: Project) => {
   if (project.images.length > 0) {
     return `${project.image_url}/${project.images[0]}`;
   }
-  return ''; // или какой-то плейсхолдер
+  return '/placeholder.png';
 };
 </script>
 
@@ -52,6 +70,7 @@ const getProjectImage = (project: Project) => {
         Проекты не найдены
       </div>
 
+      <!-- список проектов -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         <router-link
             v-for="project in projects"
@@ -70,6 +89,15 @@ const getProjectImage = (project: Project) => {
           </div>
         </router-link>
       </div>
+
+      <!-- пагинация -->
+      <BasePagination
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          @go="goToPage"
+          @prev="prevPage"
+          @next="nextPage"
+      />
     </div>
   </main>
 </template>
