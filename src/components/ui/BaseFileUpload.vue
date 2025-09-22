@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { modelValue, accept, label } = defineProps<{
+const { accept, label } = defineProps<{
   modelValue?: string | File | null;
   accept?: string;
   label?: string;

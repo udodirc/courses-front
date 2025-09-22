@@ -129,7 +129,7 @@ function applyAlignment(alignment: 'left' | 'center' | 'right' | 'justify') {
   if (!sel || sel.rangeCount === 0) return;
 
   const range = sel.getRangeAt(0);
-  let node = range.startContainer;
+  let node: Node | null = range.startContainer;
 
   while (node && node !== editorRef.value) {
     if (node instanceof HTMLElement && getComputedStyle(node).display === 'block') break;
@@ -157,12 +157,12 @@ function changeIndent(increment: number) {
   const range = sel.getRangeAt(0);
   let node: HTMLElement | null = range.startContainer.parentElement;
 
-  while (node && node !== editorRef.value) {
-    if (node instanceof HTMLElement && getComputedStyle(node).display !== 'inline') break;
+  while (node instanceof HTMLElement && node !== editorRef.value) {
+    if (getComputedStyle(node).display !== 'inline') break;
     node = node.parentElement;
   }
 
-  if (!node || node === editorRef.value) return;
+  if (!(node instanceof HTMLElement) || node === editorRef.value) return;
 
   const current = parseInt(getComputedStyle(node).marginLeft) || 0;
   const newIndent = Math.max(0, current + increment * 20);
@@ -188,6 +188,13 @@ function applyHeader(level: number | null) {
   content.value = editorRef.value?.innerHTML || '';
   undoStack.value.push(content.value);
   redoStack.value = [];
+}
+
+function triggerColorInput(inputRef: typeof textColorInput | typeof bgColorInput) {
+  const input = inputRef.value;
+  if (input instanceof HTMLInputElement) {
+    input.click();
+  }
 }
 
 onMounted(() => adjustHeight());
@@ -216,46 +223,36 @@ onMounted(() => adjustHeight());
         <button @click.prevent="wrapSelectionMultiple(['ol'])" class="toolbar-button">1. List</button>
       </div>
 
-      <!-- Цвета: SVG-иконки (палитра и кисть), скрытые color inputs -->
+      <!-- Цвета -->
       <div class="toolbar-group flex gap-1">
-        <!-- Иконка палитры (текст) -->
         <button
-            @click.prevent="() => { textColorInput && textColorInput.click && textColorInput.click(); }"
+            @click.prevent="() => triggerColorInput(textColorInput)"
             class="toolbar-button"
             aria-label="Text color"
             title="Text color"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-            <path d="M12 3C7.03 3 3 7.03 3 12c0 4.97 4.03 9 9 9 1.21 0 2.39-.22 3.5-.63a3.5 3.5 0 0 0 1.65-5.02l-1.2-2.04A4.5 4.5 0 0 0 13.5 8H12V3z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="8.5" cy="9" r="1" fill="currentColor"/>
-            <circle cx="11" cy="6.5" r="1" fill="currentColor"/>
-            <circle cx="15.5" cy="8" r="1" fill="currentColor"/>
-          </svg>
+          🎨
         </button>
         <input
             ref="textColorInput"
             type="color"
             class="hidden"
-            @input="setColor($event.target.value)"
+            @input="(e: Event) => { const t = e.target as HTMLInputElement; if (t) setColor(t.value); }"
         />
 
-        <!-- Иконка кисти (фон) -->
         <button
-            @click.prevent="() => { bgColorInput && bgColorInput.click && bgColorInput.click(); }"
+            @click.prevent="() => triggerColorInput(bgColorInput)"
             class="toolbar-button"
             aria-label="Background color"
             title="Background color"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-            <path d="M20.7 7.3c.8-.8.8-2.1 0-2.9l-1.1-1.1a2.05 2.05 0 0 0-2.9 0L7 11.9v3.5h3.5L20.7 7.3z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M2 22c0-2.2 3-4 6.5-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-          </svg>
+          🖌
         </button>
         <input
             ref="bgColorInput"
             type="color"
             class="hidden"
-            @input="setBackground($event.target.value)"
+            @input="(e: Event) => { const t = e.target as HTMLInputElement; if (t) setBackground(t.value); }"
         />
       </div>
 
@@ -318,22 +315,12 @@ onMounted(() => adjustHeight());
   background: #fff;
   color: #374151;
   font-size: 0.875rem;
-  transition: all 0.12s;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
-.toolbar-button svg {
-  display: block;
-  width: 1rem;
-  height: 1rem;
-}
-.toolbar-button:hover {
-  background: #f3f4f6;
-}
-.toolbar-button:active {
-  background: #e5e7eb;
-}
+.toolbar-button:hover { background: #f3f4f6; }
+.toolbar-button:active { background: #e5e7eb; }
 .toolbar-select {
   border: 1px solid #cbd5e0;
   border-radius: 0.375rem;

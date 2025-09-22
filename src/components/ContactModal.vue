@@ -25,17 +25,15 @@ const { saveEntity, loading, error } = useEntitySave<typeof formModel.value>();
 
 async function save() {
   try {
-    const payload = {
-      email: formModel.value.email,
-      phone: formModel.value.phone,
-      message: formModel.value.message,
-    };
+    const payload = new FormData();
+    payload.append('email', formModel.value.email);
+    payload.append('phone', formModel.value.phone);
+    payload.append('message', formModel.value.message);
 
     await saveEntity('/contacts', payload);
 
     closeModal();
     router.push('/');
-
   } catch (e) {
     console.error('Ошибка при отправке сообщения:', e);
   }

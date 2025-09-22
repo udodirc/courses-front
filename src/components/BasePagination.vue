@@ -1,9 +1,14 @@
 <script setup lang="ts">
-const props = defineProps<{
+const { currentPage, totalPages } = defineProps<{
   currentPage: number;
   totalPages: number;
 }>();
-const emit = defineEmits(['prev', 'next', 'go']);
+
+const emit = defineEmits<{
+  (e: 'prev'): void;
+  (e: 'next'): void;
+  (e: 'go', page: number): void;
+}>();
 </script>
 
 <template>
@@ -12,7 +17,7 @@ const emit = defineEmits(['prev', 'next', 'go']);
     <!-- Назад -->
     <button
         class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-        @click="$emit('prev')"
+        @click="emit('prev')"
         :disabled="currentPage === 1"
     >
       ←
@@ -22,7 +27,7 @@ const emit = defineEmits(['prev', 'next', 'go']);
     <button
         v-for="page in totalPages"
         :key="page"
-        @click="$emit('go', page)"
+        @click="emit('go', page)"
         :class="[
         'px-3 py-1 rounded-lg border',
         page === currentPage
@@ -36,7 +41,7 @@ const emit = defineEmits(['prev', 'next', 'go']);
     <!-- Вперёд -->
     <button
         class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-        @click="$emit('next')"
+        @click="emit('next')"
         :disabled="currentPage === totalPages"
     >
       →
