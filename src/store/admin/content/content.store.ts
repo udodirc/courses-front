@@ -16,7 +16,6 @@ export const useContentStore = contentStore.getStore(contentStore.api);
 export function useContentStoreWithGetters() {
     const store = useContentStore();
 
-    // ✅ без `.value`, т.к. Pinia сама разворачивает ref()
     const contentList = computed(() =>
         store.items.map(item => ({
             ...item,

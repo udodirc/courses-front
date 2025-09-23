@@ -1,3 +1,4 @@
+import { computed } from 'vue';
 import { RoleApi } from '../../../api/admin/role/role.api';
 import type { Role } from '../../../types/Role';
 import type { CreateRoleDto } from '../../../dto/role.dto.ts';
@@ -10,13 +11,23 @@ class RoleStore extends BaseStore<CreateRoleDto, Role> {
 
 const roleStore = new RoleStore();
 
-type RoleStoreState = {
-    items: Role[];
-    item: Role | null;
-    loading: boolean;
-    error: string;
-};
-export const useRoleStore = roleStore.getStore(roleStore.api, {
-    getRoleList: (state: RoleStoreState): Role[] => state.items,
-    currentRole: (state: RoleStoreState): Role | null => state.item,
-});
+export const useRoleStore = roleStore.getStore(roleStore.api);
+
+export function useRoleStoreWithGetters() {
+    const store = useRoleStore();
+
+    const roleList = computed(() =>
+        store.items.map(item => ({
+            ...item,
+            canToggleStatus: true,
+        }))
+    );
+
+    const currentRole = computed(() => store.item);
+
+    return {
+        ...store,
+        roleList,
+        currentRole,
+    };
+}

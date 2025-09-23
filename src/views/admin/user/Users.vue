@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useUserStore } from '../../../store/admin/user/user.store.js';
+import { useUserStoreWithGetters } from '../../../store/admin/user/user.store';
 import ItemList from '../../../components/ItemList.vue';
 import Filters from '../../../components/Filters.vue';
 import { useFetchList } from "../../../composables/useFetchList.ts";
 import { useFilterList, type SchemaItem } from '../../../composables/useFilterList';
 import { usePagination } from '../../../composables/usePagination';
 
-const userStore = useUserStore();
+const userStore = useUserStoreWithGetters();
 
 // роли (для селекта)
 const { items: roles, fetchItems: fetchRoles } = useFetchList<{ id: number; name: string }>('/admin/roles');
@@ -68,10 +68,10 @@ const columns = [
       </router-link>
 
       <ItemList
-          :items="userStore.getUserList"
+          :items="userStore.userList.value"
           :columns="columns"
           :basePath="'/admin/users'"
-          :deleteItem="userStore.deleteItem"
+          :deleteItem="userStore.deleteItem.bind(userStore)"
           :currentPage="userStore.currentPage"
           :totalPages="userStore.totalPages"
           @next="onNext"

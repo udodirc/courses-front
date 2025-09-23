@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRoleStore } from '../../../store/admin/role/role.store';
+import { useRoleStoreWithGetters } from '../../../store/admin/role/role.store';
 import ItemList from '../../../components/ItemList.vue';
 import Filters from '../../../components/Filters.vue';
 import { useFilterList, type SchemaItem } from '../../../composables/useFilterList';
 import { usePagination } from '../../../composables/usePagination';
 
-const roleStore = useRoleStore();
+const roleStore = useRoleStoreWithGetters();
 
 const schema = ref<SchemaItem[]>([
   { field: 'name', label: 'Имя', type: 'text', col: 'left' },
@@ -47,7 +47,7 @@ const columns = [
       </router-link>
 
       <ItemList
-          :items="roleStore.getRoleList"
+          :items="roleStore.roleList.value"
           :columns="columns"
           :basePath="'/admin/roles'"
           :deleteItem="roleStore.deleteItem"
@@ -56,6 +56,7 @@ const columns = [
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"
+          @refresh="applyFilters"
       />
     </main>
   </div>

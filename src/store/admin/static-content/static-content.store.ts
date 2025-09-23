@@ -1,5 +1,6 @@
+import { computed } from 'vue';
 import { StaticContentApi } from '../../../api/admin/static_content/static_content.api';
-import type { StaticContent } from '../../../types/StaticContent.ts';
+import type { StaticContent } from '../../../types/StaticContent';
 import type { CreateStaticContentDto } from '../../../dto/static_content.dto.ts';
 import { BaseStore } from '../../BaseStore';
 
@@ -10,19 +11,23 @@ class StaticContentStore extends BaseStore<CreateStaticContentDto, StaticContent
 
 const staticContentStore = new StaticContentStore();
 
-type StaticContentStoreState = {
-    items: StaticContent[];
-    item: StaticContent | null;
-    loading: boolean;
-    error: string;
-};
-export const useStaticContentStore = staticContentStore.getStore(staticContentStore.api, {
-    getStaticContentList: (state: StaticContentStoreState): StaticContent[] =>
-        Array.isArray(state.items)
-            ? state.items.map(item => ({
-                ...item,
-                canToggleStatus: true
-            }))
-            : [],
-    currentStaticContent: (state: StaticContentStoreState): StaticContent | null => state.item,
-});
+export const useStaticContentStore = staticContentStore.getStore(staticContentStore.api);
+
+export function useStaticContentStoreWithGetters() {
+    const store = useStaticContentStore();
+
+    const staticContentList = computed(() =>
+        store.items.map(item => ({
+            ...item,
+            canToggleStatus: true,
+        }))
+    );
+
+    const currentStaticContent = computed(() => store.item);
+
+    return {
+        ...store,
+        staticContentList,
+        currentStaticContent,
+    };
+}
