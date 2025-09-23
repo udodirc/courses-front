@@ -23,17 +23,21 @@ const localFilters = ref<FilterItem[]>(
     }))
 );
 
+// Объект для v-model
+const filterValues = ref<Record<string, string | number>>({});
+props.schema.forEach(f => {
+  const val = props.filters.find(fl => fl.field === f.field)?.value;
+  filterValues.value[f.field] = val ?? '';
+});
+
 // Синхронизация с внешними filters
 watch(
     () => props.filters,
     newFilters => {
-      const next = props.schema.map(f => ({
-        field: f.field,
-        value: newFilters.find(fl => fl.field === f.field)?.value ?? null
-      }));
-      if (JSON.stringify(next) !== JSON.stringify(localFilters.value)) {
-        localFilters.value = next;
-      }
+      props.schema.forEach(f => {
+        const val = newFilters.find(fl => fl.field === f.field)?.value;
+        filterValues.value[f.field] = val ?? '';
+      });
     },
     { deep: true }
 );
@@ -51,12 +55,19 @@ const columns = computed(() => {
 
 // Применить фильтры
 function applyFilters() {
+  localFilters.value = props.schema.map(f => ({
+    field: f.field,
+    value: filterValues.value[f.field] === '' ? null : filterValues.value[f.field]
+  }));
   emit('update:filters', [...localFilters.value]);
   emit('apply', [...localFilters.value]);
 }
 
 // Сбросить фильтры
 function resetFilters() {
+  props.schema.forEach(f => {
+    filterValues.value[f.field] = '';
+  });
   localFilters.value = props.schema.map(f => ({ field: f.field, value: null }));
   emit('update:filters', [...localFilters.value]);
   emit('reset');
@@ -68,33 +79,35 @@ function resetFilters() {
     <div class="grid grid-cols-2 gap-4 mb-4">
       <!-- Левая колонка -->
       <div class="flex flex-col gap-4">
-        <div
-            v-for="f in columns.left"
-            :key="f.field"
-            class="flex flex-col"
-        >
+        <div v-for="f in columns.left" :key="f.field" class="flex flex-col">
           <label class="text-sm font-medium text-gray-700 mb-1">{{ f.label }}</label>
 
           <input
               v-if="f.type === 'text' || f.type === 'email'"
-              v-model="localFilters.find(fl => fl.field === f.field)!.value"
+              v-model="filterValues[f.field]"
               :type="f.type"
               class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
 
           <select
               v-else-if="f.type === 'select'"
-              v-model="localFilters.find(fl => fl.field === f.field)!.value"
+              v-model="filterValues[f.field]"
               class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           >
             <option value="">-- выберите --</option>
-            <option v-for="opt in f.options || []" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            <option
+                v-for="opt in f.options || []"
+                :key="opt.value ?? opt.label"
+                :value="opt.value ?? ''"
+            >
+            {{ opt.label }}
+            </option>
           </select>
 
           <input
               v-else-if="f.type === 'date'"
               type="date"
-              v-model="localFilters.find(fl => fl.field === f.field)!.value"
+              v-model="filterValues[f.field]"
               class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
         </div>
@@ -102,33 +115,35 @@ function resetFilters() {
 
       <!-- Правая колонка -->
       <div class="flex flex-col gap-4">
-        <div
-            v-for="f in columns.middle"
-            :key="f.field"
-            class="flex flex-col"
-        >
+        <div v-for="f in columns.middle" :key="f.field" class="flex flex-col">
           <label class="text-sm font-medium text-gray-700 mb-1">{{ f.label }}</label>
 
           <input
               v-if="f.type === 'text' || f.type === 'email'"
-              v-model="localFilters.find(fl => fl.field === f.field)!.value"
+              v-model="filterValues[f.field]"
               :type="f.type"
               class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
 
           <select
               v-else-if="f.type === 'select'"
-              v-model="localFilters.find(fl => fl.field === f.field)!.value"
+              v-model="filterValues[f.field]"
               class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           >
             <option value="">-- выберите --</option>
-            <option v-for="opt in f.options || []" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            <option
+                v-for="opt in f.options || []"
+                :key="opt.value ?? opt.label"
+                :value="opt.value ?? ''"
+            >
+              {{ opt.label }}
+            </option>
           </select>
 
           <input
               v-else-if="f.type === 'date'"
               type="date"
-              v-model="localFilters.find(fl => fl.field === f.field)!.value"
+              v-model="filterValues[f.field]"
               class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
         </div>

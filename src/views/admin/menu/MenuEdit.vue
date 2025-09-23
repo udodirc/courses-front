@@ -59,7 +59,7 @@ onMounted(() => {
   if (!isNaN(menuId)) {
     useMenuStore().fetchItem(menuId);
   } else {
-    error.value = 'Некорректный ID меню';
+    error.value = { general: ['Некорректный ID меню'] };
   }
 });
 </script>

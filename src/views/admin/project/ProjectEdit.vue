@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, reactive, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { storeToRefs } from 'pinia';
 
-import { useProjectStore } from '../../../store/admin/project/project.store';
+import {useProjectStore, useProjectStoreWithGetters} from '../../../store/admin/project/project.store';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
 
 import BaseForm from '../../../components/ui/BaseForm.vue';
@@ -18,7 +17,7 @@ const router = useRouter();
 const projectId = Number(route.params.id);
 
 const projectStore = useProjectStore();
-const { currentProject } = storeToRefs(projectStore);
+const { currentProject } = useProjectStoreWithGetters();
 const { error, setError } = useErrorHandler();
 
 const loading = ref(false);
@@ -46,7 +45,7 @@ const formModel = reactive({
   images: [] as File[],
   previews: [] as string[], // blob previews для новых изображений
   imagesFolderUrl: '',
-  imagesDir: '',
+  image_dir: '',
   image_all_dir: '',
   image_og_dir: '',
   existingImages: [] as string[],
@@ -75,7 +74,7 @@ watch(currentProject, (val) => {
     canonical_url: val.canonical_url ?? '',
     robots: val.robots ?? 'index, follow',
     imagesFolderUrl: val.image_url ?? '',
-    imagesDir: val.image_dir ?? '',
+    image_dir: val.image_dir ?? '',
     image_all_dir: val.image_all_dir ?? '',
     image_og_dir: val.image_og_dir ?? '',
     existingImages: val.images ?? [],
@@ -124,7 +123,7 @@ const handleOgFileChange = (event: Event) => {
 const removeOgImage = async () => {
   try {
     if (typeof formModel.og_image === 'string' && formModel.og_image !== '') {
-      await api.delete(`/admin/files/${formModel.imagesDir}/${projectId}`, {
+      await api.delete(`/admin/files/${formModel.image_dir}/${projectId}`, {
         data: { dir: formModel.image_og_dir, filename: formModel.og_image }
       });
     }
@@ -142,7 +141,7 @@ const removeOgImage = async () => {
 // существующие изображения
 const deleteImage = async (dir: string, filename: string) => {
   try {
-    await api.delete(`/admin/files/${formModel.imagesDir}/${projectId}`, {
+    await api.delete(`/admin/files/${formModel.image_dir}/${projectId}`, {
       data: { dir, filename }
     });
     formModel.existingImages = formModel.existingImages.filter(img => img !== filename);
@@ -161,7 +160,7 @@ const save = async () => {
     const payload = new FormData();
 
     for (const key in formModel) {
-      if (['images', 'previews', 'existingImages', 'imagesFolderUrl', 'imagesDir', 'og_preview'].includes(key)) continue;
+      if (['images', 'previews', 'existingImages', 'imagesFolderUrl', 'image_dir', 'og_preview'].includes(key)) continue;
 
       const value = formModel[key as keyof typeof formModel];
 

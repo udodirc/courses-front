@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
+import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useProjectStore } from '../../../store/admin/project/project.store';
+import { useProjectStoreWithGetters } from '../../../store/admin/project/project.store';
 import BaseShow from '../../../components/BaseShow.vue';
 
 const route = useRoute();
-const projectStore = useProjectStore();
+const projectStore = useProjectStoreWithGetters();
 
 const projectId = Number(route.params.id);
-const project = computed(() => projectStore.currentProject);
-const loading = computed(() => projectStore.loading);
-const error = computed(() => projectStore.error);
+const project = projectStore.currentProject;
+const loading = projectStore.loading;
+const error = projectStore.error;
 
 onMounted(async () => {
   if (!isNaN(projectId)) {
