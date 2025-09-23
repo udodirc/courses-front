@@ -16,7 +16,7 @@ const { items: menus, fetchItems: fetchMenus } = useFetchList<{ id: number; name
 // модель формы
 const formModel = ref({
   name: '',
-  parentId: null as number | null,
+  parent_id: null as number | null,
   url: ''
 });
 
@@ -27,7 +27,7 @@ const { saveEntity, loading, error } = useEntitySave<typeof formModel.value>();
 async function save() {
   await saveEntity('/admin/menu', {
     name: formModel.value.name,
-    parent_id: formModel.value.parentId,
+    parent_id: formModel.value.parent_id,
     url: formModel.value.url,
   });
   router.push('/admin/menus');
@@ -43,7 +43,7 @@ onMounted(() => {
   <BaseForm label="Создание меню" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
     <BaseSelect
-        v-model="formModel.parentId"
+        v-model="formModel.parent_id"
         label="Родительское меню"
         :options="menus.map(menu => ({ value: menu.id, label: menu.name }))"
     />
