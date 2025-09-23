@@ -40,8 +40,8 @@ watch(
 
 // Группировка по колонкам
 const columns = computed(() => {
-  const left: FilterSchemaItem[] = [];
-  const middle: FilterSchemaItem[] = [];
+  const left: SchemaItem[] = [];
+  const middle: SchemaItem[] = [];
   props.schema.forEach(f => {
     if (f.col === 'middle') middle.push(f);
     else left.push(f);

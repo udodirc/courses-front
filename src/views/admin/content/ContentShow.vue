@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
+import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useContentStore } from '../../../store/admin/content/content.store';
+import { useContentStoreWithGetters } from '../../../store/admin/content/content.store';
 import BaseShow from '../../../components/BaseShow.vue';
 
 const route = useRoute();
-const contentStore = useContentStore();
+const contentStore = useContentStoreWithGetters();
 
 const contentId = Number(route.params.id);
-const content = computed(() => contentStore.currentContent);
-const loading = computed(() => contentStore.loading);
-const error = computed(() => contentStore.error);
+const content = contentStore.currentContent; // просто используем computed как есть
+const loading = contentStore.loading; // тоже computed
+const error = contentStore.error;
 
 onMounted(async () => {
   if (!isNaN(contentId)) {
