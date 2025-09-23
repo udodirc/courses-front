@@ -65,7 +65,7 @@ const menu = computed<MenuItem[]>(() => {
       .map(item => {
         if (item.children) {
           const filteredChildren = item.children.filter(
-              sub => !item.superadmin || auth.user?.is_superadmin
+              _ => !item.superadmin || auth.user?.is_superadmin
           );
           return { ...item, children: filteredChildren };
         }

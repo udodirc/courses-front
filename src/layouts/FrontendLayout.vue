@@ -37,7 +37,7 @@ const openModal = () => (showModal.value = true);
 const closeModal = () => (showModal.value = false);
 
 // Меню с API
-const { items: menus, fetchItems: fetchMenus, loading } = useFetchList<{
+const { items: menus, fetchItems: fetchMenus } = useFetchList<{
   id: number;
   name: string;
   url: string;

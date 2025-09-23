@@ -1,4 +1,6 @@
 import { defineStore } from 'pinia';
+import { ref } from 'vue';
+import type { Ref } from 'vue';
 
 export interface IBaseApi<TCreate, TEntity> {
     getList: (
@@ -18,102 +20,125 @@ export interface IBaseApi<TCreate, TEntity> {
     fetch: (id: number) => Promise<{ data: TEntity }>;
 }
 
-export abstract class BaseStore<TCreate, TEntity> {
+export abstract class BaseStore<TCreate, TEntity extends Record<string, any>> {
     public abstract storeId: string;
 
     public getStore(
         api: IBaseApi<TCreate, TEntity>,
-        customGetters?: Record<string, any>,
-        options?: { perPage?: number }
+        options?: { perPage?: number },
+        customGetters?: (state: {
+            items: Ref<TEntity[]>;
+            item: Ref<TEntity | null>;
+            loading: Ref<boolean>;
+            error: Ref<string>;
+            currentPage: Ref<number>;
+            totalPages: Ref<number>;
+            perPage: Ref<number>;
+            filters: Ref<Record<string, any>>;
+        }) => Record<string, any>
     ) {
-        return defineStore(this.storeId, {
-            state: () => ({
-                items: [] as TEntity[],
-                item: null as TEntity | null,
-                loading: false,
-                error: '',
-                filters: {} as Record<string, any>,
-                currentPage: 1,
-                totalPages: 1,
-                perPage: options?.perPage ?? 10,
-            }),
+        return defineStore(this.storeId, () => {
+            // state
+            const items = ref<TEntity[]>([]) as Ref<TEntity[]>;
+            const item = ref<TEntity | null>(null) as Ref<TEntity | null>;
+            const loading = ref(false);
+            const error = ref('');
+            const filters = ref<Record<string, any>>({});
+            const currentPage = ref(1);
+            const totalPages = ref(1);
+            const perPage = ref(options?.perPage ?? 10);
 
-            actions: {
-                async fetchList(filters: Record<string, any> = {}, page: number = 1) {
-                    this.loading = true;
-                    this.error = '';
-                    try {
-                        this.filters = { ...filters };
-                        const res = await api.getList({
-                            ...filters,
-                            page,
-                        });
-
-                        this.items = res.data;
-                        if (res.meta) {
-                            this.currentPage = res.meta.current_page ?? page;
-                            this.totalPages = res.meta.last_page ?? 1;
-                            this.perPage = res.meta.per_page ?? this.perPage;
-                        } else {
-                            this.currentPage = page;
-                            this.totalPages = 1;
-                        }
-                    } catch (e: any) {
-                        this.error = e?.response?.data?.message || 'Ошибка загрузки';
-                        throw e;
-                    } finally {
-                        this.loading = false;
+            // actions
+            async function fetchList(f: Record<string, any> = {}, page = 1) {
+                loading.value = true;
+                error.value = '';
+                try {
+                    filters.value = { ...f };
+                    const res = await api.getList({ ...f, page });
+                    items.value = res.data;
+                    if (res.meta) {
+                        currentPage.value = res.meta.current_page ?? page;
+                        totalPages.value = res.meta.last_page ?? 1;
+                        perPage.value = res.meta.per_page ?? perPage.value;
+                    } else {
+                        currentPage.value = page;
+                        totalPages.value = 1;
                     }
-                },
+                } catch (e: any) {
+                    error.value = e?.response?.data?.message || 'Ошибка загрузки';
+                    throw e;
+                } finally {
+                    loading.value = false;
+                }
+            }
 
-                async createItem(data: TCreate) {
-                    this.loading = true;
-                    this.error = '';
-                    try {
-                        const res = await api.create(data);
-                        this.items.push(res.data);
-                    } catch (e: any) {
-                        this.error = e?.response?.data?.errors || 'Ошибка создания';
-                        throw e;
-                    } finally {
-                        this.loading = false;
-                    }
-                },
+            async function createItem(data: TCreate) {
+                loading.value = true;
+                error.value = '';
+                try {
+                    const res = await api.create(data);
+                    (items.value as any).push(res.data);
+                } catch (e: any) {
+                    error.value = e?.response?.data?.errors || 'Ошибка создания';
+                    throw e;
+                } finally {
+                    loading.value = false;
+                }
+            }
 
-                async deleteItem(id: number) {
-                    this.loading = true;
-                    this.error = '';
-                    try {
-                        await api.delete(id);
-                        this.items = this.items.filter((i: any) => i.id !== id);
-                    } catch (e: any) {
-                        this.error = e?.response?.data?.message || 'Ошибка удаления';
-                        throw e;
-                    } finally {
-                        this.loading = false;
-                    }
-                },
+            async function fetchItem(id: number) {
+                loading.value = true;
+                error.value = '';
+                try {
+                    const res = await api.fetch(id);
+                    item.value = res.data;
+                } catch (e: any) {
+                    error.value = e?.response?.data?.message || 'Ошибка получения';
+                    throw e;
+                } finally {
+                    loading.value = false;
+                }
+            }
 
-                async fetchItem(id: number) {
-                    this.loading = true;
-                    this.error = '';
-                    try {
-                        const res = await api.fetch(id);
-                        this.item = res.data;
-                    } catch (e: any) {
-                        this.error = e?.response?.data?.message || 'Ошибка получения';
-                        throw e;
-                    } finally {
-                        this.loading = false;
-                    }
-                },
+            async function deleteItem(id: number) {
+                loading.value = true;
+                error.value = '';
+                try {
+                    await api.delete(id);
+                    items.value = items.value.filter(i => i.id !== id);
+                } catch (e: any) {
+                    error.value = e?.response?.data?.message || 'Ошибка удаления';
+                    throw e;
+                } finally {
+                    loading.value = false;
+                }
+            }
 
-                setPerPage(count: number) {
-                    this.perPage = count;
-                },
-            },
+            function setPerPage(count: number) {
+                perPage.value = count;
+            }
 
-            getters: customGetters ?? {},
+            // кастомные геттеры
+            const getters = customGetters
+                ? customGetters({ items, item, loading, error, currentPage, totalPages, perPage, filters })
+                : {};
+
+            return {
+                items,
+                item,
+                loading,
+                error,
+                filters,
+                currentPage,
+                totalPages,
+                perPage,
+                fetchList,
+                createItem,
+                fetchItem,
+                deleteItem,
+                setPerPage,
+                ...getters,
+            };
         });
     }
 }

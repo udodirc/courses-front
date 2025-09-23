@@ -1,3 +1,4 @@
+import { computed } from 'vue';
 import { ContentApi } from '../../../api/admin/content/content.api';
 import type { Content } from '../../../types/Content';
 import type { CreateContentDto } from '../../../dto/content.dto.ts';
@@ -10,19 +11,24 @@ class ContentStore extends BaseStore<CreateContentDto, Content> {
 
 const contentStore = new ContentStore();
 
-type ContentStoreState = {
-    items: Content[];
-    item: Content | null;
-    loading: boolean;
-    error: string;
-};
-export const useContentStore = contentStore.getStore(contentStore.api, {
-    getContentList: (state: ContentStoreState): Content[] =>
-        Array.isArray(state.items)
-            ? state.items.map(item => ({
-                ...item,
-                canToggleStatus: true
-            }))
-            : [],
-    currentContent: (state: ContentStoreState): Content | null => state.item,
-});
+export const useContentStore = contentStore.getStore(contentStore.api);
+
+export function useContentStoreWithGetters() {
+    const store = useContentStore();
+
+    // ✅ без `.value`, т.к. Pinia сама разворачивает ref()
+    const contentList = computed(() =>
+        store.items.map(item => ({
+            ...item,
+            canToggleStatus: true
+        }))
+    );
+
+    const currentContent = computed(() => store.item);
+
+    return {
+        ...store,
+        contentList,
+        currentContent,
+    };
+}

@@ -1,18 +1,11 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
+import type { FilterSchemaItem as SchemaItem } from '../types/Filters.ts';
 
-type FilterItem = { field: string; value: string | number };
-type Option = { label: string; value: string | number };
-type FilterSchemaItem = {
-  field: string;
-  label: string;
-  type: 'text' | 'email' | 'select' | 'date';
-  col?: 'left' | 'middle';
-  options?: Option[];
-};
+type FilterItem = { field: string; value: string | number | null };
 
 const props = defineProps<{
-  schema: FilterSchemaItem[];
+  schema: SchemaItem[];
   filters: FilterItem[];
 }>();
 
@@ -26,7 +19,7 @@ const emit = defineEmits<{
 const localFilters = ref<FilterItem[]>(
     props.schema.map(f => ({
       field: f.field,
-      value: props.filters.find(fl => fl.field === f.field)?.value || ''
+      value: props.filters.find(fl => fl.field === f.field)?.value ?? null
     }))
 );
 
@@ -36,7 +29,7 @@ watch(
     newFilters => {
       const next = props.schema.map(f => ({
         field: f.field,
-        value: newFilters.find(fl => fl.field === f.field)?.value || ''
+        value: newFilters.find(fl => fl.field === f.field)?.value ?? null
       }));
       if (JSON.stringify(next) !== JSON.stringify(localFilters.value)) {
         localFilters.value = next;
@@ -64,7 +57,7 @@ function applyFilters() {
 
 // Сбросить фильтры
 function resetFilters() {
-  localFilters.value = props.schema.map(f => ({ field: f.field, value: '' }));
+  localFilters.value = props.schema.map(f => ({ field: f.field, value: null }));
   emit('update:filters', [...localFilters.value]);
   emit('reset');
 }
