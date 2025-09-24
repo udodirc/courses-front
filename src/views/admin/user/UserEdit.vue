@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { storeToRefs } from 'pinia';
-import { useUserStore } from '../../../store/admin/user/user.store';
+import { useUserStore, useUserStoreWithGetters } from '../../../store/admin/user/user.store';
 import { useFetchList } from "../../../composables/useFetchList.ts";
 import { useEntitySave } from '../../../composables/useEntitySave';
 
@@ -17,7 +16,7 @@ const router = useRouter();
 const userId = Number(route.params.id);
 
 const userStore = useUserStore();
-const { currentUser } = storeToRefs(userStore);
+const { currentUser } = useUserStoreWithGetters();
 
 // модель формы
 const formModel = ref({
@@ -25,7 +24,7 @@ const formModel = ref({
   email: '',
   password: '',
   role: null as string | null,
-  status: 1, // по умолчанию активный
+  status: true,
 });
 
 // загрузка ролей
@@ -52,10 +51,10 @@ async function save() {
       '/admin/users',
       {
         ...formModel.value,
-        role: selectedRole?.name,
+        role: selectedRole?.name ?? null,
         status: formModel.value.status,
       },
-      userId
+      { id: userId }
   );
 
   router.push('/admin/users');

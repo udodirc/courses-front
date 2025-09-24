@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useUserStore } from '../../../store/admin/user/user.store';
+import {useUserStoreWithGetters} from '../../../store/admin/user/user.store';
 import BaseShow from '../../../components/BaseShow.vue';
 
 const route = useRoute();
-const userStore = useUserStore();
+const userStore = useUserStoreWithGetters();
 
 const userId = Number(route.params.id);
 
 // вычисляемые свойства
-const user = computed(() => userStore.currentUser);
-const loading = computed(() => userStore.loading);
-const error = computed(() => userStore.error);
+const user = userStore.currentUser;
+const loading = userStore.loading;
+const error = userStore.error;
 
 // загрузка пользователя
 onMounted(async () => {

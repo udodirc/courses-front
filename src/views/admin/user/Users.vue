@@ -4,8 +4,9 @@ import { useUserStoreWithGetters } from '../../../store/admin/user/user.store';
 import ItemList from '../../../components/ItemList.vue';
 import Filters from '../../../components/Filters.vue';
 import { useFetchList } from "../../../composables/useFetchList.ts";
-import { useFilterList, type SchemaItem } from '../../../composables/useFilterList';
+import { useFilterList } from '../../../composables/useFilterList';
 import { usePagination } from '../../../composables/usePagination';
+import type { FilterSchemaItem } from '../../../types/Filters.ts';
 
 const userStore = useUserStoreWithGetters();
 
@@ -13,7 +14,7 @@ const userStore = useUserStoreWithGetters();
 const { items: roles, fetchItems: fetchRoles } = useFetchList<{ id: number; name: string }>('/admin/roles');
 
 // схема фильтров
-const schema = ref<SchemaItem[]>([
+const schema = ref<FilterSchemaItem[]>([
   { field: 'name', label: 'Имя', type: 'text', col: 'left' },
   { field: 'email', label: 'Email', type: 'email', col: 'middle' },
   { field: 'role', label: 'Роль', type: 'select', col: 'left', options: [] },

@@ -17,23 +17,23 @@ const formModel = ref({
   email: '',
   password: '',
   roleId: null as number | null,
+  role: '',
 });
 
-// универсальное сохранение
 const { saveEntity, loading, error } = useEntitySave<typeof formModel.value>();
 
-// вычисляемое имя роли для отправки на API
 const selectedRoleName = computed(() => {
   const role = roles.value.find(r => r.id === formModel.value.roleId);
-  return role?.name || null;
+  formModel.value.role = role?.name ?? '';
+  return formModel.value.role;
 });
 
-// сохранение
 async function save() {
   await saveEntity('/admin/users', {
     name: formModel.value.name,
     email: formModel.value.email,
     password: formModel.value.password,
+    roleId: formModel.value.roleId,
     role: selectedRoleName.value,
   });
   router.push('/admin/users');

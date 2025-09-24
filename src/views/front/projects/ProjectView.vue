@@ -7,8 +7,8 @@ interface Project {
   id: number;
   name: string;
   content: string;
-  image_url: string; // базовый путь
-  images: string[];  // массив файлов
+  image_url: string;
+  images: string[];
   createdAt: string;
 }
 
@@ -89,7 +89,7 @@ onMounted(() => {
         <!-- Индикаторы -->
         <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
           <span
-              v-for="(img, idx) in project.images"
+              v-for="(_img, idx) in project.images"
               :key="idx"
               :class="{
               'w-3 h-3 rounded-full bg-white transition-opacity duration-300': true,

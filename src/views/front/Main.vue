@@ -14,7 +14,7 @@ const content = ref<ContentData | null>(null);
 const loading = ref(false);
 const error = ref<string | null>(null);
 
-const fetchContent = async (name: string) => {
+const fetchContent = async (_name: string) => {
   loading.value = true;
   error.value = null;
 
