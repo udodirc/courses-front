@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import {ref, type UnwrapRef} from 'vue';
 import api from '../api';
 import { useErrorHandler } from './useErrorHandler';
 
@@ -8,8 +8,8 @@ export function useEntitySave<TForm extends Record<string, any>>() {
 
     async function saveEntity(
         url: string,
-        form: TForm | FormData,
-        options?: { id?: number | string; headers?: Record<string, string> }
+        form: UnwrapRef<{ name: string }>,
+        options?: number
     ) {
         loading.value = true;
         error.value = null;

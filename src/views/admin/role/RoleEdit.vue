@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useRoleStore } from '../../../store/admin/role/role.store';
-import { storeToRefs } from 'pinia';
+import { useRoleStore, useRoleStoreWithGetters } from '../../../store/admin/role/role.store';
 import { useEntitySave } from '../../../composables/useEntitySave';
 import BaseInput from '../../../components/ui/BaseInput.vue';
 import BaseForm from '../../../components/ui/BaseForm.vue';
@@ -13,7 +12,7 @@ const router = useRouter();
 const roleId = Number(route.params.id);
 
 const roleStore = useRoleStore();
-const { currentRole } = storeToRefs(roleStore);
+const { currentRole } = useRoleStoreWithGetters();
 
 // форма
 const formModel = ref({

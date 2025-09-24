@@ -1,3 +1,4 @@
+// store/admin/role/role.store.ts
 import { computed } from 'vue';
 import { RoleApi } from '../../../api/admin/role/role.api';
 import type { Role } from '../../../types/Role';
@@ -11,8 +12,10 @@ class RoleStore extends BaseStore<CreateRoleDto, Role> {
 
 const roleStore = new RoleStore();
 
+// базовый store без геттеров
 export const useRoleStore = roleStore.getStore(roleStore.api);
 
+// store с геттерами
 export function useRoleStoreWithGetters() {
     const store = useRoleStore();
 
