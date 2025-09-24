@@ -31,7 +31,7 @@ watch(currentRole, (val) => {
 
 // сохранение
 async function save() {
-  await saveEntity('/admin/roles', formModel.value, roleId);
+  await saveEntity('/admin/roles', formModel.value, { id: roleId });
   router.push('/admin/roles');
 }
 
