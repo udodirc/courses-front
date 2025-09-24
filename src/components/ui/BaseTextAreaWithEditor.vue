@@ -20,8 +20,8 @@ const isHtmlView = ref(false);
 const headerLevel = ref<number | null>(null);
 
 // refs для скрытых color input
-const textColorInput = ref<HTMLInputElement | null>(null);
-const bgColorInput = ref<HTMLInputElement | null>(null);
+// const textColorInput = ref<HTMLInputElement | null>(null);
+// const bgColorInput = ref<HTMLInputElement | null>(null);
 
 // синхронизация с внешним modelValue
 watch(
@@ -108,12 +108,12 @@ function adjustHeight() {
   }
 }
 
-function setColor(color: string) {
-  wrapSelectionMultiple([], `color: ${color};`);
-}
-function setBackground(color: string) {
-  wrapSelectionMultiple([], `background-color: ${color};`);
-}
+// function setColor(color: string) {
+//   wrapSelectionMultiple([], `color: ${color};`);
+// }
+// function setBackground(color: string) {
+//   wrapSelectionMultiple([], `background-color: ${color};`);
+// }
 
 function insertLink() {
   const url = prompt('Введите URL:');
@@ -190,12 +190,12 @@ function applyHeader(level: number | null) {
   redoStack.value = [];
 }
 
-function triggerColorInput(inputRef: typeof textColorInput | typeof bgColorInput) {
-  const input = inputRef.value;
-  if (input instanceof HTMLInputElement) {
-    input.click();
-  }
-}
+// function triggerColorInput(inputRef: typeof textColorInput | typeof bgColorInput) {
+//   const input = inputRef.value;
+//   if (input instanceof HTMLInputElement) {
+//     input.click();
+//   }
+// }
 
 onMounted(() => adjustHeight());
 </script>
@@ -224,37 +224,37 @@ onMounted(() => adjustHeight());
       </div>
 
       <!-- Цвета -->
-      <div class="toolbar-group flex gap-1">
-        <button
-            @click.prevent="() => triggerColorInput(textColorInput)"
-            class="toolbar-button"
-            aria-label="Text color"
-            title="Text color"
-        >
-          🎨
-        </button>
-        <input
-            ref="textColorInput"
-            type="color"
-            class="hidden"
-            @input="(e: Event) => { const t = e.target as HTMLInputElement; if (t) setColor(t.value); }"
-        />
+<!--      <div class="toolbar-group flex gap-1">-->
+<!--        <button-->
+<!--            @click.prevent="() => triggerColorInput(textColorInput)"-->
+<!--            class="toolbar-button"-->
+<!--            aria-label="Text color"-->
+<!--            title="Text color"-->
+<!--        >-->
+<!--          🎨-->
+<!--        </button>-->
+<!--        <input-->
+<!--            ref="textColorInput"-->
+<!--            type="color"-->
+<!--            class="hidden"-->
+<!--            @input="(e: Event) => { const t = e.target as HTMLInputElement; if (t) setColor(t.value); }"-->
+<!--        />-->
 
-        <button
-            @click.prevent="() => triggerColorInput(bgColorInput)"
-            class="toolbar-button"
-            aria-label="Background color"
-            title="Background color"
-        >
-          🖌
-        </button>
-        <input
-            ref="bgColorInput"
-            type="color"
-            class="hidden"
-            @input="(e: Event) => { const t = e.target as HTMLInputElement; if (t) setBackground(t.value); }"
-        />
-      </div>
+<!--        <button-->
+<!--            @click.prevent="() => triggerColorInput(bgColorInput)"-->
+<!--            class="toolbar-button"-->
+<!--            aria-label="Background color"-->
+<!--            title="Background color"-->
+<!--        >-->
+<!--          🖌-->
+<!--        </button>-->
+<!--        <input-->
+<!--            ref="bgColorInput"-->
+<!--            type="color"-->
+<!--            class="hidden"-->
+<!--            @input="(e: Event) => { const t = e.target as HTMLInputElement; if (t) setBackground(t.value); }"-->
+<!--        />-->
+<!--      </div>-->
 
       <!-- Ссылки и изображения -->
       <div class="toolbar-group flex gap-1">
