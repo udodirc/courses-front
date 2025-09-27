@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import api from '../../../api';
 
 interface User {
     id: number;
@@ -18,7 +19,6 @@ export const useAuthStore = defineStore('auth', {
     actions: {
         async login(email: string, password: string) {
             try {
-                const api = (await import('../../../api')).default;
                 const response = await api.post('/admin/login', { email, password });
                 this.token = response.data.access_token;
                 await this.fetchUser();
@@ -31,7 +31,6 @@ export const useAuthStore = defineStore('auth', {
         async fetchUser() {
             if (!this.token) return;
             try {
-                const api = (await import('../../../api')).default;
                 const response = await api.post('/admin/me');
                 this.user = response.data;
             } catch (error) {
