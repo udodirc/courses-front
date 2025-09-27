@@ -39,14 +39,14 @@ export abstract class BaseStore<TCreate, TEntity extends Record<string, any>> {
     ) {
         return defineStore(this.storeId, () => {
             // state
-            const items = ref<TEntity[]>([]) as Ref<TEntity[]>;
-            const item = ref<TEntity | null>(null) as Ref<TEntity | null>;
-            const loading = ref(false);
-            const error = ref('');
-            const filters = ref<Record<string, any>>({});
-            const currentPage = ref(1);
-            const totalPages = ref(1);
-            const perPage = ref(options?.perPage ?? 10);
+            const items: Ref<TEntity[]> = ref([]);
+            const item: Ref<TEntity | null> = ref(null);
+            const loading: Ref<boolean> = ref(false);
+            const error: Ref<string> = ref('');
+            const filters: Ref<Record<string, any>> = ref({});
+            const currentPage: Ref<number> = ref(1);
+            const totalPages: Ref<number> = ref(1);
+            const perPage: Ref<number> = ref(options?.perPage ?? 10);
 
             // actions
             async function fetchList(f: Record<string, any> = {}, page = 1) {
@@ -54,12 +54,14 @@ export abstract class BaseStore<TCreate, TEntity extends Record<string, any>> {
                 error.value = '';
                 try {
                     filters.value = { ...f };
-                    const res = await api.getList({ ...f, page, per_page: perPage.value });
+                    //const res = await api.getList({ ...f, page, per_page: perPage.value });
+                    const res = await api.getList({ ...f, page });
                     items.value = res.data;
+
                     if (res.meta) {
                         currentPage.value = res.meta.current_page ?? page;
                         totalPages.value = res.meta.last_page ?? 1;
-                        perPage.value = res.meta.per_page ?? perPage.value;
+                        perPage.value = Number(res.meta.per_page ?? perPage.value);
                     } else {
                         currentPage.value = page;
                         totalPages.value = 1;
@@ -77,7 +79,7 @@ export abstract class BaseStore<TCreate, TEntity extends Record<string, any>> {
                 error.value = '';
                 try {
                     const res = await api.create(data);
-                    (items.value as any).push(res.data);
+                    items.value.push(res.data);
                 } catch (e: any) {
                     error.value = e?.response?.data?.errors || 'Ошибка создания';
                     throw e;

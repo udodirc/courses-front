@@ -62,12 +62,13 @@ const columns = [
       </router-link>
 
       <ItemList
+          :key="contentStore.currentPage.value"
           :items="contentStore.contentList.value"
           :columns="columns"
-          :basePath="'/admin/content'"
+          :basePath="'/admin/project'"
           :deleteItem="contentStore.deleteItem"
-          :currentPage="contentStore.currentPage"
-          :totalPages="contentStore.totalPages"
+          :currentPage="contentStore.currentPage.value"
+          :totalPages="contentStore.totalPages.value"
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"

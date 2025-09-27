@@ -79,17 +79,16 @@ const columns = [
       </router-link>
 
       <ItemList
+          :key="menuStore.currentPage.value"
           :items="menuStore.menuList.value"
           :columns="columns"
-          :basePath="'/admin/menu'"
+          :basePath="'/admin/project'"
           :deleteItem="menuStore.deleteItem"
-          :currentPage="menuStore.currentPage"
-          :totalPages="menuStore.totalPages"
+          :currentPage="menuStore.currentPage.value"
+          :totalPages="menuStore.totalPages.value"
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"
-          @order-up="moveUp"
-          @order-down="moveDown"
           @refresh="applyFilters"
       />
     </main>

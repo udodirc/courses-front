@@ -40,6 +40,8 @@ export function useMenuStoreWithGetters() {
     );
 
     const currentMenu = computed(() => store.item);
+    const totalPages = computed(() => store.totalPages);
+    const currentPage = computed(() => store.currentPage);
 
     // проброс методов изменения порядка через экземпляр MenuStore
     const moveOrderUp = (id: number) => menuStore.moveOrderUp(store, id);
@@ -49,6 +51,8 @@ export function useMenuStoreWithGetters() {
         ...store,
         menuList,
         currentMenu,
+        totalPages,
+        currentPage,
         moveOrderUp,
         moveOrderDown,
     };

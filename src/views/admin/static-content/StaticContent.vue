@@ -57,13 +57,14 @@ const columns: { label: string; field: keyof StaticContent | string }[] = [
         Создать
       </router-link>
 
-      <ItemList
+     <ItemList
+          :key="staticContentStore.currentPage.value"
           :items="staticContentStore.staticContentList.value"
           :columns="columns"
-          :basePath="'/admin/static_content'"
+          :basePath="'/admin/project'"
           :deleteItem="staticContentStore.deleteItem"
-          :currentPage="staticContentStore.currentPage"
-          :totalPages="staticContentStore.totalPages"
+          :currentPage="staticContentStore.currentPage.value"
+          :totalPages="staticContentStore.totalPages.value"
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"

@@ -24,10 +24,14 @@ export function useStaticContentStoreWithGetters() {
     );
 
     const currentStaticContent = computed(() => store.item);
+    const totalPages = computed(() => store.totalPages);
+    const currentPage = computed(() => store.currentPage);
 
     return {
         ...store,
         staticContentList,
         currentStaticContent,
+        totalPages,
+        currentPage,
     };
 }
