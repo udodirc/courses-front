@@ -15,7 +15,6 @@ export const useProjectStore = projectStore.getStore(projectStore.api);
 
 export function useProjectStoreWithGetters() {
     const store = useProjectStore();
-
     const projectList = computed(() =>
         store.items.map(item => ({
             ...item,
@@ -24,10 +23,14 @@ export function useProjectStoreWithGetters() {
     );
 
     const currentProject = computed(() => store.item);
+    const totalPages = computed(() => store.totalPages);
+    const currentPage = computed(() => store.currentPage);
 
     return {
         ...store,
         projectList,
         currentProject,
+        totalPages,
+        currentPage,
     };
 }

@@ -1,26 +1,29 @@
-// composables/usePagination.ts
 import type { Ref } from 'vue';
-import type { FilterItem } from '../composables/useFilterList'; // <- type-only import
+import type { FilterItem } from './useFilterList';
 
 export function usePagination(
     store: any,
     filters: Ref<FilterItem[]>,
     toFilterObject: (arr: FilterItem[]) => Record<string, any>
 ) {
-    const onNext = () => {
-        if (store.currentPage < store.totalPages) {
-            store.fetchList(toFilterObject(filters.value), store.currentPage + 1);
+    const onNext = async () => {
+        const current = store.currentPage?.value ?? store.currentPage;
+        const total = store.totalPages?.value ?? store.totalPages;
+
+        if (current < total) {
+            await store.fetchList(toFilterObject(filters.value), current + 1);
         }
     };
 
-    const onPrev = () => {
-        if (store.currentPage > 1) {
-            store.fetchList(toFilterObject(filters.value), store.currentPage - 1);
+    const onPrev = async () => {
+        const current = store.currentPage?.value ?? store.currentPage;
+        if (current > 1) {
+            await store.fetchList(toFilterObject(filters.value), current - 1);
         }
     };
 
-    const goToPage = (page: number) => {
-        store.fetchList(toFilterObject(filters.value), page);
+    const goToPage = async (page: number) => {
+        await store.fetchList(toFilterObject(filters.value), page);
     };
 
     return { onNext, onPrev, goToPage };

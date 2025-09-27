@@ -54,7 +54,7 @@ export abstract class BaseStore<TCreate, TEntity extends Record<string, any>> {
                 error.value = '';
                 try {
                     filters.value = { ...f };
-                    const res = await api.getList({ ...f, page });
+                    const res = await api.getList({ ...f, page, per_page: perPage.value });
                     items.value = res.data;
                     if (res.meta) {
                         currentPage.value = res.meta.current_page ?? page;
@@ -114,8 +114,9 @@ export abstract class BaseStore<TCreate, TEntity extends Record<string, any>> {
                 }
             }
 
-            function setPerPage(count: number) {
+            async function setPerPage(count: number) {
                 perPage.value = count;
+                await fetchList(filters.value, 1);
             }
 
             // кастомные геттеры

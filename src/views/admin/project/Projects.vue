@@ -26,7 +26,7 @@ const { onNext, onPrev, goToPage } = usePagination(projectStore, filters, toFilt
 
 // загрузка данных
 onMounted(async () => {
-  applyFilters();
+  await applyFilters();
 });
 
 // колонки для таблицы
@@ -57,12 +57,13 @@ const columns = [
       </router-link>
 
       <ItemList
+          :key="projectStore.currentPage.value"
           :items="projectStore.projectList.value"
           :columns="columns"
           :basePath="'/admin/project'"
           :deleteItem="projectStore.deleteItem"
-          :currentPage="projectStore.currentPage"
-          :totalPages="projectStore.totalPages"
+          :currentPage="projectStore.currentPage.value"
+          :totalPages="projectStore.totalPages.value"
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"

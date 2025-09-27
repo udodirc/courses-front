@@ -40,7 +40,7 @@ const formModel = reactive({
   og_url: '',
   canonical_url: '',
   robots: 'index, follow',
-  imges_dir: '',
+  image_dir: '',
   image_og_dir: '',
 });
 
@@ -64,7 +64,7 @@ watch(currentContent, (val) => {
   formModel.og_url = val.og_url ?? '';
   formModel.canonical_url = val.canonical_url ?? '';
   formModel.robots = val.robots ?? 'index, follow';
-  formModel.imges_dir = val.imges_dir ?? '';
+  formModel.image_dir = val.image_dir ?? '';
   formModel.image_og_dir = val.image_og_dir ?? '';
 
   // OG preview
@@ -86,7 +86,7 @@ const removeOgImage = async () => {
   try {
     // если og_image уже сохранена на сервере
     if (typeof formModel.og_image === 'string' && formModel.og_image !== '') {
-      await api.delete(`/admin/files/${formModel.imges_dir}/${contentId}`, {
+      await api.delete(`/admin/files/${formModel.image_dir}/${contentId}`, {
         data: {
           dir: formModel.image_og_dir,
           filename: formModel.og_image

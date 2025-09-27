@@ -12,7 +12,6 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <!-- Не показываем, если totalPages <= 1 -->
   <div v-if="totalPages > 1" class="flex items-center justify-center space-x-2 mt-4">
     <!-- Назад -->
     <button
@@ -38,7 +37,7 @@ const emit = defineEmits<{
       {{ page }}
     </button>
 
-    <!-- Вперёд -->
+    <!-- Вперед -->
     <button
         class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
         @click="emit('next')"

@@ -15,7 +15,7 @@ export interface  Content {
     og_url: string;
     canonical_url: string;
     robots: string;
-    imges_dir: string;
+    image_dir: string;
     image_og_dir: string;
     image_og_url: string;
     createdAt: string;

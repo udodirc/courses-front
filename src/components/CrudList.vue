@@ -25,7 +25,7 @@ const emit = defineEmits([
 </script>
 
 <template>
-  <BaseTable>
+  <BaseTable :key="currentPage">
     <template #head>
       <th
           class="w-1/3 text-left py-3 px-4 uppercase font-semibold text-sm"
@@ -56,67 +56,26 @@ const emit = defineEmits([
 
         <!-- Действия -->
         <td class="flex gap-2 justify-center">
-          <!-- Просмотр -->
-          <button
-              @click="$emit('view', item.id)"
-              title="Просмотр"
-              class="flex items-center justify-center w-8 h-8 rounded hover:bg-gray-100 transition"
-          >
-            👁
-          </button>
-
-          <!-- Редактировать -->
-          <button
-              @click="$emit('edit', item.id)"
-              title="Редактировать"
-              class="flex items-center justify-center w-8 h-8 rounded hover:bg-gray-100 transition"
-          >
-            ✏️
-          </button>
-
-          <!-- Переключить статус -->
+          <button @click="$emit('view', item.id)">👁</button>
+          <button @click="$emit('edit', item.id)">✏️</button>
           <button
               v-if="item.canToggleStatus"
               @click="$emit('toggleStatus', item.id)"
               :class="item.status ? 'text-green-600' : 'text-red-600'"
-              title="Переключить статус"
-              class="flex items-center justify-center w-8 h-8 rounded hover:bg-gray-100 transition"
           >
             {{ item.status ? '✅' : '❌' }}
           </button>
-
-          <!-- Переместить вверх -->
           <button
               v-if="item.canChangeOrder"
               @click="$emit('changeOrderUp', item.id)"
               :disabled="i === 0"
-              :class="['flex items-center justify-center w-8 h-8 rounded transition',
-                     i === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-100']"
-              title="Вверх"
-          >
-            ⬆️
-          </button>
-
-          <!-- Переместить вниз -->
+          >⬆️</button>
           <button
               v-if="item.canChangeOrder"
               @click="$emit('changeOrderDown', item.id)"
               :disabled="i === items.length - 1"
-              :class="['flex items-center justify-center w-8 h-8 rounded transition',
-                     i === items.length - 1 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-100']"
-              title="Вниз"
-          >
-            ⬇️
-          </button>
-
-          <!-- Удалить -->
-          <button
-              @click="$emit('delete', item.id)"
-              title="Удалить"
-              class="flex items-center justify-center w-8 h-8 rounded hover:bg-gray-100 transition"
-          >
-            ❌
-          </button>
+          >⬇️</button>
+          <button @click="$emit('delete', item.id)">❌</button>
         </td>
       </tr>
     </template>
