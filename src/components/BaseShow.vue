@@ -24,6 +24,14 @@ const customLabels: Record<string, string> = {
   content: 'Контент',
   status: 'Статус',
   is_superadmin: 'Главный админ',
+  meta_description: 'meta description',
+  meta_keywords: 'meta keywords',
+  og_title: 'og title',
+  og_description: 'og description',
+  og_image: 'og image',
+  og_type: 'og type',
+  og_url: 'og url',
+  canonical_url: 'canonical_url'
 };
 
 // visibleFields с фильтром exclude

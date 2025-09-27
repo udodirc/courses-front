@@ -28,6 +28,6 @@ onMounted(async () => {
       :itemId="contentId"
       :loading="loading"
       :error="error"
-      :exclude="['updatedAt', 'menu_id']"
+      :exclude="['updatedAt', 'menu_id', 'image_og_url', 'image_dir', 'image_og_dir']"
   />
 </template>
