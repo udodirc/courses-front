@@ -68,13 +68,14 @@ const columns = [
         Создать
       </router-link>
 
-      <ItemList
+     <ItemList
+          :key="userStore.currentPage.value"
           :items="userStore.userList.value"
           :columns="columns"
           :basePath="'/admin/users'"
-          :deleteItem="userStore.deleteItem.bind(userStore)"
-          :currentPage="userStore.currentPage"
-          :totalPages="userStore.totalPages"
+          :deleteItem="userStore.deleteItem"
+          :currentPage="userStore.currentPage.value"
+          :totalPages="userStore.totalPages.value"
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"

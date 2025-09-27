@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore, useUserStoreWithGetters } from '../../../store/admin/user/user.store';
 import { useFetchList } from "../../../composables/useFetchList.ts";
@@ -18,11 +18,12 @@ const userId = Number(route.params.id);
 const userStore = useUserStore();
 const { currentUser } = useUserStoreWithGetters();
 
-// модель формы
+// форма с подтверждением пароля
 const formModel = ref({
   name: '',
   email: '',
   password: '',
+  passwordConfirmation: '',
   role: null as string | null,
   status: true,
 });
@@ -43,21 +44,28 @@ watch(currentUser, (val) => {
   }
 });
 
-// сохранение
 async function save() {
+  if (formModel.value.password !== formModel.value.passwordConfirmation) {
+    error.value = { passwordConfirmation: ['Пароли не совпадают'] };
+    return;
+  }
+
   const selectedRole = roles.value.find(r => r.name === formModel.value.role);
 
-  await saveEntity(
-      '/admin/users',
-      {
-        ...formModel.value,
-        role: selectedRole?.name ?? null,
-        status: formModel.value.status,
-      },
-      { id: userId }
-  );
-
-  router.push('/admin/users');
+  try {
+    await saveEntity(
+        '/admin/users',
+        {
+          ...formModel.value,
+          role: selectedRole?.name ?? null,
+          status: formModel.value.status,
+        },
+        { id: userId }
+    );
+    router.push('/admin/users');
+  } catch (e) {
+    console.log('Ошибка сохранения пользователя', e);
+  }
 }
 
 onMounted(() => {
@@ -79,7 +87,13 @@ onMounted(() => {
 
     <BaseInput v-model="formModel.name" label="Имя" required />
     <BaseInput v-model="formModel.email" label="Email" type="email" required />
+
     <BaseInput v-model="formModel.password" label="Пароль" type="password" />
+    <BaseInput
+        v-model="formModel.passwordConfirmation"
+        label="Повторите пароль"
+        type="password"
+    />
 
     <BaseToggle
         v-model="formModel.status"

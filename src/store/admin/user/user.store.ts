@@ -26,10 +26,14 @@ export function useUserStoreWithGetters() {
     );
 
     const currentUser = computed(() => store.item);
+    const totalPages = computed(() => store.totalPages);
+    const currentPage = computed(() => store.currentPage);
 
     return {
         ...store,
         userList,
         currentUser,
+        totalPages,
+        currentPage,
     };
 }

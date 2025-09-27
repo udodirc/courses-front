@@ -23,6 +23,7 @@ const customLabels: Record<string, string> = {
   menu_name: 'Меню',
   content: 'Контент',
   status: 'Статус',
+  is_superadmin: 'Главный админ',
 };
 
 // visibleFields с фильтром exclude
@@ -40,6 +41,9 @@ const renderValue = (key: string | number, value: any) => {
   const keyStr = String(key); // Явное приведение к строке
   if (keyStr === 'status') {
     return value == 1 ? 'Активный' : 'Неактивный';
+  }
+  if (keyStr === 'is_superadmin') {
+    return value == 1 ? 'Да' : 'Нет';
   }
   if (value == null) return '';
   if (typeof value !== 'object') {
