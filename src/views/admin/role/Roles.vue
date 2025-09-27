@@ -48,12 +48,13 @@ const columns = [
       </router-link>
 
       <ItemList
+          :key="roleStore.currentPage.value"
           :items="roleStore.roleList.value"
           :columns="columns"
           :basePath="'/admin/roles'"
           :deleteItem="roleStore.deleteItem"
-          :currentPage="roleStore.currentPage"
-          :totalPages="roleStore.totalPages"
+          :currentPage="roleStore.currentPage.value"
+          :totalPages="roleStore.totalPages.value"
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"

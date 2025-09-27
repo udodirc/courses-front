@@ -22,15 +22,19 @@ export function useRoleStoreWithGetters() {
     const roleList = computed(() =>
         store.items.map(item => ({
             ...item,
-            canToggleStatus: true,
+            canToggleStatus: false,
         }))
     );
 
     const currentRole = computed(() => store.item);
+    const totalPages = computed(() => store.totalPages);
+    const currentPage = computed(() => store.currentPage);
 
     return {
         ...store,
         roleList,
         currentRole,
+        totalPages,
+        currentPage,
     };
 }
