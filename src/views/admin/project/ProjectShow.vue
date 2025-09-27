@@ -29,7 +29,7 @@ onMounted(async () => {
         :itemId="projectId"
         :loading="loading"
         :error="error"
-        :exclude="['updatedAt', 'image_url', 'images', 'image_dir']"
+        :exclude="['updatedAt', 'image_url', 'images', 'image_og_url', 'image_dir', 'image_og_dir', 'image_all_dir']"
     />
 
     <!-- Блок картинок -->
