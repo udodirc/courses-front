@@ -62,7 +62,7 @@ const renderValue = (key: string | number, value: any) => {
     <div v-if="item" class="border border-gray-200 p-4 rounded bg-gray-50 space-y-2">
       <div v-for="(value, key) in visibleFields" :key="key" class="flex">
         <span class="font-bold mr-2">
-          {{ customLabels[key] || mergedLabels[key] || key }}:
+          {{ (customLabels[key] || mergedLabels[key] || key).charAt(0).toUpperCase() + (customLabels[key] || mergedLabels[key] || key).slice(1) }}:
         </span>
         <span>{{ renderValue(key, value) }}</span>
       </div>
