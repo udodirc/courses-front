@@ -1,6 +1,7 @@
 export interface  Content {
     id: number;
     menu_id: number;
+    menu_name?: string;
     content: string;
     status: boolean;
     title: string;
@@ -14,5 +15,8 @@ export interface  Content {
     og_url: string;
     canonical_url: string;
     robots: string;
+    image_dir: string;
+    image_og_dir: string;
+    image_og_url: string;
     createdAt: string;
 }

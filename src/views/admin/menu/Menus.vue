@@ -1,19 +1,21 @@
+// Menu.vue (script setup)
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useMenuStore } from '../../../store/admin/menu/menu.store';
+import { useMenuStoreWithGetters } from '../../../store/admin/menu/menu.store';
 import ItemList from '../../../components/ItemList.vue';
 import Filters from '../../../components/Filters.vue';
 import { useFetchList } from '../../../composables/useFetchList';
-import { useFilterList, type SchemaItem } from '../../../composables/useFilterList';
+import { useFilterList } from '../../../composables/useFilterList';
 import { usePagination } from '../../../composables/usePagination';
+import type { FilterSchemaItem } from '../../../types/Filters.ts';
 
-const menuStore = useMenuStore();
+const menuStore = useMenuStoreWithGetters();
 
 // загрузка всех меню для селекта родителя
 const { items: menus, fetchItems: fetchMenus } = useFetchList<{ id: number; name: string }>('/admin/menu');
 
 // схема фильтров
-const schema = ref<SchemaItem[]>([
+const schema = ref<FilterSchemaItem[]>([
   { field: 'name', label: 'Имя', type: 'text', col: 'left' },
   { field: 'parent_id', label: 'Родительское меню', type: 'select', col: 'middle', options: [] },
   { field: 'created_from', label: 'Создано с', type: 'date', col: 'left' },
@@ -29,12 +31,12 @@ const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(me
 const { onNext, onPrev, goToPage } = usePagination(menuStore, filters, toFilterObject);
 
 const moveUp = async (id: number) => {
-  await menuStore.moveOrderUp(id);
-  applyFilters(); // чтобы обновить фильтры и список
+  if (menuStore.moveOrderUp) await menuStore.moveOrderUp(id);
+  applyFilters();
 };
 
 const moveDown = async (id: number) => {
-  await menuStore.moveOrderDown(id);
+  if (menuStore.moveOrderDown) await menuStore.moveOrderDown(id);
   applyFilters();
 };
 
@@ -56,7 +58,6 @@ const columns = [
   { label: 'URL', field: 'url' },
 ];
 </script>
-
 <template>
   <div class="w-full h-screen overflow-x-hidden border-t flex flex-col">
     <main class="w-full flex-grow p-6">
@@ -78,17 +79,16 @@ const columns = [
       </router-link>
 
       <ItemList
-          :items="menuStore.getMenuList"
+          :key="menuStore.currentPage.value"
+          :items="menuStore.menuList.value"
           :columns="columns"
           :basePath="'/admin/menu'"
           :deleteItem="menuStore.deleteItem"
-          :currentPage="menuStore.currentPage"
-          :totalPages="menuStore.totalPages"
+          :currentPage="menuStore.currentPage.value"
+          :totalPages="menuStore.totalPages.value"
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"
-          @order-up="moveUp"
-          @order-down="moveDown"
           @refresh="applyFilters"
       />
     </main>

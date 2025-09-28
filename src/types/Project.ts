@@ -1,6 +1,6 @@
 export interface  Project {
     id: number;
-    menu_id: number;
+    name: string;
     content: string;
     status: boolean;
     url: string;
@@ -15,5 +15,16 @@ export interface  Project {
     og_url: string;
     canonical_url: string;
     robots: string;
+    images: [];
+    previews: [];
+    imagesFolderUrl: string;
+    imagesDir: string;
+    image_all_dir: string;
+    image_og_dir: string;
+    existingImages: [];
+    main_page: string;
+    image_og_url: string;
+    image_url: string;
+    image_dir: string;
     createdAt: string;
 }

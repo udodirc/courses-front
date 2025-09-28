@@ -60,7 +60,7 @@ const { saveEntity, loading, error } = useEntitySave<FormData>();
 
 // Загрузка данных из бэкенда
 onMounted(() => {
-  const data = window['initialProjectData'];
+  const data = window.initialProjectData;
   if (data) {
     formModel.value = {
       name: data.name,

@@ -13,8 +13,17 @@ function logout() {
   router.push("/admin/login");
 }
 
+// Типизация меню
+interface MenuItem {
+  name: string;
+  path?: string;
+  icon?: string;
+  superadmin?: boolean;
+  children?: MenuItem[];
+}
+
 // Полное меню
-const allMenu = [
+const allMenu: MenuItem[] = [
   { name: "Профиль", path: "/admin/profile", icon: "fas fa-tachometer-alt" },
   { name: "Пользователи", path: "/admin/users", icon: "fas fa-users", superadmin: true },
   {
@@ -49,20 +58,19 @@ function toggleExpand(name: string) {
   expanded.value = expanded.value === name ? null : name;
 }
 
-// Фильтрация меню для обычных админов
-const menu = computed(() => {
-  return allMenu.filter(item => {
-    if (item.superadmin && !auth.user?.is_superadmin) return false;
-    // Для подменю тоже фильтруем
-    if (item.children) {
-      item.children = item.children.filter(sub => {
-        // Подменю наследует superadmin от родителя
-        if (item.superadmin && !auth.user?.is_superadmin) return false;
-        return true;
+// Фильтруем меню для обычных админов
+const menu = computed<MenuItem[]>(() => {
+  return allMenu
+      .filter(item => !item.superadmin || auth.user?.is_superadmin)
+      .map(item => {
+        if (item.children) {
+          const filteredChildren = item.children.filter(
+              _ => !item.superadmin || auth.user?.is_superadmin
+          );
+          return { ...item, children: filteredChildren };
+        }
+        return item;
       });
-    }
-    return true;
-  });
 });
 </script>
 
@@ -71,17 +79,21 @@ const menu = computed(() => {
     <!-- Sidebar -->
     <aside class="relative bg-sidebar h-screen w-64 hidden sm:block shadow-xl">
       <div class="p-6">
-        <RouterLink to="/admin/content" class="text-white text-3xl font-semibold uppercase hover:text-gray-300">
+        <RouterLink
+            to="/admin/content"
+            class="text-white text-3xl font-semibold uppercase hover:text-gray-300"
+        >
           Админка
         </RouterLink>
       </div>
 
       <nav class="text-white text-base font-semibold pt-3">
-        <div v-for="item in menu" :key="item.name">
+        <template v-for="item in menu" :key="item.name">
           <!-- Обычный пункт -->
           <RouterLink
               v-if="!item.children"
-              :to="item.path"
+              :key="item.name + '-link'"
+              :to="item.path!"
               class="flex items-center py-4 pl-6 nav-item opacity-75 hover:opacity-100"
               :class="{ 'active-nav-link': route.path === item.path }"
           >
@@ -90,7 +102,7 @@ const menu = computed(() => {
           </RouterLink>
 
           <!-- Пункт с подменю -->
-          <div v-else>
+          <div v-else :key="item.name + '-submenu'">
             <div
                 @click="toggleExpand(item.name)"
                 class="flex items-center justify-between py-4 pl-6 pr-4 cursor-pointer hover:opacity-100"
@@ -100,13 +112,13 @@ const menu = computed(() => {
                 <i :class="[item.icon, 'mr-3']"></i>
                 {{ item.name }}
               </div>
-              <span>{{ expanded === item.name ? "▲" : "▼" }}</span>
+              <span>{{ expanded === item.name ? '▲' : '▼' }}</span>
             </div>
             <div v-if="expanded === item.name" class="ml-6">
               <RouterLink
                   v-for="sub in item.children"
-                  :key="sub.path"
-                  :to="sub.path"
+                  :key="sub.path + '-sub'"
+                  :to="sub.path!"
                   class="block py-2 pl-3 text-sm opacity-75 hover:opacity-100"
                   :class="{ 'active-nav-link': route.path === sub.path }"
               >
@@ -114,7 +126,7 @@ const menu = computed(() => {
               </RouterLink>
             </div>
           </div>
-        </div>
+        </template>
       </nav>
 
       <!-- Logout -->
@@ -137,7 +149,10 @@ const menu = computed(() => {
       <!-- Mobile Header -->
       <header class="w-full bg-sidebar py-5 px-6 sm:hidden">
         <div class="flex items-center justify-between">
-          <RouterLink to="/admin/dashboard" class="text-white text-3xl font-semibold uppercase hover:text-gray-300">
+          <RouterLink
+              to="/admin/dashboard"
+              class="text-white text-3xl font-semibold uppercase hover:text-gray-300"
+          >
             Admin
           </RouterLink>
           <button @click="mobileOpen = !mobileOpen" class="text-white text-3xl">
@@ -148,38 +163,39 @@ const menu = computed(() => {
 
         <!-- Mobile Nav -->
         <nav v-if="mobileOpen" class="flex flex-col pt-4">
-          <RouterLink
-              v-for="item in menu"
-              v-if="!item.children"
-              :key="item.name"
-              :to="item.path"
-              class="flex items-center text-white py-2 pl-4 nav-item"
-              :class="{ 'active-nav-link': route.path === item.path }"
-          >
-            <i :class="[item.icon, 'mr-3']"></i>
-            {{ item.name }}
-          </RouterLink>
-
-          <div v-else :key="item.name" class="pl-4">
-            <div
-                @click="toggleExpand(item.name)"
-                class="flex justify-between items-center py-2 cursor-pointer text-white"
+          <template v-for="item in menu" :key="item.name + '-mobile'">
+            <RouterLink
+                v-if="!item.children"
+                :key="item.name + '-link-mobile'"
+                :to="item.path!"
+                class="flex items-center text-white py-2 pl-4 nav-item"
+                :class="{ 'active-nav-link': route.path === item.path }"
             >
-              <span>{{ item.name }}</span>
-              <span>{{ expanded === item.name ? "▲" : "▼" }}</span>
-            </div>
-            <div v-if="expanded === item.name" class="ml-4">
-              <RouterLink
-                  v-for="sub in item.children"
-                  :key="sub.path"
-                  :to="sub.path"
-                  class="block text-white py-1 pl-3"
-                  :class="{ 'active-nav-link': route.path === sub.path }"
+              <i :class="[item.icon, 'mr-3']"></i>
+              {{ item.name }}
+            </RouterLink>
+
+            <div v-else :key="item.name + '-submenu-mobile'" class="pl-4">
+              <div
+                  @click="toggleExpand(item.name)"
+                  class="flex justify-between items-center py-2 cursor-pointer text-white"
               >
-                {{ sub.name }}
-              </RouterLink>
+                <span>{{ item.name }}</span>
+                <span>{{ expanded === item.name ? "▲" : "▼" }}</span>
+              </div>
+              <div v-if="expanded === item.name" class="ml-4">
+                <RouterLink
+                    v-for="sub in item.children"
+                    :key="sub.path + '-sub-mobile'"
+                    :to="sub.path!"
+                    class="block text-white py-1 pl-3"
+                    :class="{ 'active-nav-link': route.path === sub.path }"
+                >
+                  {{ sub.name }}
+                </RouterLink>
+              </div>
             </div>
-          </div>
+          </template>
         </nav>
       </header>
 

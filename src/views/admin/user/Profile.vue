@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '../../../store/admin/auth/auth.store';
 import { UserApi } from '../../../api/admin/user/user.api';
 import BaseInput from '../../../components/ui/BaseInput.vue';
 import BaseForm from '../../../components/ui/BaseForm.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
 
 const router = useRouter();
-const auth = useAuthStore();
 const userApi = new UserApi();
 
 // Форма редактирования профиля

@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRoleStore } from '../../../store/admin/role/role.store';
+import { useRoleStoreWithGetters } from '../../../store/admin/role/role.store';
 import ItemList from '../../../components/ItemList.vue';
 import Filters from '../../../components/Filters.vue';
-import { useFilterList, type SchemaItem } from '../../../composables/useFilterList';
+import { useFilterList } from '../../../composables/useFilterList';
 import { usePagination } from '../../../composables/usePagination';
+import type { FilterSchemaItem } from '../../../types/Filters.ts';
 
-const roleStore = useRoleStore();
+const roleStore = useRoleStoreWithGetters();
 
-const schema = ref<SchemaItem[]>([
+const schema = ref<FilterSchemaItem[]>([
   { field: 'name', label: 'Имя', type: 'text', col: 'left' },
   { field: 'created_from', label: 'Создано с', type: 'date', col: 'left' },
   { field: 'created_to', label: 'Создано по', type: 'date', col: 'left' },
@@ -47,15 +48,17 @@ const columns = [
       </router-link>
 
       <ItemList
-          :items="roleStore.getRoleList"
+          :key="roleStore.currentPage.value"
+          :items="roleStore.roleList.value"
           :columns="columns"
           :basePath="'/admin/roles'"
           :deleteItem="roleStore.deleteItem"
-          :currentPage="roleStore.currentPage"
-          :totalPages="roleStore.totalPages"
+          :currentPage="roleStore.currentPage.value"
+          :totalPages="roleStore.totalPages.value"
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"
+          @refresh="applyFilters"
       />
     </main>
   </div>

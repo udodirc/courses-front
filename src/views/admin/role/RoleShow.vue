@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { useRoleStore } from '../../../store/admin/role/role.store';
+import { useRoleStoreWithGetters } from '../../../store/admin/role/role.store';
 import BaseShow from '../../../components/BaseShow.vue';
 
 const route = useRoute();
-const roleStore = useRoleStore();
+const roleStore = useRoleStoreWithGetters(); // теперь правильно вызывается как функция
 
 const roleId = Number(route.params.id);
-const role = computed(() => roleStore.currentRole);
+const role = roleStore.currentRole;
 const loading = computed(() => roleStore.loading);
 const error = computed(() => roleStore.error);
 

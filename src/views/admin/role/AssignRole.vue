@@ -25,8 +25,12 @@ const selectedRoleName = computed(() => {
   return role?.name || null;
 });
 
-// Универсальное сохранение
-const { saveEntity, loading, error } = useEntitySave<typeof formModel.value>();
+interface AssignRoleDto {
+  id: number | null;
+  role: string | null;
+}
+
+const { saveEntity, loading, error } = useEntitySave<AssignRoleDto>();
 
 async function save() {
   await saveEntity('/admin/roles/assign', {

@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { storeToRefs } from 'pinia';
 
-import { useMenuStore } from '../../../store/admin/menu/menu.store';
+import { useMenuStore, useMenuStoreWithGetters } from '../../../store/admin/menu/menu.store';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
 import api from '../../../api';
 
@@ -16,8 +15,8 @@ const route = useRoute();
 const router = useRouter();
 const menuId = Number(route.params.id);
 
-const menuStore = useMenuStore();
-const { currentMenu } = storeToRefs(menuStore);
+// Используем store с геттерами
+const { currentMenu } = useMenuStoreWithGetters();
 const { error, setError } = useErrorHandler();
 const loading = ref(false);
 
@@ -56,7 +55,13 @@ const save = async () => {
 };
 
 // загрузка данных меню при монтировании
-onMounted(() => menuStore.fetchItem(menuId));
+onMounted(() => {
+  if (!isNaN(menuId)) {
+    useMenuStore().fetchItem(menuId);
+  } else {
+    error.value = { general: ['Некорректный ID меню'] };
+  }
+});
 </script>
 
 <template>

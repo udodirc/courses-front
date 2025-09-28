@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useContentStore } from '../../../store/admin/content/content.store';
+import { useContentStoreWithGetters } from '../../../store/admin/content/content.store';
 import ItemList from '../../../components/ItemList.vue';
 import Filters from '../../../components/Filters.vue';
 import { useFetchList } from '../../../composables/useFetchList';
-import { useFilterList, type SchemaItem } from '../../../composables/useFilterList';
+import { useFilterList } from '../../../composables/useFilterList';
 import { usePagination } from '../../../composables/usePagination';
+import type { FilterSchemaItem } from '../../../types/Filters.ts';
 
-const contentStore = useContentStore();
-
-// загрузка всех меню для селекта родителя
+const contentStore = useContentStoreWithGetters();
 const { items: menus, fetchItems: fetchMenus } = useFetchList<{ id: number; name: string }>('/admin/menu');
 
-// схема фильтров
-const schema = ref<SchemaItem[]>([
+const schema = ref<FilterSchemaItem[]>([
   { field: 'menu_id', label: 'Меню', type: 'select', col: 'left', options: [] },
   { field: 'status', label: 'Статус', type: 'select', col: 'middle', options: [
       { label: 'Активный', value: 1 },
@@ -23,21 +21,21 @@ const schema = ref<SchemaItem[]>([
   { field: 'created_to', label: 'Создано по', type: 'date', col: 'middle' },
 ]);
 
-// composables
 const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(contentStore, schema.value);
 const { onNext, onPrev, goToPage } = usePagination(contentStore, filters, toFilterObject);
 
-// загрузка меню и добавление в schema
 onMounted(async () => {
   await fetchMenus();
   const parentFilter = schema.value.find(f => f.field === 'menu_id');
   if (parentFilter) {
-    parentFilter.options = menus.value.map(m => ({ label: m.name, value: m.id }));
+    parentFilter.options = menus.value.map(m => ({
+      label: m.name,
+      value: m.id as string | number, // приведение типа
+    }));
   }
   applyFilters();
 });
 
-// колонки для таблицы
 const columns = [
   { label: 'ID', field: 'id' },
   { label: 'Меню', field: 'menu_name' },
@@ -49,7 +47,6 @@ const columns = [
     <main class="w-full flex-grow p-6">
       <h1 class="text-3xl text-black pb-6">Контент</h1>
 
-      <!-- Фильтры -->
       <Filters
           v-model:filters="filters"
           :schema="schema"
@@ -65,12 +62,13 @@ const columns = [
       </router-link>
 
       <ItemList
-          :items="contentStore.getContentList"
+          :key="contentStore.currentPage.value"
+          :items="contentStore.contentList.value"
           :columns="columns"
           :basePath="'/admin/content'"
           :deleteItem="contentStore.deleteItem"
-          :currentPage="contentStore.currentPage"
-          :totalPages="contentStore.totalPages"
+          :currentPage="contentStore.currentPage.value"
+          :totalPages="contentStore.totalPages.value"
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"

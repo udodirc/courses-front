@@ -19,6 +19,7 @@ const { view, edit, toggleStatus, changeOrder, delete: destroy } =
 
 <template>
   <CrudList
+      :key="currentPage"
       :items="items"
       :columns="columns"
       :currentPage="currentPage"

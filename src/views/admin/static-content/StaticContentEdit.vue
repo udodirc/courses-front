@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useStaticContentStore } from '../../../store/admin/static-content/static-content.store';
+import { useStaticContentStore, useStaticContentStoreWithGetters } from '../../../store/admin/static-content/static-content.store';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
-import { storeToRefs } from 'pinia';
 
 import BaseForm from '../../../components/ui/BaseForm.vue';
 import BaseTextArea from '../../../components/ui/BaseTextArea.vue';
@@ -17,14 +16,14 @@ const router = useRouter();
 const contentId = Number(route.params.id);
 
 const staticContentStore = useStaticContentStore();
-const { currentStaticContent } = storeToRefs(staticContentStore);
+const { currentStaticContent } = useStaticContentStoreWithGetters();
 const { error, setError } = useErrorHandler();
 
 const loading = ref(false);
 const formModel = ref({
   name: '',
   content: '',
-  status: 1,
+  status: true,
 });
 
 watch(currentStaticContent, (val) => {

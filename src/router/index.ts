@@ -1,12 +1,19 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../store/admin/auth/auth.store';
+import type { RouteRecordRaw } from 'vue-router';
 
 // Layout
 import FrontendLayout from '../layouts/FrontendLayout.vue';
 import DashboardLayout from '../layouts/DashboardLayout.vue';
 
+interface AppRouteMeta {
+    layout?: string;
+    requiresAuth?: boolean;
+    superadmin?: boolean;
+}
+
 // Все маршруты
-const routes = [
+const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
 
     {
         path: '/',
@@ -68,7 +75,7 @@ const router = createRouter({
 });
 
 // 🔒 Защита маршрутов
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, _from, next) => {
     const auth = useAuthStore();
 
     if (auth.token && !auth.user) {

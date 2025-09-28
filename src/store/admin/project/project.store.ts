@@ -1,3 +1,4 @@
+import { computed } from 'vue';
 import { ProjectApi } from '../../../api/admin/project/project.api';
 import type { Project } from '../../../types/Project';
 import type { CreateProjectDto } from '../../../dto/project.dto.ts';
@@ -10,19 +11,26 @@ class ProjectStore extends BaseStore<CreateProjectDto, Project> {
 
 const projectStore = new ProjectStore();
 
-type ProjectStoreState = {
-    items: Project[];
-    item: Project | null;
-    loading: boolean;
-    error: string;
-};
-export const useProjectStore = projectStore.getStore(projectStore.api, {
-    getProjectList: (state: ProjectStoreState): Project[] =>
-        Array.isArray(state.items)
-            ? state.items.map(item => ({
-                ...item,
-                canToggleStatus: true
-            }))
-            : [],
-    currentProject: (state: ProjectStoreState): Project | null => state.item,
-});
+export const useProjectStore = projectStore.getStore(projectStore.api);
+
+export function useProjectStoreWithGetters() {
+    const store = useProjectStore();
+    const projectList = computed(() =>
+        store.items.map(item => ({
+            ...item,
+            canToggleStatus: true,
+        }))
+    );
+
+    const currentProject = computed(() => store.item);
+    const totalPages = computed(() => store.totalPages);
+    const currentPage = computed(() => store.currentPage);
+
+    return {
+        ...store,
+        projectList,
+        currentProject,
+        totalPages,
+        currentPage,
+    };
+}

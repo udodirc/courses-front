@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useUserStore } from '../../../store/admin/user/user.store.js';
+import { useUserStoreWithGetters } from '../../../store/admin/user/user.store';
 import ItemList from '../../../components/ItemList.vue';
 import Filters from '../../../components/Filters.vue';
 import { useFetchList } from "../../../composables/useFetchList.ts";
-import { useFilterList, type SchemaItem } from '../../../composables/useFilterList';
+import { useFilterList } from '../../../composables/useFilterList';
 import { usePagination } from '../../../composables/usePagination';
+import type { FilterSchemaItem } from '../../../types/Filters.ts';
 
-const userStore = useUserStore();
+const userStore = useUserStoreWithGetters();
 
 // роли (для селекта)
 const { items: roles, fetchItems: fetchRoles } = useFetchList<{ id: number; name: string }>('/admin/roles');
 
 // схема фильтров
-const schema = ref<SchemaItem[]>([
+const schema = ref<FilterSchemaItem[]>([
   { field: 'name', label: 'Имя', type: 'text', col: 'left' },
   { field: 'email', label: 'Email', type: 'email', col: 'middle' },
   { field: 'role', label: 'Роль', type: 'select', col: 'left', options: [] },
@@ -67,13 +68,14 @@ const columns = [
         Создать
       </router-link>
 
-      <ItemList
-          :items="userStore.getUserList"
+     <ItemList
+          :key="userStore.currentPage.value"
+          :items="userStore.userList.value"
           :columns="columns"
           :basePath="'/admin/users'"
           :deleteItem="userStore.deleteItem"
-          :currentPage="userStore.currentPage"
-          :totalPages="userStore.totalPages"
+          :currentPage="userStore.currentPage.value"
+          :totalPages="userStore.totalPages.value"
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"

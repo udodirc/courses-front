@@ -1,31 +1,28 @@
 import { ref } from 'vue';
 
 export function useErrorHandler() {
-    const rawError = ref<Record<string, string[]> | null>(null);
+    const error = ref<string | Record<string, string[]> | null>(null);
 
     const setError = (e: any) => {
         const data = e?.response?.data;
 
         if (data?.errors && typeof data.errors === 'object') {
-            // Ошибки валидации (422)
-            rawError.value = data.errors;
+            // Laravel валидация (422)
+            error.value = data.errors;
         } else if (data?.exception) {
-            // Ошибки сервера (500, 403 и т.п.)
-            rawError.value = {
-                general: [data.exception],
-            };
+            // Ошибка сервера (500, 403 и т.п.)
+            error.value = data.exception;
         } else if (data?.message) {
-            // Если есть только message
-            rawError.value = {
-                general: [data.message],
-            };
+            // Любая другая ошибка с message
+            error.value = data.message;
         } else {
-            // fallback
-            rawError.value = {
-                general: ['Произошла неизвестная ошибка'],
-            };
+            error.value = 'Произошла неизвестная ошибка';
         }
     };
 
-    return { error: rawError, setError };
+    const clearError = () => {
+        error.value = null;
+    };
+
+    return { error, setError, clearError };
 }

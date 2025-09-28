@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
+import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useMenuStore } from '../../../store/admin/menu/menu.store';
+import { useMenuStoreWithGetters } from '../../../store/admin/menu/menu.store';
 import BaseShow from '../../../components/BaseShow.vue';
 
 const route = useRoute();
-const menuStore = useMenuStore();
+const menuStore = useMenuStoreWithGetters();
 
 const menuId = Number(route.params.id);
-const menu = computed(() => menuStore.currentMenu);
-const loading = computed(() => menuStore.loading);
-const error = computed(() => menuStore.error);
+const menu = menuStore.currentMenu;
+const loading = menuStore.loading;
+const error = menuStore.error;
 
 onMounted(async () => {
   if (!isNaN(menuId)) {
@@ -27,6 +27,6 @@ onMounted(async () => {
       :itemId="menuId"
       :loading="loading"
       :error="error"
-      :exclude="['updatedAt', 'parent_id']"
+      :exclude="['updatedAt', 'parent_id', 'order']"
   />
 </template>

@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useProjectStore } from '../../../store/admin/project/project.store';
+import { useProjectStoreWithGetters } from '../../../store/admin/project/project.store';
 import ItemList from '../../../components/ItemList.vue';
 import Filters from '../../../components/Filters.vue';
-import { useFilterList, type SchemaItem } from '../../../composables/useFilterList';
+import { useFilterList } from '../../../composables/useFilterList';
 import { usePagination } from '../../../composables/usePagination';
+import type { FilterSchemaItem } from '../../../types/Filters.ts';
 
-const projectStore = useProjectStore();
+const projectStore = useProjectStoreWithGetters();
 
 // схема фильтров
-const schema = ref<SchemaItem[]>([
+const schema = ref<FilterSchemaItem[]>([
   { field: 'name', label: 'Имя', type: 'text', col: 'left' },
   { field: 'status', label: 'Статус', type: 'select', col: 'middle', options: [
       { label: 'Активный', value: 1 },
@@ -23,9 +24,9 @@ const schema = ref<SchemaItem[]>([
 const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(projectStore, schema.value);
 const { onNext, onPrev, goToPage } = usePagination(projectStore, filters, toFilterObject);
 
-// загрузка меню и добавление в schema
+// загрузка данных
 onMounted(async () => {
-  applyFilters();
+  await applyFilters();
 });
 
 // колонки для таблицы
@@ -56,12 +57,13 @@ const columns = [
       </router-link>
 
       <ItemList
-          :items="projectStore.getProjectList"
+          :key="projectStore.currentPage.value"
+          :items="projectStore.projectList.value"
           :columns="columns"
           :basePath="'/admin/project'"
           :deleteItem="projectStore.deleteItem"
-          :currentPage="projectStore.currentPage"
-          :totalPages="projectStore.totalPages"
+          :currentPage="projectStore.currentPage.value"
+          :totalPages="projectStore.totalPages.value"
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"

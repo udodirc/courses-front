@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { storeToRefs } from 'pinia';
 
-import { useContentStore } from '../../../store/admin/content/content.store';
+import {useContentStore, useContentStoreWithGetters} from '../../../store/admin/content/content.store';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
 
 import BaseForm from '../../../components/ui/BaseForm.vue';
@@ -20,7 +19,7 @@ const router = useRouter();
 const contentId = Number(route.params.id);
 
 const contentStore = useContentStore();
-const { currentContent } = storeToRefs(contentStore);
+const { currentContent } = useContentStoreWithGetters();
 const { error, setError } = useErrorHandler();
 
 const loading = ref(false);
@@ -29,7 +28,7 @@ const ogFileInputRef = ref<HTMLInputElement | null>(null);
 // реактивная модель формы
 const formModel = reactive({
   content: '',
-  status: 1,
+  status: false as boolean,
   title: '',
   meta_description: '',
   meta_keywords: '',
@@ -41,7 +40,7 @@ const formModel = reactive({
   og_url: '',
   canonical_url: '',
   robots: 'index, follow',
-  imagesDir: '',
+  image_dir: '',
   image_og_dir: '',
 });
 
@@ -65,7 +64,7 @@ watch(currentContent, (val) => {
   formModel.og_url = val.og_url ?? '';
   formModel.canonical_url = val.canonical_url ?? '';
   formModel.robots = val.robots ?? 'index, follow';
-  formModel.imagesDir = val.image_dir ?? '';
+  formModel.image_dir = val.image_dir ?? '';
   formModel.image_og_dir = val.image_og_dir ?? '';
 
   // OG preview
@@ -87,7 +86,7 @@ const removeOgImage = async () => {
   try {
     // если og_image уже сохранена на сервере
     if (typeof formModel.og_image === 'string' && formModel.og_image !== '') {
-      await api.delete(`/admin/files/${formModel.imagesDir}/${contentId}`, {
+      await api.delete(`/admin/files/${formModel.image_dir}/${contentId}`, {
         data: {
           dir: formModel.image_og_dir,
           filename: formModel.og_image
@@ -161,6 +160,7 @@ onMounted(() => contentStore.fetchItem(contentId));
     <!-- Основной контент -->
     <BaseTextAreaWithEditor
         v-model="formModel.content"
+        @input="onTextareaInput"
         label="Контент"
         required
         class="w-full mb-4"

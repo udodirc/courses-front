@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useStaticContentStore } from '../../../store/admin/static-content/static-content.store';
+import { useStaticContentStoreWithGetters } from '../../../store/admin/static-content/static-content.store';
 import ItemList from '../../../components/ItemList.vue';
 import Filters from '../../../components/Filters.vue';
-import { useFilterList, type SchemaItem } from '../../../composables/useFilterList';
+import { useFilterList } from '../../../composables/useFilterList';
 import { usePagination } from '../../../composables/usePagination';
+import type { FilterSchemaItem } from '../../../types/Filters.ts';
+import type { StaticContent } from '../../../types/StaticContent.ts';
 
-const staticContentStore = useStaticContentStore();
+const staticContentStore = useStaticContentStoreWithGetters();
 
 // схема фильтров
-const schema = ref<SchemaItem[]>([
+const schema = ref<FilterSchemaItem[]>([
   { field: 'name', label: 'Имя', type: 'text', col: 'left' },
   { field: 'status', label: 'Статус', type: 'select', col: 'middle', options: [
       { label: 'Активный', value: 1 },
@@ -23,13 +25,13 @@ const schema = ref<SchemaItem[]>([
 const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(staticContentStore, schema.value);
 const { onNext, onPrev, goToPage } = usePagination(staticContentStore, filters, toFilterObject);
 
-// загрузка меню и добавление в schema
-onMounted(async () => {
+// загрузка списка
+onMounted(() => {
   applyFilters();
 });
 
 // колонки для таблицы
-const columns = [
+const columns: { label: string; field: keyof StaticContent | string }[] = [
   { label: 'ID', field: 'id' },
   { label: 'Имя', field: 'name' },
 ];
@@ -55,13 +57,14 @@ const columns = [
         Создать
       </router-link>
 
-      <ItemList
-          :items="staticContentStore.getStaticContentList"
+     <ItemList
+          :key="staticContentStore.currentPage.value"
+          :items="staticContentStore.staticContentList.value"
           :columns="columns"
           :basePath="'/admin/static_content'"
           :deleteItem="staticContentStore.deleteItem"
-          :currentPage="staticContentStore.currentPage"
-          :totalPages="staticContentStore.totalPages"
+          :currentPage="staticContentStore.currentPage.value"
+          :totalPages="staticContentStore.totalPages.value"
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"
