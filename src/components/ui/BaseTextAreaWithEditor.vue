@@ -18,24 +18,26 @@ const redoStack = ref<string[]>([]);
 const textAlign = ref<'left' | 'center' | 'right' | 'justify'>('left');
 const headerLevel = ref<number | null>(null);
 
-// Синхронизация с внешним modelValue
+// Синхронизация с внешним modelValue (только обновляем content)
 watch(
-    () => props.modelValue,
-    (val) => {
+    [() => props.modelValue, isHtmlView],
+    ([val, htmlView]) => {
       if (val !== content.value) {
         content.value = val || '';
-        nextTick(() => {
-          if (editorRef.value && !isHtmlView.value) editorRef.value.innerHTML = content.value;
-        });
       }
+      nextTick(() => {
+        if (editorRef.value && !htmlView) {
+          editorRef.value.innerHTML = content.value;
+        }
+      });
     },
     { immediate: true }
 );
 
-// Обновление родителя
-function updateValue() {
-  emit('update:modelValue', content.value);
-}
+// Любые изменения content сразу наружу
+watch(content, (val) => {
+  emit('update:modelValue', val);
+});
 
 // Получение текущего диапазона
 function getSelectionRange() {
@@ -55,7 +57,6 @@ function insertHTML(html: string) {
   content.value = editorRef.value?.innerHTML || '';
   undoStack.value.push(content.value);
   redoStack.value = [];
-  updateValue();
 }
 
 // Оборачивание выделенного текста тегами и стилями
@@ -70,7 +71,7 @@ function wrapSelectionMultiple(tags: string[], style?: string, href?: string) {
   insertHTML(selectedText);
 }
 
-// Обработчик ввода
+// Обработчик ввода (contenteditable)
 function onInput() {
   if (!editorRef.value) return;
   const sel = window.getSelection();
@@ -79,7 +80,6 @@ function onInput() {
   content.value = editorRef.value.innerHTML;
   undoStack.value.push(content.value);
   redoStack.value = [];
-  updateValue();
 
   nextTick(() => {
     if (range && sel) {
@@ -95,7 +95,6 @@ function undo() {
   redoStack.value.push(content.value);
   content.value = undoStack.value.pop()!;
   if (editorRef.value && !isHtmlView.value) editorRef.value.innerHTML = content.value;
-  updateValue();
 }
 
 function redo() {
@@ -103,7 +102,6 @@ function redo() {
   undoStack.value.push(content.value);
   content.value = redoStack.value.pop()!;
   if (editorRef.value && !isHtmlView.value) editorRef.value.innerHTML = content.value;
-  updateValue();
 }
 
 // Очистка
@@ -112,7 +110,6 @@ function clear() {
   if (editorRef.value) editorRef.value.innerHTML = '';
   undoStack.value = [];
   redoStack.value = [];
-  updateValue();
 }
 
 // Ссылки и картинки
@@ -146,7 +143,6 @@ function applyAlignment(alignment: 'left' | 'center' | 'right' | 'justify') {
   content.value = editorRef.value?.innerHTML || '';
   undoStack.value.push(content.value);
   redoStack.value = [];
-  updateValue();
 }
 
 // Заголовки
@@ -162,7 +158,16 @@ function applyHeader(level: number | null) {
   content.value = editorRef.value?.innerHTML || '';
   undoStack.value.push(content.value);
   redoStack.value = [];
-  updateValue();
+}
+
+// Цвет текста
+function applyTextColor(color: string) {
+  wrapSelectionMultiple([], `color: ${color}`);
+}
+
+// Фон текста
+function applyBackgroundColor(color: string) {
+  wrapSelectionMultiple([], `background-color: ${color}`);
 }
 
 onMounted(() => {
@@ -207,6 +212,18 @@ onMounted(() => {
         <button @click.prevent="undo()" class="toolbar-button">Undo</button>
         <button @click.prevent="redo()" class="toolbar-button">Redo</button>
         <button @click.prevent="clear()" class="toolbar-button text-red-600">Clear</button>
+      </div>
+
+      <!-- Цвет текста и фона -->
+      <div class="toolbar-group flex gap-1 items-center">
+        <label class="flex items-center gap-1">
+          <span class="text-sm">Цвет текста:</span>
+          <input type="color" @input="applyTextColor($event.target.value)" class="w-8 h-8 border rounded cursor-pointer"/>
+        </label>
+        <label class="flex items-center gap-1">
+          <span class="text-sm">Фон:</span>
+          <input type="color" @input="applyBackgroundColor($event.target.value)" class="w-8 h-8 border rounded cursor-pointer"/>
+        </label>
       </div>
 
       <div class="toolbar-group flex gap-1 items-center">
