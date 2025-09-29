@@ -6,6 +6,9 @@
 .main-menu{
     font-size: 1.2em;
 }
+.child-menu{
+    font-size: 1.0rem;
+}
 .line-clamp-3 {
     display: -webkit-box;
     -webkit-line-clamp: 3;

@@ -146,7 +146,7 @@ onMounted(async () => {
 
                 <ul
                     v-show="expanded === item.name"
-                    class="absolute top-full mt-2 bg-white shadow-lg rounded-md w-48 z-20"
+                    class="absolute top-full mt-2 bg-white shadow-lg rounded-md w-48 z-20 child-menu"
                 >
                   <li v-for="sub in item.children || []" :key="sub.id">
                     <RouterLink
