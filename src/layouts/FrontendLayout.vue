@@ -100,7 +100,7 @@ onMounted(async () => {
         </div>
 
         <!-- Меню -->
-        <nav class="flex-1 flex justify-center">
+        <nav class="flex-1 flex justify-center main-menu">
           <ul class="flex space-x-4 items-center">
             <!-- Статическая Главная -->
             <li class="relative menu-item flex items-center">
@@ -209,9 +209,4 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.prose {
-  line-height: 1.7;
-  font-size: 1rem;
-  color: #333;
-}
 </style>
