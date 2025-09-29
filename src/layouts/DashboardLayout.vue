@@ -150,7 +150,7 @@ const menu = computed<MenuItem[]>(() => {
       <header class="w-full bg-sidebar py-5 px-6 sm:hidden">
         <div class="flex items-center justify-between">
           <RouterLink
-              to="/admin/dashboard"
+              to="/admin/content"
               class="text-white text-3xl font-semibold uppercase hover:text-gray-300"
           >
             Admin

@@ -1,1 +1,17 @@
-@import url("https://cdn.tailwindcss.com");
+.prose {
+    line-height: 1.7;
+    font-size: 1rem;
+    color: #333;
+}
+.main-menu{
+    font-size: 1.2em;
+}
+.child-menu{
+    font-size: 1.0rem;
+}
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}

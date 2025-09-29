@@ -18,26 +18,40 @@ const redoStack = ref<string[]>([]);
 const textAlign = ref<'left' | 'center' | 'right' | 'justify'>('left');
 const headerLevel = ref<number | null>(null);
 
-// Синхронизация с внешним modelValue
+// НОВЫЙ ФЛАГ: указывает, что изменение произошло внутри компонента,
+// чтобы игнорировать обратную синхронизацию из props.modelValue.
+const isInternalChange = ref(false);
+
+// Синхронизация с внешним modelValue (только обновляем content)
 watch(
-    () => props.modelValue,
-    (val) => {
+    [() => props.modelValue, isHtmlView],
+    ([val, htmlView]) => {
+      // Игнорируем, если изменение пришло от нас самих (из onInput)
+      if (isInternalChange.value) {
+        isInternalChange.value = false;
+        return;
+      }
+
       if (val !== content.value) {
         content.value = val || '';
-        nextTick(() => {
-          if (editorRef.value && !isHtmlView.value) editorRef.value.innerHTML = content.value;
-        });
       }
+
+      // Обновляем DOM только при внешнем изменении или переключении видов
+      nextTick(() => {
+        if (editorRef.value && !htmlView) {
+          editorRef.value.innerHTML = content.value;
+        }
+      });
     },
     { immediate: true }
 );
 
-// Обновление родителя
-function updateValue() {
-  emit('update:modelValue', content.value);
-}
+// Любые изменения content сразу наружу
+watch(content, (val) => {
+  emit('update:modelValue', val);
+});
 
-// Получение текущего диапазона
+// Получение текущего диапазона (оставлено для функций форматирования)
 function getSelectionRange() {
   const sel = window.getSelection();
   if (!sel || sel.rangeCount === 0) return null;
@@ -50,12 +64,15 @@ function insertHTML(html: string) {
   if (!sel || sel.rangeCount === 0) return;
   const range = sel.getRangeAt(0);
   const frag = document.createRange().createContextualFragment(html);
+
+  // Устанавливаем флаг перед изменением content.value
+  isInternalChange.value = true;
+
   range.deleteContents();
   range.insertNode(frag);
   content.value = editorRef.value?.innerHTML || '';
   undoStack.value.push(content.value);
   redoStack.value = [];
-  updateValue();
 }
 
 // Оборачивание выделенного текста тегами и стилями
@@ -67,43 +84,47 @@ function wrapSelectionMultiple(tags: string[], style?: string, href?: string) {
   if (href) selectedText = `<a href="${href}" target="_blank">${selectedText}</a>`;
   if (style) selectedText = `<span style="${style}">${selectedText}</span>`;
   for (const tag of tags) selectedText = `<${tag}>${selectedText}</${tag}>`;
+
   insertHTML(selectedText);
 }
 
-// Обработчик ввода
+// Обработчик ввода (contenteditable)
 function onInput() {
   if (!editorRef.value) return;
-  const sel = window.getSelection();
-  const range = sel && sel.rangeCount > 0 ? sel.getRangeAt(0).cloneRange() : null;
 
+  // Устанавливаем флаг, чтобы watch игнорировал это изменение
+  isInternalChange.value = true;
+
+  // Просто обновляем content.value. Браузер сам сохранит курсор.
   content.value = editorRef.value.innerHTML;
+
   undoStack.value.push(content.value);
   redoStack.value = [];
-  updateValue();
-
-  nextTick(() => {
-    if (range && sel) {
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
-  });
 }
 
 // Undo / Redo
 function undo() {
   if (undoStack.value.length === 0) return;
+
+  // Устанавливаем флаг, чтобы избежать конфликтов при обновлении DOM
+  isInternalChange.value = true;
+
   redoStack.value.push(content.value);
   content.value = undoStack.value.pop()!;
+
   if (editorRef.value && !isHtmlView.value) editorRef.value.innerHTML = content.value;
-  updateValue();
 }
 
 function redo() {
   if (redoStack.value.length === 0) return;
+
+  // Устанавливаем флаг
+  isInternalChange.value = true;
+
   undoStack.value.push(content.value);
   content.value = redoStack.value.pop()!;
+
   if (editorRef.value && !isHtmlView.value) editorRef.value.innerHTML = content.value;
-  updateValue();
 }
 
 // Очистка
@@ -112,7 +133,7 @@ function clear() {
   if (editorRef.value) editorRef.value.innerHTML = '';
   undoStack.value = [];
   redoStack.value = [];
-  updateValue();
+  isInternalChange.value = true; // Сброс, чтобы не было конфликтов
 }
 
 // Ссылки и картинки
@@ -135,6 +156,10 @@ function applyAlignment(alignment: 'left' | 'center' | 'right' | 'justify') {
     if (node instanceof HTMLElement && getComputedStyle(node).display === 'block') break;
     node = node.parentElement;
   }
+
+  // Устанавливаем флаг перед изменением content.value
+  isInternalChange.value = true;
+
   if (!node || node === editorRef.value) {
     const div = document.createElement('div');
     div.style.textAlign = alignment;
@@ -146,7 +171,6 @@ function applyAlignment(alignment: 'left' | 'center' | 'right' | 'justify') {
   content.value = editorRef.value?.innerHTML || '';
   undoStack.value.push(content.value);
   redoStack.value = [];
-  updateValue();
 }
 
 // Заголовки
@@ -159,10 +183,23 @@ function applyHeader(level: number | null) {
   const el = document.createElement(tag);
   el.appendChild(selectedText);
   range.insertNode(el);
+
+  // Устанавливаем флаг перед изменением content.value
+  isInternalChange.value = true;
+
   content.value = editorRef.value?.innerHTML || '';
   undoStack.value.push(content.value);
   redoStack.value = [];
-  updateValue();
+}
+
+// Цвет текста
+function applyTextColor(color: string) {
+  wrapSelectionMultiple([], `color: ${color}`);
+}
+
+// Фон текста
+function applyBackgroundColor(color: string) {
+  wrapSelectionMultiple([], `background-color: ${color}`);
 }
 
 onMounted(() => {
@@ -174,7 +211,6 @@ onMounted(() => {
   <div class="editor-container w-full">
     <label class="block text-sm text-gray-700 mb-2">{{ label }}</label>
 
-    <!-- Toolbar -->
     <div class="flex flex-wrap gap-2 mb-2">
       <div class="toolbar-group flex gap-1">
         <select v-model.number="headerLevel" @change="applyHeader(headerLevel)" class="toolbar-select">
@@ -211,12 +247,22 @@ onMounted(() => {
 
       <div class="toolbar-group flex gap-1 items-center">
         <label class="flex items-center gap-1">
+          <span class="text-sm">Цвет текста:</span>
+          <input type="color" @input="applyTextColor(($event.target as HTMLInputElement).value)" class="w-8 h-8 border rounded cursor-pointer"/>
+        </label>
+        <label class="flex items-center gap-1">
+          <span class="text-sm">Фон:</span>
+          <input type="color" @input="applyBackgroundColor(($event.target as HTMLInputElement).value)" class="w-8 h-8 border rounded cursor-pointer"/>
+        </label>
+      </div>
+
+      <div class="toolbar-group flex gap-1 items-center">
+        <label class="flex items-center gap-1">
           <input type="checkbox" v-model="isHtmlView" /> HTML
         </label>
       </div>
     </div>
 
-    <!-- Editor -->
     <div
         ref="editorRef"
         contenteditable="true"

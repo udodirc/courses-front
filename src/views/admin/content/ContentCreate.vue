@@ -5,9 +5,9 @@ import { useFetchList } from '../../../composables/useFetchList';
 import { useEntitySave } from '../../../composables/useEntitySave';
 
 import BaseForm from '../../../components/ui/BaseForm.vue';
-import BaseTextArea from '../../../components/ui/BaseTextAreaWithEditor.vue';
+import BaseTextArea from "../../../components/ui/BaseTextArea.vue";
+import BaseTextAreaWithEditor from "../../../components/ui/BaseTextAreaWithEditor.vue";
 import BaseSelect from '../../../components/ui/BaseSelect.vue';
-import BaseInput from '../../../components/ui/BaseInput.vue';
 import BaseFileUpload from '../../../components/ui/BaseFileUpload.vue';
 import BaseImagePreview from '../../../components/ui/BaseImagePreview.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
@@ -130,17 +130,24 @@ const removeOgImage = () => {
     />
 
     <!-- Основной контент -->
-    <BaseTextArea v-model="formModel.content" label="Контент" required />
-    <BaseInput v-model="formModel.title" label="Seo title"/>
-    <BaseInput v-model="formModel.meta_description" label="Meta description"/>
-    <BaseInput v-model="formModel.meta_keywords" label="Meta keywords"/>
-    <BaseInput v-model="formModel.og_title" label="Og title"/>
-    <BaseInput v-model="formModel.og_description" label="Og description"/>
-    <BaseInput v-model="formModel.og_keywords" label="Og keywords"/>
-    <BaseInput v-model="formModel.og_type" label="Og type" required/>
-    <BaseInput v-model="formModel.og_url" label="Og url"/>
-    <BaseInput v-model="formModel.canonical_url" label="Canonical url"/>
-    <BaseInput v-model="formModel.robots" label="Robots" required/>
+    <BaseTextAreaWithEditor
+        v-model="formModel.content"
+        label="Контент"
+        required
+        class="w-full mb-4"
+    />
+
+    <!-- SEO / Open Graph -->
+    <BaseTextArea v-model="formModel.title" label="SEO title"/>
+    <BaseTextArea v-model="formModel.meta_description" label="Meta description"/>
+    <BaseTextArea v-model="formModel.meta_keywords" label="Meta keywords"/>
+    <BaseTextArea v-model="formModel.og_title" label="Og title"/>
+    <BaseTextArea v-model="formModel.og_description" label="Og description"/>
+    <BaseTextArea v-model="formModel.og_keywords" label="Og keywords"/>
+    <BaseTextArea v-model="formModel.og_type" label="Og type"/>
+    <BaseTextArea v-model="formModel.og_url" label="Og url"/>
+    <BaseTextArea v-model="formModel.canonical_url" label="Canonical url"/>
+    <BaseTextArea v-model="formModel.robots" label="Robots"/>
 
     <!-- OG IMAGE UPLOAD -->
     <div class="mb-4">
