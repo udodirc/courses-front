@@ -36,17 +36,21 @@ const fetchContent = async (slug: string) => {
 
     // Обновляем SEO-поля после получения данных
     if (content.value) {
+      const ogImage = (content.value.og_image != 'Og image')
+          ? APP_URL + PUBLIC_CONTENT_OG_IMAGE_BASE_PATH + "/" + content.value.id + "/" + content.value.og_image
+          : '';
+
       seoState.title = content.value.meta_title || content.value.menu_name;
       seoState.meta_description = content.value.meta_description || '';
       seoState.meta_keywords = content.value.meta_keywords || '';
       seoState.og_title = content.value.og_title || '';
       seoState.og_description = content.value.og_description || '';
       seoState.og_keywords = content.value.og_keywords || '';
-      seoState.og_image = APP_URL + PUBLIC_CONTENT_OG_IMAGE_BASE_PATH + "/" + content.value.id + "/" + content.value.og_image || '';
-      seoState.og_type = content.value.og_type || 'website'; // По умолчанию 'website'
-      seoState.og_url = content.value.og_url || window.location.href; // По умолчанию текущий URL
-      seoState.canonical_url = content.value.canonical_url || window.location.href; // По умолчанию текущий URL
-      seoState.robots = content.value.robots || 'index, follow'; // По умолчанию 'index, follow'
+      seoState.og_image =  ogImage;
+      seoState.og_type = content.value.og_type || 'website';
+      seoState.og_url = content.value.og_url || window.location.href;
+      seoState.canonical_url = content.value.canonical_url || window.location.href;
+      seoState.robots = content.value.robots || 'index, follow';
     }
   } catch (err: any) {
     error.value = err.response?.data?.message || 'Ошибка загрузки контента';
