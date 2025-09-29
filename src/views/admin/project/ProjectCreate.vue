@@ -3,7 +3,8 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useEntitySave } from '../../../composables/useEntitySave';
 import BaseForm from '../../../components/ui/BaseForm.vue';
-import BaseTextArea from '../../../components/ui/BaseTextAreaWithEditor.vue';
+import BaseTextArea from "../../../components/ui/BaseTextArea.vue";
+import BaseTextAreaWithEditor from "../../../components/ui/BaseTextAreaWithEditor.vue";
 import BaseInput from "../../../components/ui/BaseInput.vue";
 import FormErrors from '../../../components/ui/FormErrors.vue';
 
@@ -189,17 +190,25 @@ async function save() {
     <FormErrors :error="error" />
 
     <BaseInput v-model="formModel.name" label="Имя"/>
-    <BaseTextArea v-model="formModel.content" label="Контент" required />
+    <BaseTextAreaWithEditor
+        v-model="formModel.content"
+        label="Контент"
+        required
+        class="w-full mb-4"
+    />
     <BaseInput v-model="formModel.url" label="URL" required />
-    <BaseInput v-model="formModel.title" label="Seo title"/>
-    <BaseInput v-model="formModel.meta_description" label="Meta description"/>
-    <BaseInput v-model="formModel.meta_keywords" label="Meta keywords"/>
-    <BaseInput v-model="formModel.og_title" label="Og title"/>
-    <BaseInput v-model="formModel.og_description" label="Og description"/>
-    <BaseInput v-model="formModel.og_keywords" label="Og keywords"/>
-    <BaseInput v-model="formModel.og_type" label="Og type" required/>
-    <BaseInput v-model="formModel.canonical_url" label="Canonical url"/>
-    <BaseInput v-model="formModel.robots" label="Robots" required/>
+
+    <!-- SEO / Open Graph -->
+    <BaseTextArea v-model="formModel.title" label="SEO title"/>
+    <BaseTextArea v-model="formModel.meta_description" label="Meta description"/>
+    <BaseTextArea v-model="formModel.meta_keywords" label="Meta keywords"/>
+    <BaseTextArea v-model="formModel.og_title" label="Og title"/>
+    <BaseTextArea v-model="formModel.og_description" label="Og description"/>
+    <BaseTextArea v-model="formModel.og_keywords" label="Og keywords"/>
+    <BaseTextArea v-model="formModel.og_type" label="Og type"/>
+    <BaseTextArea v-model="formModel.og_url" label="Og url"/>
+    <BaseTextArea v-model="formModel.canonical_url" label="Canonical url"/>
+    <BaseTextArea v-model="formModel.robots" label="Robots"/>
 
     <!-- OG IMAGE UPLOAD -->
     <div class="mt-4">

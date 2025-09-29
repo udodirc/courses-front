@@ -160,7 +160,6 @@ onMounted(() => contentStore.fetchItem(contentId));
     <!-- Основной контент -->
     <BaseTextAreaWithEditor
         v-model="formModel.content"
-        @input="onTextareaInput"
         label="Контент"
         required
         class="w-full mb-4"

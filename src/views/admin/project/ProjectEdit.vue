@@ -6,7 +6,8 @@ import {useProjectStore, useProjectStoreWithGetters} from '../../../store/admin/
 import { useErrorHandler } from '../../../composables/useErrorHandler';
 
 import BaseForm from '../../../components/ui/BaseForm.vue';
-import BaseTextArea from '../../../components/ui/BaseTextAreaWithEditor.vue';
+import BaseTextArea from "../../../components/ui/BaseTextArea.vue";
+import BaseTextAreaWithEditor from "../../../components/ui/BaseTextAreaWithEditor.vue";
 import BaseInput from "../../../components/ui/BaseInput.vue";
 import BaseToggle from '../../../components/ui/BaseToggle.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
@@ -193,19 +194,21 @@ onMounted(() => projectStore.fetchItem(projectId));
 
     <!-- базовые поля -->
     <BaseInput v-model="formModel.name" label="Имя" class="mb-2" />
-    <BaseTextArea v-model="formModel.content" label="Контент" required class="mb-4" />
+    <BaseTextAreaWithEditor v-model="formModel.content" label="Контент" required class="mb-4" />
     <BaseInput v-model="formModel.url" label="URL" required />
     <BaseToggle v-model="formModel.status" label="Статус" :activeLabel="'Активный'" :inactiveLabel="'Неактивный'" class="mb-4"/>
-    <BaseInput v-model="formModel.title" label="SEO title" class="mb-2" />
-    <BaseInput v-model="formModel.meta_description" label="Meta description" class="mb-2" />
-    <BaseInput v-model="formModel.meta_keywords" label="Meta keywords" class="mb-2" />
-    <BaseInput v-model="formModel.og_title" label="Og title" class="mb-2" />
-    <BaseInput v-model="formModel.og_description" label="Og description" class="mb-2" />
-    <BaseInput v-model="formModel.og_keywords" label="Og keywords" class="mb-2" />
-    <BaseInput v-model="formModel.og_type" label="Og type" class="mb-2" />
-    <BaseInput v-model="formModel.og_url" label="Og url" class="mb-2" />
-    <BaseInput v-model="formModel.canonical_url" label="Canonical url" class="mb-2" />
-    <BaseInput v-model="formModel.robots" label="Robots" class="mb-2" />
+
+    <!-- SEO / Open Graph -->
+    <BaseTextArea v-model="formModel.title" label="SEO title"/>
+    <BaseTextArea v-model="formModel.meta_description" label="Meta description"/>
+    <BaseTextArea v-model="formModel.meta_keywords" label="Meta keywords"/>
+    <BaseTextArea v-model="formModel.og_title" label="Og title"/>
+    <BaseTextArea v-model="formModel.og_description" label="Og description"/>
+    <BaseTextArea v-model="formModel.og_keywords" label="Og keywords"/>
+    <BaseTextArea v-model="formModel.og_type" label="Og type"/>
+    <BaseTextArea v-model="formModel.og_url" label="Og url"/>
+    <BaseTextArea v-model="formModel.canonical_url" label="Canonical url"/>
+    <BaseTextArea v-model="formModel.robots" label="Robots"/>
 
     <!-- OG IMAGE -->
     <div class="mb-4">
