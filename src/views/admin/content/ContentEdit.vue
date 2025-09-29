@@ -7,7 +7,7 @@ import { useErrorHandler } from '../../../composables/useErrorHandler';
 
 import BaseForm from '../../../components/ui/BaseForm.vue';
 import BaseTextAreaWithEditor from '../../../components/ui/BaseTextAreaWithEditor.vue';
-import BaseInput from '../../../components/ui/BaseInput.vue';
+import BaseTextArea from "../../../components/ui/BaseTextArea.vue";
 import BaseToggle from '../../../components/ui/BaseToggle.vue';
 import BaseFileUpload from '../../../components/ui/BaseFileUpload.vue';
 import BaseImagePreview from '../../../components/ui/BaseImagePreview.vue';
@@ -175,16 +175,16 @@ onMounted(() => contentStore.fetchItem(contentId));
     />
 
     <!-- SEO / Open Graph -->
-    <BaseInput v-model="formModel.title" label="SEO title" class="mb-2"/>
-    <BaseInput v-model="formModel.meta_description" label="Meta description" class="mb-2"/>
-    <BaseInput v-model="formModel.meta_keywords" label="Meta keywords" class="mb-2"/>
-    <BaseInput v-model="formModel.og_title" label="Og title" class="mb-2"/>
-    <BaseInput v-model="formModel.og_description" label="Og description" class="mb-2"/>
-    <BaseInput v-model="formModel.og_keywords" label="Og keywords" class="mb-2"/>
-    <BaseInput v-model="formModel.og_type" label="Og type" class="mb-2"/>
-    <BaseInput v-model="formModel.og_url" label="Og url" class="mb-2"/>
-    <BaseInput v-model="formModel.canonical_url" label="Canonical url" class="mb-2"/>
-    <BaseInput v-model="formModel.robots" label="Robots" class="mb-2"/>
+    <BaseTextArea v-model="formModel.title" label="SEO title"/>
+    <BaseTextArea v-model="formModel.meta_description" label="Meta description"/>
+    <BaseTextArea v-model="formModel.meta_keywords" label="Meta keywords"/>
+    <BaseTextArea v-model="formModel.og_title" label="Og title"/>
+    <BaseTextArea v-model="formModel.og_description" label="Og description"/>
+    <BaseTextArea v-model="formModel.og_keywords" label="Og keywords"/>
+    <BaseTextArea v-model="formModel.og_type" label="Og type"/>
+    <BaseTextArea v-model="formModel.og_url" label="Og url"/>
+    <BaseTextArea v-model="formModel.canonical_url" label="Canonical url"/>
+    <BaseTextArea v-model="formModel.robots" label="Robots"/>
 
     <!-- OG IMAGE UPLOAD -->
     <div class="mb-4">
