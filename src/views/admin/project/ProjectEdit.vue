@@ -36,7 +36,6 @@ const formModel = reactive({
   meta_keywords: '',
   og_title: '',
   og_description: '',
-  og_keywords: '',
   og_image: null as File | string | null,
   og_preview: '', // blob preview для OG
   og_type: '',
@@ -67,7 +66,6 @@ watch(currentProject, (val) => {
     meta_keywords: val.meta_keywords ?? '',
     og_title: val.og_title ?? '',
     og_description: val.og_description ?? '',
-    og_keywords: val.og_keywords ?? '',
     og_image: val.og_image ?? '',
     og_preview: val.og_image ? `${val.image_og_url}/${val.og_image}` : '',
     og_type: val.og_type ?? '',
@@ -204,7 +202,6 @@ onMounted(() => projectStore.fetchItem(projectId));
     <BaseTextArea v-model="formModel.meta_keywords" label="Meta keywords"/>
     <BaseTextArea v-model="formModel.og_title" label="Og title"/>
     <BaseTextArea v-model="formModel.og_description" label="Og description"/>
-    <BaseTextArea v-model="formModel.og_keywords" label="Og keywords"/>
     <BaseTextArea v-model="formModel.og_type" label="Og type"/>
     <BaseTextArea v-model="formModel.og_url" label="Og url"/>
     <BaseTextArea v-model="formModel.canonical_url" label="Canonical url"/>

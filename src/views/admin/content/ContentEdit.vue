@@ -34,7 +34,6 @@ const formModel = reactive({
   meta_keywords: '',
   og_title: '',
   og_description: '',
-  og_keywords: '',
   og_image: '' as File | string | null,
   og_type: '',
   og_url: '',
@@ -58,7 +57,6 @@ watch(currentContent, (val) => {
   formModel.meta_keywords = val.meta_keywords ?? '';
   formModel.og_title = val.og_title ?? '';
   formModel.og_description = val.og_description ?? '';
-  formModel.og_keywords = val.og_keywords ?? '';
   formModel.og_image = val.og_image ?? '';
   formModel.og_type = val.og_type ?? '';
   formModel.og_url = val.og_url ?? '';
@@ -179,7 +177,6 @@ onMounted(() => contentStore.fetchItem(contentId));
     <BaseTextArea v-model="formModel.meta_keywords" label="Meta keywords"/>
     <BaseTextArea v-model="formModel.og_title" label="Og title"/>
     <BaseTextArea v-model="formModel.og_description" label="Og description"/>
-    <BaseTextArea v-model="formModel.og_keywords" label="Og keywords"/>
     <BaseTextArea v-model="formModel.og_type" label="Og type"/>
     <BaseTextArea v-model="formModel.og_url" label="Og url"/>
     <BaseTextArea v-model="formModel.canonical_url" label="Canonical url"/>

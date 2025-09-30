@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import api from '../../../api';
 import { useRoute } from 'vue-router';
+import seoState from '../../../seo/seo.js';
 
 interface Project {
   id: number;
@@ -9,6 +10,17 @@ interface Project {
   content: string;
   image_url: string;
   images: string[];
+  meta_title?: string;
+  meta_description?: string;
+  meta_keywords?: string;
+  og_title?: string;
+  og_description?: string;
+  og_keywords?: string;
+  og_image?: string;
+  og_type?: string;
+  og_url?: string;
+  canonical_url?: string;
+  robots?: string;
   createdAt: string;
 }
 
@@ -29,6 +41,26 @@ const fetchProject = async (id: string | number) => {
   try {
     const response = await api.get(`/projects/${id}`);
     project.value = response.data.data;
+    const APP_URL = import.meta.env.VITE_APP_URL || '';
+    const VITE_PUBLIC_PROJECTS_OG_IMAGE_BASE_PATH = import.meta.env.VITE_PUBLIC_PROJECTS_OG_IMAGE_BASE_PATH || '';
+
+    if (project.value) {
+      const ogImage = (project.value.og_image != 'Og image')
+          ? APP_URL + VITE_PUBLIC_PROJECTS_OG_IMAGE_BASE_PATH + "/" + project.value.id + "/" + project.value.og_image
+          : '';
+
+      seoState.title = project.value.meta_title || '';
+      seoState.meta_description = project.value.meta_description || '';
+      seoState.meta_keywords = project.value.meta_keywords || '';
+      seoState.og_title = project.value.og_title || '';
+      seoState.og_description = project.value.og_description || '';
+      seoState.og_keywords = project.value.og_keywords || '';
+      seoState.og_image =  ogImage;
+      seoState.og_type = project.value.og_type || 'website';
+      seoState.og_url = project.value.og_url || window.location.href;
+      seoState.canonical_url = project.value.canonical_url || window.location.href;
+      seoState.robots = project.value.robots || 'index, follow';
+    }
   } catch (err: any) {
     error.value = err.response?.data?.message || 'Ошибка загрузки проекта';
   } finally {
@@ -39,14 +71,13 @@ const fetchProject = async (id: string | number) => {
 // Навигация слайдами
 const nextSlide = () => {
   if (!project.value || project.value.images.length === 0) return;
-  currentSlide.value = (currentSlide.value + 1) % project.value.images.length;
+  currentSlide.value = (currentSlide.value + 1) % project.value!.images.length;
 };
 
 const prevSlide = () => {
   if (!project.value || project.value.images.length === 0) return;
   currentSlide.value =
-      (currentSlide.value - 1 + project.value.images.length) %
-      project.value.images.length;
+      (currentSlide.value - 1 + project.value!.images.length) % project.value!.images.length;
 };
 
 // Функция увеличения/уменьшения
@@ -90,12 +121,12 @@ onUnmounted(() => {
 
       <!-- Слайдер -->
       <div
-          v-if="project.images.length"
+          v-if="project!.images.length"
           class="relative w-full h-96 overflow-hidden rounded-lg group mb-6"
       >
         <transition name="fade" mode="out-in">
           <img
-              :src="`${project.image_url}/${project.images[currentSlide]}`"
+              :src="`${project!.image_url}/${project!.images[currentSlide]}`"
               class="w-full h-full object-cover transition-transform duration-500 ease-in-out transform group-hover:scale-105 cursor-pointer"
               alt="project image"
               :key="currentSlide"
@@ -122,7 +153,7 @@ onUnmounted(() => {
 
         <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2 z-10">
           <span
-              v-for="(_img, idx) in project.images"
+              v-for="(_img, idx) in project!.images"
               :key="idx"
               :class="{
               'w-3 h-3 rounded-full bg-white transition-opacity duration-300 cursor-pointer': true,
@@ -137,14 +168,14 @@ onUnmounted(() => {
       <!-- Zoom modal -->
       <transition name="modal-fade">
         <div
-            v-if="isZoomed && project.images.length"
+            v-if="isZoomed && project!.images.length"
             class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 cursor-zoom-out p-4"
             @click="toggleZoom"
         >
           <div class="relative max-w-full max-h-full" @click.stop>
             <transition name="fade" mode="out-in">
               <img
-                  :src="`${project.image_url}/${project.images[currentSlide]}`"
+                  :src="`${project!.image_url}/${project!.images[currentSlide]}`"
                   class="max-w-full max-h-screen object-contain"
                   alt="zoomed project image"
                   :key="currentSlide"
@@ -162,7 +193,7 @@ onUnmounted(() => {
             <!-- Prev -->
             <button
                 @click.stop="prevSlide"
-                class="absolute top-1/2 left-4 -translate-y-1/2 text-black text-3xl p-4 hover:bg-white hover:bg-opacity-10 rounded-full transition"
+                class="absolute top-1/2 left-4 -translate-y-1/2 bg-white bg-opacity-70 text-gray-700 text-3xl p-4 hover:bg-opacity-100 rounded-full transition"
             >
               ‹
             </button>
@@ -170,7 +201,7 @@ onUnmounted(() => {
             <!-- Next -->
             <button
                 @click.stop="nextSlide"
-                class="absolute top-1/2 right-4 -translate-y-1/2 text-black text-3xl p-4 hover:bg-white hover:bg-opacity-10 rounded-full transition"
+                class="absolute top-1/2 right-4 -translate-y-1/2 bg-white bg-opacity-70 text-gray-700 text-3xl p-4 hover:bg-opacity-100 rounded-full transition"
             >
               ›
             </button>
@@ -184,23 +215,4 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* Плавный fade */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-/* Плавный fade модалки */
-.modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.modal-fade-enter-from,
-.modal-fade-leave-to {
-  opacity: 0;
-}
 </style>

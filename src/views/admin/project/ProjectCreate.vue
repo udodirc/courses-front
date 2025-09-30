@@ -22,7 +22,6 @@ interface FormModel {
   meta_keywords: string;
   og_title: string;
   og_description: string;
-  og_keywords: string;
   og_image: File | string | null;
   og_type: string;
   og_url: string;
@@ -43,7 +42,6 @@ const formModel = ref<FormModel>({
   meta_keywords: '',
   og_title: '',
   og_description: '',
-  og_keywords: '',
   og_image: null,
   og_type: 'og_type',
   og_url: '',
@@ -72,7 +70,6 @@ onMounted(() => {
       meta_keywords: data.meta_keywords,
       og_title: data.og_title,
       og_description: data.og_description,
-      og_keywords: data.og_keywords,
       og_image: data.og_image || null,
       og_type: data.og_type,
       og_url: data.og_url,
@@ -151,7 +148,6 @@ async function save() {
     payload.append('meta_keywords', formModel.value.meta_keywords || '');
     payload.append('og_title', formModel.value.og_title || '');
     payload.append('og_description', formModel.value.og_description || '');
-    payload.append('og_keywords', formModel.value.og_keywords || '');
 
     // OG image — только файл
     if (formModel.value.og_image instanceof File) {
@@ -204,7 +200,6 @@ async function save() {
     <BaseTextArea v-model="formModel.meta_keywords" label="Meta keywords"/>
     <BaseTextArea v-model="formModel.og_title" label="Og title"/>
     <BaseTextArea v-model="formModel.og_description" label="Og description"/>
-    <BaseTextArea v-model="formModel.og_keywords" label="Og keywords"/>
     <BaseTextArea v-model="formModel.og_type" label="Og type"/>
     <BaseTextArea v-model="formModel.og_url" label="Og url"/>
     <BaseTextArea v-model="formModel.canonical_url" label="Canonical url"/>

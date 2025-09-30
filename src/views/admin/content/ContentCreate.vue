@@ -30,7 +30,6 @@ const formModel = ref({
   meta_keywords: '',
   og_title: '',
   og_description: '',
-  og_keywords: '',
   og_image: '' as File | string | null,
   og_type: 'og_type',
   og_url: '',
@@ -143,7 +142,6 @@ const removeOgImage = () => {
     <BaseTextArea v-model="formModel.meta_keywords" label="Meta keywords"/>
     <BaseTextArea v-model="formModel.og_title" label="Og title"/>
     <BaseTextArea v-model="formModel.og_description" label="Og description"/>
-    <BaseTextArea v-model="formModel.og_keywords" label="Og keywords"/>
     <BaseTextArea v-model="formModel.og_type" label="Og type"/>
     <BaseTextArea v-model="formModel.og_url" label="Og url"/>
     <BaseTextArea v-model="formModel.canonical_url" label="Canonical url"/>
