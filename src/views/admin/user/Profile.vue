@@ -14,10 +14,11 @@ const formModel = ref({
   name: '',
   email: '',
   password: '',
+  passwordConfirmation: '',
 });
 
 const loading = ref(false);
-const error = ref('');
+const error = ref<string | Record<string, string[]>>('');
 
 // Получение профиля текущего пользователя
 async function fetchProfile() {
@@ -41,6 +42,11 @@ async function save() {
   loading.value = true;
   error.value = '';
 
+  if (formModel.value.password !== formModel.value.passwordConfirmation) {
+    error.value = { passwordConfirmation: ['Пароли не совпадают'] };
+    loading.value = false;
+    return;
+  }
   try {
     await userApi.updateProfile(formModel.value);
     router.push('/admin/content');
@@ -64,5 +70,10 @@ onMounted(() => {
     <BaseInput v-model="formModel.name" label="Имя" required />
     <BaseInput v-model="formModel.email" label="Email" type="email" required />
     <BaseInput v-model="formModel.password" label="Пароль" type="password" placeholder="Оставьте пустым, чтобы не менять" />
+    <BaseInput
+        v-model="formModel.passwordConfirmation"
+        label="Подтверждение пароля"
+        type="password"
+    />
   </BaseForm>
 </template>
