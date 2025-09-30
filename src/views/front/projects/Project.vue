@@ -10,6 +10,7 @@ interface Project {
   url: string;
   image_url: string; // базовый путь
   images: string[];
+  main_page: string;
   createdAt: string;
 }
 
@@ -54,8 +55,11 @@ const nextPage = () => goToPage(currentPage.value + 1);
 
 // функция для получения полной ссылки на первую картинку
 const getProjectImage = (project: Project) => {
+  console.log(project.main_page);
   if (project.images.length > 0) {
-    return `${project.image_url}/${project.images[0]}`;
+    const main_image = (project.main_page) ? project.main_page : project.images[0];
+
+    return `${project.image_url}/${main_image}`;
   }
   return '/placeholder.png';
 };
@@ -85,7 +89,6 @@ const getProjectImage = (project: Project) => {
           />
           <div class="p-4">
             <h2 class="font-semibold text-lg mb-2">{{ project.name }}</h2>
-            <p class="text-gray-600 text-sm line-clamp-3" v-html="project.content"></p>
           </div>
         </router-link>
       </div>
