@@ -12,6 +12,9 @@ const staticContent = ref<Record<string, string>>({});
 const loadingStatic = ref(false);
 const staticContentError = ref<string | null>(null);
 
+// Переменная для открытия мобильного меню
+const menuOpen = ref(false);
+
 // Открыть/закрыть подменю
 const toggleExpand = (name: string) => {
   expanded.value = expanded.value === name ? null : name;
@@ -20,7 +23,8 @@ const toggleExpand = (name: string) => {
 // Закрытие подменю при клике вне
 const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
-  if (!target.closest(".menu-item")) {
+  // Убеждаемся, что клик не был внутри элемента меню или кнопки бургера
+  if (!target.closest(".menu-item") && !target.closest(".burger-button")) {
     expanded.value = null;
   }
 };
@@ -91,38 +95,64 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen flex flex-col font-sans">
-    <!-- Header -->
-    <header class="bg-white shadow-md">
+    <header class="bg-white shadow-md relative">
       <div class="container mx-auto flex items-center justify-between px-6 py-4">
-        <!-- Левый блок: логотип или пустое место -->
-        <div class="flex-shrink-0 w-32 flex items-center justify-start">
-          <!-- Можно вставить логотип сюда, сейчас пусто -->
+
+        <div class="flex items-center space-x-4 flex-grow justify-center md:hidden">
+          <button
+              @click="openModal"
+              class="bg-black text-white px-3 py-1 text-sm rounded-md font-semibold hover:bg-gray-800 transition-colors duration-200"
+          >
+            Связаться
+          </button>
+          <div v-if="staticContent.messenger_icons" v-html="staticContent.messenger_icons"></div>
         </div>
 
-        <!-- Меню -->
-        <nav class="flex-1 flex justify-center main-menu">
-          <ul class="flex space-x-4 items-center">
-            <!-- Статическая Главная -->
-            <li class="relative menu-item flex items-center">
+        <button
+            class="md:hidden flex flex-col justify-between w-6 h-5 focus:outline-none burger-button"
+            @click="menuOpen = !menuOpen"
+        >
+          <span
+              class="block h-0.5 bg-black rounded transition-transform duration-300"
+              :class="{ 'rotate-45 translate-y-2': menuOpen }"
+          ></span>
+          <span
+              class="block h-0.5 bg-black rounded transition-opacity duration-300"
+              :class="{ 'opacity-0': menuOpen }"
+          ></span>
+          <span
+              class="block h-0.5 bg-black rounded transition-transform duration-300"
+              :class="{ '-rotate-45 -translate-y-2': menuOpen }"
+          ></span>
+        </button>
+
+        <nav
+            class="main-menu md:flex flex-1 justify-center absolute md:static top-full left-0 w-full md:w-auto bg-white md:bg-transparent shadow-md md:shadow-none z-20"
+            :class="{ 'hidden': !menuOpen, 'flex': menuOpen }"
+        >
+          <ul class="flex flex-col md:flex-row md:space-x-6 items-start md:items-center p-4 md:p-0">
+            <li class="relative menu-item w-full md:w-auto">
               <RouterLink
                   to="/"
-                  class="px-3 py-2 rounded-md transition-colors duration-200 flex items-center"
+                  class="block px-4 py-2 rounded-md transition-colors duration-200"
                   :class="{
-                    'bg-gray-200 text-black font-semibold': isActive('/'),
-                    'hover:bg-gray-100': !isActive('/')
-                  }"
+                  'bg-gray-200 text-black font-semibold': isActive('/'),
+                  'hover:bg-gray-100': !isActive('/')
+                }"
               >
                 Главная
               </RouterLink>
             </li>
 
-            <!-- Динамическое меню -->
-            <li v-for="item in menus || []" :key="item.id" class="relative menu-item">
-              <!-- Если нет дочерних -->
+            <li
+                v-for="item in menus || []"
+                :key="item.id"
+                class="relative menu-item w-full md:w-auto"
+            >
               <RouterLink
                   v-if="!item.children || item.children.length === 0"
                   :to="normalizeUrl(item.url)"
-                  class="px-3 py-2 rounded-md transition-colors duration-200 flex items-center"
+                  class="block px-4 py-2 rounded-md transition-colors duration-200"
                   :class="{
                   'bg-gray-200 text-black font-semibold': isActive(item.url),
                   'hover:bg-gray-100': !isActive(item.url)
@@ -131,11 +161,10 @@ onMounted(async () => {
                 {{ item.name }}
               </RouterLink>
 
-              <!-- С дочерними -->
-              <div v-else class="relative">
+              <div v-else class="relative w-full md:w-auto">
                 <button
                     @click.stop="toggleExpand(item.name)"
-                    class="px-3 py-2 rounded-md transition-colors duration-200 flex items-center"
+                    class="block w-full px-4 py-2 rounded-md transition-colors duration-200 text-left md:text-center"
                     :class="{
                     'bg-gray-200 text-black font-semibold': isChildActive(item.children),
                     'hover:bg-gray-100': !isChildActive(item.children)
@@ -146,7 +175,7 @@ onMounted(async () => {
 
                 <ul
                     v-show="expanded === item.name"
-                    class="absolute top-full mt-2 bg-white shadow-lg rounded-md w-48 z-20 child-menu"
+                    class="md:absolute md:top-full mt-2 bg-white shadow-lg rounded-md w-full md:w-48 z-20 child-menu"
                 >
                   <li v-for="sub in item.children || []" :key="sub.id">
                     <RouterLink
@@ -166,8 +195,7 @@ onMounted(async () => {
           </ul>
         </nav>
 
-        <!-- Правый блок: кнопки и иконки -->
-        <div class="flex items-center space-x-4">
+        <div class="hidden md:flex items-center space-x-4">
           <button
               @click="openModal"
               class="bg-black text-white px-5 py-2 rounded-md font-semibold hover:bg-gray-800 transition-colors duration-200"
@@ -175,13 +203,10 @@ onMounted(async () => {
             Связаться
           </button>
 
-          <!-- Messenger Icons -->
           <div v-if="staticContent.messenger_icons" v-html="staticContent.messenger_icons"></div>
         </div>
       </div>
     </header>
-
-    <!-- Main Content -->
     <main class="flex-1 max-w-6xl mx-auto px-6 py-12 w-full">
       <div
           v-if="staticContentError"
@@ -190,12 +215,15 @@ onMounted(async () => {
         {{ staticContentError }}
       </div>
 
-      <div v-if="route.path === '/' && staticContent.main" v-html="staticContent.main" class="prose"></div>
+      <div
+          v-if="route.path === '/' && staticContent.main"
+          v-html="staticContent.main"
+          class="prose"
+      ></div>
 
       <RouterView v-else />
     </main>
 
-    <!-- Footer -->
     <footer class="bg-black text-white py-6 px-6 text-center mt-auto">
       <div class="max-w-4xl mx-auto space-y-2">
         <div v-if="staticContent.social_networks" v-html="staticContent.social_networks"></div>
@@ -203,10 +231,10 @@ onMounted(async () => {
       </div>
     </footer>
 
-    <!-- Contact Modal -->
     <ContactModal v-if="showModal" @close="closeModal" />
   </div>
 </template>
 
 <style scoped>
+/* Пустой блок */
 </style>

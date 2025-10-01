@@ -49,7 +49,6 @@ async function save() {
       <!-- Увеличена ширина контейнера с `max-w-md` на `max-w-xl` -->
       <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg w-full max-w-xl">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold">Связаться с нами</h2>
           <button @click="closeModal" class="text-gray-500 hover:text-gray-700">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -57,7 +56,7 @@ async function save() {
           </button>
         </div>
         <p>
-          <BaseForm label="Создание меню" :loading="loading" :onSubmit="save">
+          <BaseForm label="Отправьте сообщение" :loading="loading" :onSubmit="save">
             <FormErrors :error="error" />
             <BaseInput v-model="formModel.email" label="Email" required />
             <BaseInput v-model="formModel.phone" label="Телефон"/>
