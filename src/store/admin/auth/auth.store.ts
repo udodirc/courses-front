@@ -4,7 +4,7 @@ import api from '../../../api';
 interface User {
     id: number;
     name: string;
-    email: string;
+    login: string;
     is_superadmin: boolean;
 }
 
@@ -17,9 +17,9 @@ export const useAuthStore = defineStore('auth', {
         isAuthenticated: (state) => !!state.token,
     },
     actions: {
-        async login(email: string, password: string) {
+        async login(name: string, password: string) {
             try {
-                const response = await api.post('/admin/login', { email, password });
+                const response = await api.post('/admin/login', { name, password });
                 this.token = response.data.access_token;
                 await this.fetchUser();
             } catch (error: unknown) {
