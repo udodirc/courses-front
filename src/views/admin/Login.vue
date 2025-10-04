@@ -5,11 +5,11 @@
 
       <!-- Email -->
       <div class="flex flex-col">
-        <label class="mb-1 text-gray-700 font-medium">Email</label>
+        <label class="mb-1 text-gray-700 font-medium">Login</label>
         <input
-            v-model="email"
-            type="email"
-            placeholder="Введите email"
+            v-model="login"
+            type="text"
+            placeholder="Введите login"
             required
             class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
         />
@@ -50,7 +50,7 @@ import { useRouter } from 'vue-router';
 const auth = useAuthStore();
 const router = useRouter();
 
-const email = ref('');
+const login = ref('');
 const password = ref('');
 const loading = ref(false);
 const error = ref('');
@@ -59,10 +59,10 @@ async function submit() {
   loading.value = true;
   error.value = '';
   try {
-    await auth.login(email.value, password.value);
+    await auth.login(login.value, password.value);
     router.push('/admin/content');
   } catch {
-    error.value = 'Ошибка авторизации. Проверьте email и пароль.';
+    error.value = 'Ошибка авторизации. Проверьте login и пароль.';
   } finally {
     loading.value = false;
   }
