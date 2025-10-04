@@ -127,7 +127,7 @@ onUnmounted(() => {
         <transition name="fade" mode="out-in">
           <img
               :src="`${project!.image_url}/${project!.images[currentSlide]}`"
-              class="w-full h-full object-cover transition-transform duration-500 ease-in-out transform group-hover:scale-105 cursor-pointer"
+              class="w-full h-full object-cover transition-transform duration-5000 ease-in-out transform group-hover:scale-105 cursor-pointer"
               alt="project image"
               :key="currentSlide"
               @click="toggleZoom"
