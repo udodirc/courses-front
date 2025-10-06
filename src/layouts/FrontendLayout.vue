@@ -126,17 +126,17 @@ onMounted(async () => {
     <header class="bg-white shadow-md relative">
       <div class="container mx-auto flex items-center justify-between px-6 py-4">
 
-        <!-- Мобильная кнопка "Связаться" -->
-        <div
-            v-if="isSendMessage && !loadingSettings"
-            class="flex items-center space-x-4 flex-grow justify-center md:hidden"
-        >
+        <!-- Мобильная версия -->
+        <div class="flex items-center space-x-4 flex-grow justify-center md:hidden">
+          <!-- Кнопка появляется только если isSendMessage -->
           <button
+              v-if="isSendMessage && !loadingSettings"
               @click="openModal"
               class="bg-black text-white px-3 py-1 text-sm rounded-md font-semibold hover:bg-gray-800 transition-colors duration-200"
           >
             Связаться
           </button>
+          <!-- Иконки всегда -->
           <div v-if="staticContent.messenger_icons" v-html="staticContent.messenger_icons"></div>
         </div>
 
@@ -229,9 +229,10 @@ onMounted(async () => {
           </ul>
         </nav>
 
-        <!-- Десктопная кнопка "Связаться" -->
-        <div v-if="isSendMessage && !loadingSettings" class="hidden md:flex items-center space-x-4">
+        <!-- Десктопная версия -->
+        <div class="hidden md:flex items-center space-x-4">
           <button
+              v-if="isSendMessage && !loadingSettings"
               @click="openModal"
               class="bg-black text-white px-5 py-2 rounded-md font-semibold hover:bg-gray-800 transition-colors duration-200"
           >
@@ -239,6 +240,7 @@ onMounted(async () => {
           </button>
           <div v-if="staticContent.messenger_icons" v-html="staticContent.messenger_icons"></div>
         </div>
+
       </div>
     </header>
 
