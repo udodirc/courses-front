@@ -6,24 +6,29 @@ import api from "../api";
 import ContactModal from "../components/ContactModal.vue";
 
 const route = useRoute();
+
+// состояния
 const expanded = ref<string | null>(null);
 const showModal = ref(false);
 const staticContent = ref<Record<string, string>>({});
 const loadingStatic = ref(false);
 const staticContentError = ref<string | null>(null);
 
-// Переменная для открытия мобильного меню
+const settings = ref<Record<string, string | boolean>>({});
+const loadingSettings = ref(false);
+const settingsError = ref<string | null>(null);
+const isSendMessage = ref<boolean>(false);
+
 const menuOpen = ref(false);
 
-// Открыть/закрыть подменю
+// открыть / закрыть подменю
 const toggleExpand = (name: string) => {
   expanded.value = expanded.value === name ? null : name;
 };
 
-// Закрытие подменю при клике вне
+// клик вне меню
 const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
-  // Убеждаемся, что клик не был внутри элемента меню или кнопки бургера
   if (!target.closest(".menu-item") && !target.closest(".burger-button")) {
     expanded.value = null;
   }
@@ -40,7 +45,7 @@ onBeforeUnmount(() => {
 const openModal = () => (showModal.value = true);
 const closeModal = () => (showModal.value = false);
 
-// Меню с API
+// --- Меню с API ---
 const { items: menus, fetchItems: fetchMenus } = useFetchList<{
   id: number;
   name: string;
@@ -48,10 +53,9 @@ const { items: menus, fetchItems: fetchMenus } = useFetchList<{
   children?: { id: number; name: string; url: string }[];
 }>("/menu/tree");
 
-// Нормализация url
 const normalizeUrl = (url?: string) => (url && url !== "" ? `/${url}` : "#");
 
-// Статический контент
+// --- Статический контент ---
 const fetchStaticContent = async () => {
   loadingStatic.value = true;
   staticContentError.value = null;
@@ -61,8 +65,8 @@ const fetchStaticContent = async () => {
         { name: "main" },
         { name: "social_networks" },
         { name: "rights" },
-        { name: "messenger_icons" }
-      ]
+        { name: "messenger_icons" },
+      ],
     });
     staticContent.value = response.data.data.reduce(
         (acc: Record<string, string>, item: { name: string; content: string }) => {
@@ -78,18 +82,42 @@ const fetchStaticContent = async () => {
   }
 };
 
-// Подсветка активного маршрута
+// --- Настройки ---
+const fetchSettings = async () => {
+  loadingSettings.value = true;
+  settingsError.value = null;
+  try {
+    const response = await api.post("/settings", {
+      keys: [{ key: "send_message" }],
+    });
+
+    settings.value = response.data.data.reduce(
+        (acc: Record<string, string | boolean>, item: { key: string; value: string }) => {
+          let value: string | boolean = item.value;
+          if (item.value === "true") value = true;
+          else if (item.value === "false") value = false;
+          acc[item.key] = value;
+          return acc;
+        },
+        {}
+    );
+
+    // флаг для кнопки
+    isSendMessage.value = Boolean(settings.value["send_message"]);
+  } catch (e) {
+    settingsError.value = "Не удалось загрузить настройки. Попробуйте позже.";
+  } finally {
+    loadingSettings.value = false;
+  }
+};
+
+// --- Подсветка активного маршрута ---
 const isActive = (url?: string) => route.path === normalizeUrl(url);
 const isChildActive = (children?: { url: string }[]) =>
     children?.some((sub) => route.path === normalizeUrl(sub.url));
 
 onMounted(async () => {
-  try {
-    await fetchMenus();
-    await fetchStaticContent();
-  } catch (e) {
-    console.error("Ошибка загрузки", e);
-  }
+  await Promise.all([fetchMenus(), fetchStaticContent(), fetchSettings()]);
 });
 </script>
 
@@ -98,7 +126,11 @@ onMounted(async () => {
     <header class="bg-white shadow-md relative">
       <div class="container mx-auto flex items-center justify-between px-6 py-4">
 
-        <div class="flex items-center space-x-4 flex-grow justify-center md:hidden">
+        <!-- Мобильная кнопка "Связаться" -->
+        <div
+            v-if="isSendMessage && !loadingSettings"
+            class="flex items-center space-x-4 flex-grow justify-center md:hidden"
+        >
           <button
               @click="openModal"
               class="bg-black text-white px-3 py-1 text-sm rounded-md font-semibold hover:bg-gray-800 transition-colors duration-200"
@@ -108,6 +140,7 @@ onMounted(async () => {
           <div v-if="staticContent.messenger_icons" v-html="staticContent.messenger_icons"></div>
         </div>
 
+        <!-- Бургер -->
         <button
             class="md:hidden flex flex-col justify-between w-6 h-5 focus:outline-none burger-button"
             @click="menuOpen = !menuOpen"
@@ -126,9 +159,10 @@ onMounted(async () => {
           ></span>
         </button>
 
+        <!-- Меню -->
         <nav
             class="main-menu md:flex flex-1 justify-center absolute md:static top-full left-0 w-full md:w-auto bg-white md:bg-transparent shadow-md md:shadow-none z-20"
-            :class="{ 'hidden': !menuOpen, 'flex': menuOpen }"
+            :class="{ hidden: !menuOpen, flex: menuOpen }"
         >
           <ul class="flex flex-col md:flex-row md:space-x-6 items-start md:items-center p-4 md:p-0">
             <li class="relative menu-item w-full md:w-auto">
@@ -150,7 +184,7 @@ onMounted(async () => {
                 class="relative menu-item w-full md:w-auto"
             >
               <RouterLink
-                  v-if="!item.children || item.children.length === 0"
+                  v-if="!item.children?.length"
                   :to="normalizeUrl(item.url)"
                   class="block px-4 py-2 rounded-md transition-colors duration-200"
                   :class="{
@@ -195,18 +229,19 @@ onMounted(async () => {
           </ul>
         </nav>
 
-        <div class="hidden md:flex items-center space-x-4">
+        <!-- Десктопная кнопка "Связаться" -->
+        <div v-if="isSendMessage && !loadingSettings" class="hidden md:flex items-center space-x-4">
           <button
               @click="openModal"
               class="bg-black text-white px-5 py-2 rounded-md font-semibold hover:bg-gray-800 transition-colors duration-200"
           >
             Связаться
           </button>
-
           <div v-if="staticContent.messenger_icons" v-html="staticContent.messenger_icons"></div>
         </div>
       </div>
     </header>
+
     <main class="flex-1 max-w-6xl mx-auto px-6 py-12 w-full">
       <div
           v-if="staticContentError"
@@ -234,7 +269,3 @@ onMounted(async () => {
     <ContactModal v-if="showModal" @close="closeModal" />
   </div>
 </template>
-
-<style scoped>
-/* Пустой блок */
-</style>
