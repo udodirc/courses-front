@@ -28,6 +28,7 @@ const customLabels: Record<string, string> = {
   last_name: 'Фамилия',
   phone: 'Телефон',
   status: 'Статус',
+  referrals_count: 'Количество рефералов',
   is_superadmin: 'Главный админ',
   meta_description: 'meta description',
   meta_keywords: 'meta keywords',
