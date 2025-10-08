@@ -11,8 +11,10 @@ class PartnerStore extends BaseStore<CreatePartnerDto, Partner> {
 
 const partnerStore = new PartnerStore();
 
+// обычный store
 export const usePartnerStore = partnerStore.getStore(partnerStore.api);
 
+// store с геттерами
 export function usePartnerStoreWithGetters() {
     const store = usePartnerStore();
 

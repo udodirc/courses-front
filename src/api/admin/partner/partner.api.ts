@@ -4,5 +4,5 @@ import type { Partner } from '../../../types/Partner';
 import type { CreatePartnerDto } from '../../../dto/partner.dto.ts';
 
 export class PartnerApi extends BaseApi<CreatePartnerDto, Partner> {
-    protected resource = 'partners/structure';
+    protected resource = 'partners';
 }
