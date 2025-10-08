@@ -48,6 +48,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'roles/assign-role', name: 'AdminAssignRole', component: () => import('../views/admin/role/AssignRole.vue'), meta: { superadmin: true } },
             { path: 'permissions/give-permissions', name: 'AdminGivePermissions', component: () => import('../views/admin/permissions/GivePermissions.vue'), meta: { superadmin: true } },
             { path: 'permissions/create-permissions', name: 'AdminCreatePermissions', component: () => import('../views/admin/permissions/CreatePermissions.vue'), meta: { superadmin: true } },
+            { path: 'partners', name: 'AdminPartners', component: () => import('../views/admin/partner/Partners.vue'), meta: { superadmin: true } },
             { path: 'menus', name: 'AdminMenus', component: () => import('../views/admin/menu/Menus.vue') },
             { path: '/admin/menu/:id', name: 'AdminMenuShow', component: () => import('../views/admin/menu/MenuShow.vue') },
             { path: '/admin/menu/create', name: 'AdminMenuCreate', component: () => import('../views/admin/menu/MenuCreate.vue') },
