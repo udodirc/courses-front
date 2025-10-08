@@ -20,6 +20,7 @@ const emit = defineEmits([
   'toggleStatus',
   'changeOrderUp',
   'changeOrderDown',
+  'canDelete',
   'delete',
 ]);
 </script>
@@ -75,7 +76,10 @@ const emit = defineEmits([
               @click="$emit('changeOrderDown', item.id)"
               :disabled="i === items.length - 1"
           >⬇️</button>
-          <button @click="$emit('delete', item.id)">❌</button>
+          <button
+              v-if="item.canDelete"
+              @click="$emit('delete', item.id)"
+          >❌</button>
         </td>
       </tr>
     </template>

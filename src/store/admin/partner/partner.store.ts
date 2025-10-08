@@ -22,6 +22,7 @@ export function usePartnerStoreWithGetters() {
         store.items.map(item => ({
             ...item,
             canToggleStatus: true,
+            canDelete : false
         }))
     );
 
