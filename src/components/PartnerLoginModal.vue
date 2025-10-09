@@ -51,11 +51,12 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { usePartnerStore } from "../store/client/partner.store";
+import { useRouter } from "vue-router";
 
 const emit = defineEmits(["close"]);
 
 const partnerStore = usePartnerStore();
-
+const router = useRouter();
 const form = ref({
   login: "",
   password: "",
@@ -72,6 +73,7 @@ const login = async () => {
     // Вызываем метод из Pinia store
     await partnerStore.login(form.value.login, form.value.password);
     emit("close");
+    router.push('/partner/profile');
   } catch (error: any) {
     errorMessage.value = error.response?.data?.error || "Ошибка входа";
   } finally {

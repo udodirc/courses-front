@@ -93,18 +93,18 @@ router.beforeEach(async (to, _from, next) => {
     const partner = usePartnerStore();
 
     // --- Партнёр ---
-    if (to.path.startsWith('/partner')) {
+    if (to.path.startsWith('/')) {
         if (partner.token && !partner.user) {
             try {
                 await partner.fetchUser();
             } catch (e) {
                 partner.logout();
-                if (to.path !== '/login') return next('/login');
+                if (to.path !== '/') return next('/');
             }
         }
 
         if (!partner.isAuthenticated) {
-            if (to.path !== '/login') return next('/login');
+            if (to.path !== '/') return next('/');
         } else if (to.path === '/partner') {
             // Если авторизован и пытается зайти на общий /partner → редирект на /partner/profile
             return next('/partner/profile');
