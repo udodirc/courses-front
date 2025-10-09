@@ -1,10 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../store/admin/auth/auth.store';
+import { usePartnerStore } from '../store/client/partner.store';
 import type { RouteRecordRaw } from 'vue-router';
 
 // Layout
 import FrontendLayout from '../layouts/FrontendLayout.vue';
 import DashboardLayout from '../layouts/DashboardLayout.vue';
+import ClientLayout from '../layouts/ClientLayout.vue';
 
 interface AppRouteMeta {
     layout?: string;
@@ -70,6 +72,15 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
         ],
     },
 
+    {
+        path: '/partner',
+        component: ClientLayout,
+        meta: { layout: 'partner', requiresAuth: true },
+        children: [
+            { path: 'profile', name: 'PartnerProfile', component: () => import('../views/client/partner/Profile.vue') }
+        ],
+    },
+
 ];
 
 const router = createRouter({
@@ -77,31 +88,55 @@ const router = createRouter({
     routes,
 });
 
-// 🔒 Защита маршрутов
 router.beforeEach(async (to, _from, next) => {
     const auth = useAuthStore();
+    const partner = usePartnerStore();
 
-    if (auth.token && !auth.user) {
-        try {
-            await auth.fetchUser();
-        } catch (e) {
-            auth.logout();
-            return next('/admin/login');
+    // --- Партнёр ---
+    if (to.path.startsWith('/partner')) {
+        if (partner.token && !partner.user) {
+            try {
+                await partner.fetchUser();
+            } catch (e) {
+                partner.logout();
+                if (to.path !== '/login') return next('/login');
+            }
+        }
+
+        if (!partner.isAuthenticated) {
+            if (to.path !== '/login') return next('/login');
+        } else if (to.path === '/partner') {
+            // Если авторизован и пытается зайти на общий /partner → редирект на /partner/profile
+            return next('/partner/profile');
         }
     }
 
-    if (to.meta.requiresAuth && !auth.isAuthenticated) {
-        return next('/admin/login');
+    // --- Админ ---
+    if (to.path.startsWith('/admin')) {
+        if (auth.token && !auth.user) {
+            try {
+                await auth.fetchUser();
+            } catch (e) {
+                auth.logout();
+                if (to.path !== '/admin/login') return next('/admin/login');
+            }
+        }
+
+        if (!auth.isAuthenticated) {
+            if (to.path !== '/admin/login') return next('/admin/login');
+        }
+
+        if (to.meta.superadmin && !auth.user?.is_superadmin) {
+            if (to.path !== '/admin/content') return next('/admin/content');
+        }
+
+        return next();
     }
 
-    if (to.meta.superadmin && !auth.user?.is_superadmin) {
-        return next('/admin/content'); // обычный админ не может заходить
-    }
-
+    // --- Любой другой маршрут (публичный) ---
     next();
 });
 
-// 🔒 Вычисляемый список видимых маршрутов для меню
 import { computed } from 'vue';
 export const visibleAdminRoutes = computed(() => {
     const auth = useAuthStore();
