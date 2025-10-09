@@ -6,5 +6,5 @@ export interface User {
         name: string;
     };
     status: boolean;
-    createdAt: string; // или Date
+    createdAt: string;
 }

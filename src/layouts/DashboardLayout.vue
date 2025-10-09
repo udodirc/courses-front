@@ -44,6 +44,7 @@ const allMenu: MenuItem[] = [
       { name: "Создать права", path: "/admin/permissions/create-permissions" },
     ],
   },
+  { name: "Партнеры", path: "/admin/partners", icon: "fas fa-bars" },
   { name: "Меню", path: "/admin/menus", icon: "fas fa-bars" },
   { name: "Контент", path: "/admin/content", icon: "fas fa-bars" },
   { name: "Статичный контент", path: "/admin/static-content", icon: "fas fa-bars" },
