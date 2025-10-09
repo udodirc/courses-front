@@ -16,6 +16,7 @@ export const usePartnerStore = defineStore('partner', {
         isAuthenticated: (state) => !!state.token,
     },
     actions: {
+        // Вход
         async login(login: string, password: string) {
             try {
                 const response = await api.post('/login', { login, password });
@@ -27,6 +28,31 @@ export const usePartnerStore = defineStore('partner', {
                 throw error;
             }
         },
+
+        // Регистрация
+        async register(sponsor: string, login: string, email: string, password: string) {
+            try {
+                const response = await api.post('/register', { sponsor, login, email, password });
+                this.token = response.data.token;
+                localStorage.setItem('partner_token', this.token);
+                await this.fetchUser();
+            } catch (error: any) {
+                console.error('Partner register error:', error.response?.data || error.message);
+                throw error;
+            }
+        },
+
+        // Восстановление пароля
+        async forgotPassword(email: string) {
+            try {
+                await api.post('/forgot-password', { email });
+            } catch (error: any) {
+                console.error('Partner forgot password error:', error.response?.data || error.message);
+                throw error;
+            }
+        },
+
+        // Получение данных пользователя
         async fetchUser() {
             if (!this.token) return;
             try {
@@ -37,6 +63,8 @@ export const usePartnerStore = defineStore('partner', {
                 this.logout();
             }
         },
+
+        // Выход
         logout() {
             this.token = '';
             this.user = null;
