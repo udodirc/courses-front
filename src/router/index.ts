@@ -16,6 +16,11 @@ interface AppRouteMeta {
 
 // Все маршруты
 const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
+    {
+        path: '/email/verify-redirect',
+        name: 'verify-email-redirect',
+        component: () => import('../views/front/auth/VerifyEmailView.vue'),
+    },
 
     {
         path: '/',
@@ -94,6 +99,10 @@ router.beforeEach(async (to, _from, next) => {
 
     // --- Партнёр ---
     if (to.path.startsWith('/')) {
+        if (to.path.startsWith('/email/verify-redirect')) {
+            return next()
+        }
+
         if (partner.token && !partner.user) {
             try {
                 await partner.fetchUser();
