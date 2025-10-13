@@ -64,6 +64,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
                 meta: { superadmin: true },
             },
             { path: 'partners/:id/edit', name: 'AdminPartnerEdit', component: () => import('../views/admin/partner/PartnerEdit.vue'), meta: { superadmin: true } },
+            { path: 'levels', name: 'AdminLevels', component: () => import('../views/admin/level/Levels.vue') },
             { path: 'menus', name: 'AdminMenus', component: () => import('../views/admin/menu/Menus.vue') },
             { path: '/admin/menu/:id', name: 'AdminMenuShow', component: () => import('../views/admin/menu/MenuShow.vue') },
             { path: '/admin/menu/create', name: 'AdminMenuCreate', component: () => import('../views/admin/menu/MenuCreate.vue') },
