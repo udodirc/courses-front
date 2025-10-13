@@ -1,10 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../store/admin/auth/auth.store';
+import { usePartnerStore } from '../store/client/partner.store';
 import type { RouteRecordRaw } from 'vue-router';
 
 // Layout
 import FrontendLayout from '../layouts/FrontendLayout.vue';
 import DashboardLayout from '../layouts/DashboardLayout.vue';
+import ClientLayout from '../layouts/ClientLayout.vue';
 
 interface AppRouteMeta {
     layout?: string;
@@ -14,16 +16,16 @@ interface AppRouteMeta {
 
 // Все маршруты
 const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
+    {
+        path: '/email/verify-redirect',
+        name: 'verify-email-redirect',
+        component: () => import('../views/front/auth/VerifyEmailView.vue'),
+    },
 
     {
-        path: '/',
-        component: FrontendLayout,
-        meta: { layout: 'front' },
-        children: [
-            { path: 'projects', name: 'FrontendProjects', component: () => import('../views/front/projects/Project.vue') },
-            { path: 'projects/:id', name: 'ProjectView', component: () => import('../views/front/projects/ProjectView.vue') },
-            { path: ':slug', name: 'FrontendPage', component: () => import('../views/front/Page.vue'), props: true },
-        ],
+        path: '/reset-password',
+        name: 'reset-password',
+        component: () => import('../views/front/auth/ResetPassword.vue'),
     },
 
     // Страницы без авторизации
@@ -70,6 +72,26 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
         ],
     },
 
+    {
+        path: '/partner',
+        component: ClientLayout,
+        meta: { layout: 'partner', requiresAuth: true },
+        children: [
+            { path: 'profile', name: 'PartnerProfile', component: () => import('../views/client/partner/Profile.vue') }
+        ],
+    },
+
+    {
+        path: '/',
+        component: FrontendLayout,
+        meta: { layout: 'front' },
+        children: [
+            { path: 'projects', name: 'FrontendProjects', component: () => import('../views/front/projects/Project.vue') },
+            { path: 'projects/:id', name: 'ProjectView', component: () => import('../views/front/projects/ProjectView.vue') },
+            { path: ':slug', name: 'FrontendPage', component: () => import('../views/front/Page.vue'), props: true },
+        ],
+    },
+
 ];
 
 const router = createRouter({
@@ -77,31 +99,43 @@ const router = createRouter({
     routes,
 });
 
-// 🔒 Защита маршрутов
 router.beforeEach(async (to, _from, next) => {
     const auth = useAuthStore();
+    const partner = usePartnerStore();
 
-    if (auth.token && !auth.user) {
-        try {
-            await auth.fetchUser();
-        } catch (e) {
-            auth.logout();
-            return next('/admin/login');
+    // --- Админ ---
+    if (to.matched.some(record => record.meta.layout === 'admin')) {
+        if (auth.token && !auth.user) {
+            try { await auth.fetchUser() }
+            catch { auth.logout(); return next('/admin/login') }
         }
+
+        if (!auth.isAuthenticated) return next('/admin/login')
+        if (to.meta.superadmin && !auth.user?.is_superadmin) return next('/admin/content')
+        return next()
     }
 
-    if (to.meta.requiresAuth && !auth.isAuthenticated) {
-        return next('/admin/login');
+    // --- Партнёр ---
+    if (to.matched.some(record => record.meta.layout === 'partner') ||
+        to.path.startsWith('/reset-password') ||
+        to.path.startsWith('/email/verify-redirect')) {
+
+        if (partner.token && !partner.user) {
+            try { await partner.fetchUser() }
+            catch { partner.logout(); return next('/') }
+        }
+
+        if (to.matched.some(record => record.meta.layout === 'partner') && !partner.isAuthenticated) {
+            return next('/')
+        }
+
+        return next()
     }
 
-    if (to.meta.superadmin && !auth.user?.is_superadmin) {
-        return next('/admin/content'); // обычный админ не может заходить
-    }
+    // --- Любой другой маршрут (публичный) ---
+    next()
+})
 
-    next();
-});
-
-// 🔒 Вычисляемый список видимых маршрутов для меню
 import { computed } from 'vue';
 export const visibleAdminRoutes = computed(() => {
     const auth = useAuthStore();

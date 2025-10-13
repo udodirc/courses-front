@@ -4,12 +4,15 @@ import { RouterLink, RouterView, useRoute } from "vue-router";
 import { useFetchList } from "../composables/useFetchList";
 import api from "../api";
 import ContactModal from "../components/ContactModal.vue";
+import PartnerLoginModal from "../components/PartnerLoginModal.vue"; // ✅ импорт
 
 const route = useRoute();
 
 // состояния
 const expanded = ref<string | null>(null);
 const showModal = ref(false);
+const showLoginModal = ref(false); // ✅ для модалки входа
+
 const staticContent = ref<Record<string, string>>({});
 const loadingStatic = ref(false);
 const staticContentError = ref<string | null>(null);
@@ -44,6 +47,9 @@ onBeforeUnmount(() => {
 
 const openModal = () => (showModal.value = true);
 const closeModal = () => (showModal.value = false);
+
+const openLoginModal = () => (showLoginModal.value = true); // ✅ открыть вход
+const closeLoginModal = () => (showLoginModal.value = false); // ✅ закрыть вход
 
 // --- Меню с API ---
 const { items: menus, fetchItems: fetchMenus } = useFetchList<{
@@ -128,7 +134,6 @@ onMounted(async () => {
 
         <!-- Мобильная версия -->
         <div class="flex items-center space-x-4 flex-grow justify-center md:hidden">
-          <!-- Кнопка появляется только если isSendMessage -->
           <button
               v-if="isSendMessage && !loadingSettings"
               @click="openModal"
@@ -136,7 +141,13 @@ onMounted(async () => {
           >
             Связаться
           </button>
-          <!-- Иконки всегда -->
+          <!-- Кнопка Вход -->
+          <button
+              @click="openLoginModal"
+              class="text-sm font-semibold text-gray-800 hover:text-black transition-colors duration-200"
+          >
+            Вход
+          </button>
           <div v-if="staticContent.messenger_icons" v-html="staticContent.messenger_icons"></div>
         </div>
 
@@ -145,18 +156,9 @@ onMounted(async () => {
             class="md:hidden flex flex-col justify-between w-6 h-5 focus:outline-none burger-button"
             @click="menuOpen = !menuOpen"
         >
-          <span
-              class="block h-0.5 bg-black rounded transition-transform duration-300"
-              :class="{ 'rotate-45 translate-y-2': menuOpen }"
-          ></span>
-          <span
-              class="block h-0.5 bg-black rounded transition-opacity duration-300"
-              :class="{ 'opacity-0': menuOpen }"
-          ></span>
-          <span
-              class="block h-0.5 bg-black rounded transition-transform duration-300"
-              :class="{ '-rotate-45 -translate-y-2': menuOpen }"
-          ></span>
+          <span class="block h-0.5 bg-black rounded transition-transform duration-300" :class="{ 'rotate-45 translate-y-2': menuOpen }"></span>
+          <span class="block h-0.5 bg-black rounded transition-opacity duration-300" :class="{ 'opacity-0': menuOpen }"></span>
+          <span class="block h-0.5 bg-black rounded transition-transform duration-300" :class="{ '-rotate-45 -translate-y-2': menuOpen }"></span>
         </button>
 
         <!-- Меню -->
@@ -170,9 +172,9 @@ onMounted(async () => {
                   to="/"
                   class="block px-4 py-2 rounded-md transition-colors duration-200"
                   :class="{
-                  'bg-gray-200 text-black font-semibold': isActive('/'),
-                  'hover:bg-gray-100': !isActive('/')
-                }"
+                    'bg-gray-200 text-black font-semibold': isActive('/'),
+                    'hover:bg-gray-100': !isActive('/')
+                  }"
               >
                 Главная
               </RouterLink>
@@ -188,9 +190,9 @@ onMounted(async () => {
                   :to="normalizeUrl(item.url)"
                   class="block px-4 py-2 rounded-md transition-colors duration-200"
                   :class="{
-                  'bg-gray-200 text-black font-semibold': isActive(item.url),
-                  'hover:bg-gray-100': !isActive(item.url)
-                }"
+                    'bg-gray-200 text-black font-semibold': isActive(item.url),
+                    'hover:bg-gray-100': !isActive(item.url)
+                  }"
               >
                 {{ item.name }}
               </RouterLink>
@@ -200,9 +202,9 @@ onMounted(async () => {
                     @click.stop="toggleExpand(item.name)"
                     class="block w-full px-4 py-2 rounded-md transition-colors duration-200 text-left md:text-center"
                     :class="{
-                    'bg-gray-200 text-black font-semibold': isChildActive(item.children),
-                    'hover:bg-gray-100': !isChildActive(item.children)
-                  }"
+                      'bg-gray-200 text-black font-semibold': isChildActive(item.children),
+                      'hover:bg-gray-100': !isChildActive(item.children)
+                    }"
                 >
                   {{ item.name }}
                 </button>
@@ -216,9 +218,9 @@ onMounted(async () => {
                         :to="normalizeUrl(sub.url)"
                         class="block px-4 py-2 rounded-md transition-colors duration-200"
                         :class="{
-                        'bg-gray-200 text-black font-semibold': isActive(sub.url),
-                        'hover:bg-gray-100': !isActive(sub.url)
-                      }"
+                          'bg-gray-200 text-black font-semibold': isActive(sub.url),
+                          'hover:bg-gray-100': !isActive(sub.url)
+                        }"
                     >
                       {{ sub.name }}
                     </RouterLink>
@@ -238,6 +240,15 @@ onMounted(async () => {
           >
             Связаться
           </button>
+
+          <!-- ✅ Кнопка входа -->
+          <button
+              @click="openLoginModal"
+              class="text-sm font-semibold text-gray-800 hover:text-black transition-colors duration-200"
+          >
+            Вход
+          </button>
+
           <div v-if="staticContent.messenger_icons" v-html="staticContent.messenger_icons"></div>
         </div>
 
@@ -269,5 +280,6 @@ onMounted(async () => {
     </footer>
 
     <ContactModal v-if="showModal" @close="closeModal" />
+    <PartnerLoginModal v-if="showLoginModal" @close="closeLoginModal" /> <!-- ✅ модалка входа -->
   </div>
 </template>
