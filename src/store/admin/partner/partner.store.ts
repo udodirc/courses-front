@@ -28,7 +28,8 @@ export function usePartnerStoreWithGetters() {
         store.items.map(item => ({
             ...item,
             canToggleStatus: true,
-            canDelete: false
+            canDelete: false,
+            structure: 'partners/structure/' + item.id,
         }))
     );
 

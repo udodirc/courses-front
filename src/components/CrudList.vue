@@ -49,10 +49,24 @@ const emit = defineEmits([
             :key="col.field"
             class="w-1/3 text-left py-3 px-4"
         >
-          {{ col.format
-            ? col.format(col.field.split('.').reduce((acc, key) => acc?.[key], item), item)
-            : col.field.split('.').reduce((acc, key) => acc?.[key], item)
-          }}
+          <template v-if="col.field === 'login'">
+            <a
+                :href="`/${item.structure}`"
+                class="text-blue-600 hover:underline"
+                @click.prevent="$emit('view', item.id)"
+            >
+              {{ col.format
+                ? col.format(col.field.split('.').reduce((acc, key) => acc?.[key], item), item)
+                : col.field.split('.').reduce((acc, key) => acc?.[key], item)
+              }}
+            </a>
+          </template>
+          <template v-else>
+            {{ col.format
+              ? col.format(col.field.split('.').reduce((acc, key) => acc?.[key], item), item)
+              : col.field.split('.').reduce((acc, key) => acc?.[key], item)
+            }}
+          </template>
         </td>
 
         <!-- Действия -->
