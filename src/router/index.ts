@@ -23,14 +23,9 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
     },
 
     {
-        path: '/',
-        component: FrontendLayout,
-        meta: { layout: 'front' },
-        children: [
-            { path: 'projects', name: 'FrontendProjects', component: () => import('../views/front/projects/Project.vue') },
-            { path: 'projects/:id', name: 'ProjectView', component: () => import('../views/front/projects/ProjectView.vue') },
-            { path: ':slug', name: 'FrontendPage', component: () => import('../views/front/Page.vue'), props: true },
-        ],
+        path: '/reset-password',
+        name: 'reset-password',
+        component: () => import('../views/front/auth/ResetPassword.vue'),
     },
 
     // Страницы без авторизации
@@ -86,6 +81,17 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
         ],
     },
 
+    {
+        path: '/',
+        component: FrontendLayout,
+        meta: { layout: 'front' },
+        children: [
+            { path: 'projects', name: 'FrontendProjects', component: () => import('../views/front/projects/Project.vue') },
+            { path: 'projects/:id', name: 'ProjectView', component: () => import('../views/front/projects/ProjectView.vue') },
+            { path: ':slug', name: 'FrontendPage', component: () => import('../views/front/Page.vue'), props: true },
+        ],
+    },
+
 ];
 
 const router = createRouter({
@@ -97,54 +103,38 @@ router.beforeEach(async (to, _from, next) => {
     const auth = useAuthStore();
     const partner = usePartnerStore();
 
-    // --- Партнёр ---
-    if (to.path.startsWith('/')) {
-        if (to.path.startsWith('/email/verify-redirect')) {
-            return next()
+    // --- Админ ---
+    if (to.matched.some(record => record.meta.layout === 'admin')) {
+        if (auth.token && !auth.user) {
+            try { await auth.fetchUser() }
+            catch { auth.logout(); return next('/admin/login') }
         }
 
-        if (partner.token && !partner.user) {
-            try {
-                await partner.fetchUser();
-            } catch (e) {
-                partner.logout();
-                if (to.path !== '/') return next('/');
-            }
-        }
-
-        if (!partner.isAuthenticated) {
-            if (to.path !== '/') return next('/');
-        } else if (to.path === '/partner') {
-            // Если авторизован и пытается зайти на общий /partner → редирект на /partner/profile
-            return next('/partner/profile');
-        }
+        if (!auth.isAuthenticated) return next('/admin/login')
+        if (to.meta.superadmin && !auth.user?.is_superadmin) return next('/admin/content')
+        return next()
     }
 
-    // --- Админ ---
-    if (to.path.startsWith('/admin')) {
-        if (auth.token && !auth.user) {
-            try {
-                await auth.fetchUser();
-            } catch (e) {
-                auth.logout();
-                if (to.path !== '/admin/login') return next('/admin/login');
-            }
+    // --- Партнёр ---
+    if (to.matched.some(record => record.meta.layout === 'partner') ||
+        to.path.startsWith('/reset-password') ||
+        to.path.startsWith('/email/verify-redirect')) {
+
+        if (partner.token && !partner.user) {
+            try { await partner.fetchUser() }
+            catch { partner.logout(); return next('/') }
         }
 
-        if (!auth.isAuthenticated) {
-            if (to.path !== '/admin/login') return next('/admin/login');
+        if (to.matched.some(record => record.meta.layout === 'partner') && !partner.isAuthenticated) {
+            return next('/')
         }
 
-        if (to.meta.superadmin && !auth.user?.is_superadmin) {
-            if (to.path !== '/admin/content') return next('/admin/content');
-        }
-
-        return next();
+        return next()
     }
 
     // --- Любой другой маршрут (публичный) ---
-    next();
-});
+    next()
+})
 
 import { computed } from 'vue';
 export const visibleAdminRoutes = computed(() => {

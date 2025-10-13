@@ -45,7 +45,7 @@ export const usePartnerStore = defineStore('partner', {
         // Восстановление пароля
         async forgotPassword(email: string) {
             try {
-                await api.post('/forgot-password', { email });
+                await api.post('/password/email', { email });
             } catch (error: any) {
                 console.error('Partner forgot password error:', error.response?.data || error.message);
                 throw error;
