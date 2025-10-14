@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { onMounted } from "vue";
 import { useFetchList } from "../../../composables/useFetchList.ts";
-import api from "../../../api"; // если есть общий axios instance
+import api from "../../../api";
 
 interface Level {
-  id: number;
+  id?: number;
   level: number;
   percentage: number;
-  createdAt: string;
+  createdAt?: string;
 }
 
 const {
@@ -16,7 +16,37 @@ const {
   loading,
 } = useFetchList<Level>("/admin/levels");
 
-// Собираем данные в формат для бэка и отправляем
+// Добавить новый уровень
+const addLevel = () => {
+  const maxLevel = levels.value.length
+      ? Math.max(...levels.value.map((l) => l.level))
+      : 0;
+  levels.value.push({
+    level: maxLevel + 1,
+    percentage: 0,
+  });
+};
+
+// Удалить уровень (с API)
+const removeLevel = async (level: Level, index: number) => {
+  if (!confirm(`Удалить уровень №${level.level}?`)) return;
+
+  // если уровень уже сохранён в БД (есть id)
+  if (level.id) {
+    try {
+      await api.delete(`/admin/levels/${level.id}`);
+      levels.value.splice(index, 1);
+      alert(`Уровень №${level.level} удалён`);
+    } catch (e: any) {
+      console.error(e);
+      alert("Ошибка при удалении уровня");
+    }
+  } else {
+    // просто удалить из списка (ещё не сохранён)
+    levels.value.splice(index, 1);
+  }
+};
+
 const saveAllLevels = async () => {
   const payload = {
     levels: levels.value.map((l) => ({ [l.level]: l.percentage })),
@@ -36,14 +66,22 @@ onMounted(fetchLevels);
 
 <template>
   <div class="p-6">
-    <h2 class="text-xl font-bold mb-4">Настройки уровней</h2>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold">Настройки уровней</h2>
+      <button
+          @click="addLevel"
+          class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+      >
+        + Добавить уровень
+      </button>
+    </div>
 
     <div v-if="loading">Загрузка...</div>
 
     <div v-else class="space-y-4">
       <div
-          v-for="level in levels"
-          :key="level.id"
+          v-for="(level, index) in levels"
+          :key="index"
           class="flex items-center space-x-4"
       >
         <label class="w-48 font-medium">Уровень №{{ level.level }}</label>
@@ -52,6 +90,12 @@ onMounted(fetchLevels);
             type="number"
             class="border rounded p-2 flex-1"
         />
+        <button
+            @click="removeLevel(level, index)"
+            class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+        >
+          Удалить
+        </button>
       </div>
 
       <button
@@ -59,7 +103,7 @@ onMounted(fetchLevels);
           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           :disabled="loading"
       >
-        💾 Сохранить все уровни
+        Сохранить все уровни
       </button>
     </div>
   </div>
