@@ -44,8 +44,15 @@ const allMenu: MenuItem[] = [
       { name: "Создать права", path: "/admin/permissions/create-permissions" },
     ],
   },
-  { name: "Партнеры", path: "/admin/partners", icon: "fas fa-bars" },
-  { name: "Уровни", path: "/admin/levels", icon: "fas fa-bars" },
+  {
+    name: "Партнеры",
+    icon: "fas fa-user",
+    superadmin: true,
+    children: [
+      { name: "Партнеры", path: "/admin/partners" },
+      { name: "Уровни", path: "/admin/levels" },
+    ],
+  },
   { name: "Меню", path: "/admin/menus", icon: "fas fa-bars" },
   { name: "Контент", path: "/admin/content", icon: "fas fa-bars" },
   { name: "Статичный контент", path: "/admin/static-content", icon: "fas fa-bars" },
