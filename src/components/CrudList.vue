@@ -64,9 +64,8 @@ const emit = defineEmits([
           </template>
           <template v-else-if="col.field === 'partner_name'">
             <a
-                :href="`/admin/partners/structure/${item.partner_id}`"
+                :href="`/admin/partners/${item.partner_id}`"
                 class="text-blue-600 hover:underline"
-                @click.prevent="$emit('view', item.partner_id)"
             >
               {{ col.format
                 ? col.format(col.field.split('.').reduce((acc, key) => acc?.[key], item), item)
@@ -76,13 +75,13 @@ const emit = defineEmits([
           </template>
           <template v-else-if="col.field === 'sponsor_name'">
             <a
-                :href="`/admin/partners/structure/${item.partner_id}`"
+                :href="`/admin/partners/${item.sponsor_id}`"
                 class="text-blue-600 hover:underline"
-                @click.prevent="$emit('view', item.partner_id)"
             >
-              {{ col.format
-                ? col.format(col.field.split('.').reduce((acc, key) => acc?.[key], item), item)
-                : col.field.split('.').reduce((acc, key) => acc?.[key], item)
+              {{
+                col.format
+                    ? col.format(col.field.split('.').reduce((acc, key) => acc?.[key], item), item)
+                    : col.field.split('.').reduce((acc, key) => acc?.[key], item)
               }}
             </a>
           </template>
