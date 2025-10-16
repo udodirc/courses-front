@@ -12,6 +12,11 @@ const paymentStore = useCoursePaymentStoreWithGetters();
 
 // схема фильтров
 const schema = ref<FilterSchemaItem[]>([
+  { field: 'customer', label: 'Покупатель', type: 'text', col: 'left' },
+  { field: 'status', label: 'Статус', type: 'select', col: 'middle', options: [
+      { label: 'Активный', value: 1 },
+      { label: 'Неактивный', value: 0 },
+    ] },
   { field: 'created_from', label: 'Создано с', type: 'date', col: 'left' },
   { field: 'created_to', label: 'Создано по', type: 'date', col: 'middle' },
 ]);
@@ -28,7 +33,7 @@ onMounted(async () => {
 // колонки для таблицы
 const columns = [
   { label: 'ID', field: 'id' },
-  { label: 'Название', field: 'course_name' },
+  { label: 'Название курса', field: 'course_name' },
   { label: 'Покупатель', field: 'partner_name' },
   { label: 'Сумма', field: 'amount' },
 ];
