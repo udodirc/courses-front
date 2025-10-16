@@ -10,7 +10,7 @@ import type { FilterSchemaItem } from '../../../types/Filters.ts';
 import { useFetchList } from '../../../composables/useFetchList';
 
 const sponsorPayoutStore = useSponsorPayoutStoreWithGetters();
-const { items: levels, fetchItems: fetchLevels } = useFetchList<{ id: number; name: string }>('/admin/levels');
+const { items: levels, fetchItems: fetchLevels } = useFetchList<{ id: number; level: string }>('/admin/levels');
 
 // схема фильтров
 const schema = ref<FilterSchemaItem[]>([
