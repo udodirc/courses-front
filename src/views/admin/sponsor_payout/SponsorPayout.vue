@@ -1,14 +1,14 @@
-// CoursePayment.vue (script setup)
+// SponsorPayout.vue (script setup)
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useCoursePaymentStoreWithGetters } from '../../../store/admin/course_payment/course_payment.store.ts';
+import { useSponsorPayoutStoreWithGetters } from '../../../store/admin/sponsor_payout/sponsor_payout.store.ts';
 import ItemList from '../../../components/ItemList.vue';
 import Filters from '../../../components/Filters.vue';
 import { useFilterList } from '../../../composables/useFilterList';
 import { usePagination } from '../../../composables/usePagination';
 import type { FilterSchemaItem } from '../../../types/Filters.ts';
 
-const paymentStore = useCoursePaymentStoreWithGetters();
+const sponsorPayoutStore = useSponsorPayoutStoreWithGetters();
 
 // схема фильтров
 const schema = ref<FilterSchemaItem[]>([
@@ -17,8 +17,8 @@ const schema = ref<FilterSchemaItem[]>([
 ]);
 
 // composables
-const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(paymentStore, schema.value);
-const { onNext, onPrev, goToPage } = usePagination(paymentStore, filters, toFilterObject);
+const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(sponsorPayoutStore, schema.value);
+const { onNext, onPrev, goToPage } = usePagination(sponsorPayoutStore, filters, toFilterObject);
 
 // загрузка меню и добавление в schema
 onMounted(async () => {
@@ -28,15 +28,18 @@ onMounted(async () => {
 // колонки для таблицы
 const columns = [
   { label: 'ID', field: 'id' },
-  { label: 'Название', field: 'course_name' },
+  { label: 'Название курса', field: 'course_name' },
   { label: 'Покупатель', field: 'partner_name' },
+  { label: 'Спонсор', field: 'sponsor_name' },
   { label: 'Сумма', field: 'amount' },
+  { label: 'Процент', field: 'percentage' },
+  { label: 'Уровень', field: 'level' },
 ];
 </script>
 <template>
   <div class="w-full h-screen overflow-x-hidden border-t flex flex-col">
     <main class="w-full flex-grow p-6">
-      <h1 class="text-3xl text-black pb-6">Оплаченные курсы</h1>
+      <h1 class="text-3xl text-black pb-6">Спонсорские выплаты</h1>
 
       <!-- Фильтры -->
       <Filters
@@ -47,13 +50,13 @@ const columns = [
       />
 
       <ItemList
-          :key="paymentStore.currentPage.value"
-          :items="paymentStore.coursePaymentList.value"
+          :key="sponsorPayoutStore.currentPage.value"
+          :items="sponsorPayoutStore.sponsorPayoutList.value"
           :columns="columns"
-          :basePath="'/admin/courses-payments'"
-          :deleteItem="paymentStore.deleteItem"
-          :currentPage="paymentStore.currentPage.value"
-          :totalPages="paymentStore.totalPages.value"
+          :basePath="'/admin//sponsor-payouts'"
+          :deleteItem="sponsorPayoutStore.deleteItem"
+          :currentPage="sponsorPayoutStore.currentPage.value"
+          :totalPages="sponsorPayoutStore.totalPages.value"
           :showActions="false"
           @next="onNext"
           @prev="onPrev"

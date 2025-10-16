@@ -59,6 +59,7 @@ const allMenu: MenuItem[] = [
     superadmin: true,
     children: [
       { name: "Оплаченные курсы", path: "/admin/courses-payments" },
+      { name: "Спонсорские выплаты", path: "/admin/sponsors-payouts" },
     ],
   },
   { name: "Меню", path: "/admin/menus", icon: "fas fa-bars" },

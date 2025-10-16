@@ -6,7 +6,7 @@ import type { CreateCoursePaymentDto } from '../../../dto/course_payment.dto.ts'
 import { BaseStore } from '../../BaseStore';
 
 class CoursePaymentStore extends BaseStore<CreateCoursePaymentDto, CoursePayment> {
-    public storeId = 'admin-menu';
+    public storeId = 'admin-courses-payments';
     public api = new CoursePaymentApi();
 }
 
