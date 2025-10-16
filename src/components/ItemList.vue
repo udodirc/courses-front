@@ -2,14 +2,20 @@
 import CrudList from './CrudList.vue';
 import { useCrudActions } from '../composables/useCrudActions';
 
-const props = defineProps<{
+interface Props {
   items: any[];
   columns: { label: string; field: string }[];
   basePath: string;
   deleteItem: (id: number) => Promise<void>;
   currentPage: number;
   totalPages: number;
-}>();
+  showActions?: boolean;
+}
+
+// ✅ Задаём дефолтное значение через withDefaults
+const props = withDefaults(defineProps<Props>(), {
+  showActions: true,
+});
 
 const emit = defineEmits(['prev', 'next', 'go', 'refresh']);
 
@@ -24,6 +30,7 @@ const { view, edit, toggleStatus, changeOrder, delete: destroy } =
       :columns="columns"
       :currentPage="currentPage"
       :totalPages="totalPages"
+      :showActions="showActions"
       @prev="$emit('prev')"
       @next="$emit('next')"
       @go="$emit('go', $event)"

@@ -4,11 +4,12 @@ import BaseTable from './BaseTable.vue';
 import BasePagination from './BasePagination.vue';
 import type { Column } from '../types/Column.ts';
 
-const { items, columns, currentPage, totalPages } = defineProps<{
+const { items, columns, currentPage, totalPages, showActions } = defineProps<{
   items: any[],
   columns: Column[],
   currentPage: number,
   totalPages: number,
+  showActions: boolean
 }>();
 
 const emit = defineEmits([
@@ -35,7 +36,7 @@ const emit = defineEmits([
       >
         {{ col.label }}
       </th>
-      <th>Действия</th>
+      <th v-if="showActions">Действия</th>
     </template>
 
     <template #body>
@@ -70,7 +71,7 @@ const emit = defineEmits([
         </td>
 
         <!-- Действия -->
-        <td class="flex gap-2 justify-center">
+        <td v-if="showActions" class="flex gap-2 justify-center">
           <button @click="$emit('view', item.id)">👁</button>
           <button @click="$emit('edit', item.id)">✏️</button>
           <button

@@ -53,6 +53,14 @@ const allMenu: MenuItem[] = [
       { name: "Уровни", path: "/admin/levels" },
     ],
   },
+  {
+    name: "Бухгалтерия",
+    icon: "fa fa-money",
+    superadmin: true,
+    children: [
+      { name: "Оплаченные курсы", path: "/admin/courses-payments" },
+    ],
+  },
   { name: "Меню", path: "/admin/menus", icon: "fas fa-bars" },
   { name: "Контент", path: "/admin/content", icon: "fas fa-bars" },
   { name: "Статичный контент", path: "/admin/static-content", icon: "fas fa-bars" },
