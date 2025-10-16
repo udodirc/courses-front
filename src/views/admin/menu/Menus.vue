@@ -10,8 +10,6 @@ import { usePagination } from '../../../composables/usePagination';
 import type { FilterSchemaItem } from '../../../types/Filters.ts';
 
 const menuStore = useMenuStoreWithGetters();
-
-// загрузка всех меню для селекта родителя
 const { items: menus, fetchItems: fetchMenus } = useFetchList<{ id: number; name: string }>('/admin/menu');
 
 // схема фильтров
