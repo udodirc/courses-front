@@ -3,7 +3,8 @@ import api from '../api';
 
 export function useCrudActions(
     baseRoute: string,
-    deleteFn: (id: number) => Promise<void>
+    deleteFn: (id: number) => Promise<void>,
+    emit?: (event: any, ...args: any[]) => void
 ) {
     const router = useRouter();
 
@@ -36,5 +37,9 @@ export function useCrudActions(
         if (confirm('Удалить?')) await deleteFn(id);
     };
 
-    return { view, edit, toggleStatus, changeOrder, delete: destroy };
+    const payment = (id: number) => {
+        emit?.('payment', id);
+    };
+
+    return { view, edit, toggleStatus, changeOrder, delete: destroy, payment };
 }
