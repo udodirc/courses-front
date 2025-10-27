@@ -29,6 +29,7 @@ const allMenu: MenuItem[] = [
     icon: "fas fa-user",
     children: [
       { name: "Партнеры", path: "/partner/structure" },
+      { name: "Лично приглашеные", path: "/partner/invited-partners" },
     ],
   },
 ];

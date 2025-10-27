@@ -18,8 +18,9 @@ export interface ApiResponse<T> {
 export abstract class BaseApi<TCreate, TEntity = any> {
     protected abstract resource: string;
 
-    async getList(params?: Record<string, any>): Promise<ApiResponse<TEntity[]>> {
-        const res: AxiosResponse<ApiResponse<TEntity[]>> = await api.get(`/admin/${this.resource}`, { params });
+    async getList(params?: Record<string, any>, url?: string): Promise<ApiResponse<TEntity[]>> {
+        const requestUrl = url || `/admin/${this.resource}`;
+        const res: AxiosResponse<ApiResponse<TEntity[]>> = await api.get(requestUrl, { params });
         return res.data;
     }
 

@@ -28,6 +28,10 @@ export const usePartnerStore = defineStore('partner', () => {
             token.value = response.data.token;
             localStorage.setItem('partner_token', token.value);
             await fetchUser();
+
+            if (user.value?.id) {
+                localStorage.setItem('partner_id', user.value.id.toString());
+            }
         } catch (error: any) {
             console.error('Login error:', error.response?.data || error.message);
             throw error;
@@ -66,12 +70,12 @@ export const usePartnerStore = defineStore('partner', () => {
     }
 
     // === список партнёров ===
-    async function fetchList(f: Record<string, any> = {}, page = 1) {
+    async function fetchList(f: Record<string, any> = {}, page = 1, url: string) {
         loading.value = true;
         error.value = '';
         try {
             filters.value = { ...f };
-            const res = await partnerApi.getList({ ...f, page, per_page: perPage.value });
+            const res = await partnerApi.getList({ ...f, page, per_page: perPage.value }, url);
             items.value = res.data;
 
             if (res.meta) {
@@ -93,11 +97,7 @@ export const usePartnerStore = defineStore('partner', () => {
     // === вычисляемые ===
     const partnerList = computed(() =>
         items.value.map(item => ({
-            ...item,
-            canToggleStatus: true,
-            canDelete: false,
-            structure: 'partners/structure/' + item.id,
-            canPay: true,
+            ...item
         }))
     );
 
