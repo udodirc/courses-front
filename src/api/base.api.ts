@@ -2,16 +2,24 @@
 import api from './index.ts';
 import type { AxiosResponse, AxiosError } from 'axios';
 
+export interface PaginationMeta {
+    current_page?: number;
+    last_page?: number;
+    per_page?: number;
+    total?: number;
+}
+
 export interface ApiResponse<T> {
     data: T;
     message?: string;
+    meta?: PaginationMeta;
 }
 
 export abstract class BaseApi<TCreate, TEntity = any> {
     protected abstract resource: string;
 
     async getList(params?: Record<string, any>): Promise<ApiResponse<TEntity[]>> {
-        const res: AxiosResponse<any> = await api.get(`/admin/${this.resource}`, { params });
+        const res: AxiosResponse<ApiResponse<TEntity[]>> = await api.get(`/admin/${this.resource}`, { params });
         return res.data;
     }
 
@@ -29,9 +37,7 @@ export abstract class BaseApi<TCreate, TEntity = any> {
             const res: AxiosResponse<ApiResponse<TEntity>> = await api.post(`/admin/${this.resource}`, data);
             return res.data;
         } catch (err) {
-            console.log(
-                err
-            )
+            console.error(err);
             throw err as AxiosError;
         }
     }

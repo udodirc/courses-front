@@ -91,7 +91,8 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
         component: ClientLayout,
         meta: { layout: 'partner', requiresAuth: true },
         children: [
-            { path: 'profile', name: 'PartnerProfile', component: () => import('../views/client/partner/Profile.vue') }
+            { path: 'profile', name: 'PartnerProfile', component: () => import('../views/client/partner/Profile.vue') },
+            { path: 'structure', name: 'Structure', component: () => import('../views/client/partner/Structure.vue') }
         ],
     },
 
