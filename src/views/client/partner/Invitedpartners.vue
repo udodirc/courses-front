@@ -12,6 +12,7 @@ const columns = [
   { label: 'Логин', field: 'login' },
   { label: 'Email', field: 'email' },
   { label: 'Кол-во рефералов', field: 'referrals_count' },
+  { label: 'Кол-во курсов', field: 'courses_count' },
   { label: 'Дата регистрации', field: 'createdAt' },
 ];
 
