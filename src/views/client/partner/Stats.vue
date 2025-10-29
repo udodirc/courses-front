@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { usePartnerStore } from '../../../store/client/partner.store';
 import { onMounted } from 'vue';
+import { useStaticContent } from '../../../composables/useStaticContent';
+
+const { staticContent, loadingStatic, staticContentError, fetchStaticContent } = useStaticContent();
 
 const partnerStore = usePartnerStore();
 
@@ -14,6 +17,7 @@ onMounted(async () => {
   } catch (e) {
     console.error(e);
   }
+  await fetchStaticContent(['referrals_links', 'banner_advertisement']);
 });
 </script>
 
@@ -45,4 +49,8 @@ onMounted(async () => {
   <div v-else>
     Статистика не найдена
   </div>
+
+  <div v-if="loadingStatic">Загрузка...</div>
+  <div v-else-if="staticContentError">{{ staticContentError }}</div>
+  <div v-else v-html="staticContent['referrals_links']" class="p-4 bg-white rounded shadow" style="margin-bottom: 50px;"></div>
 </template>

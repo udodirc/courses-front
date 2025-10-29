@@ -4,7 +4,6 @@ import { usePartnerStore } from '../../../store/client/partner.store';
 import ItemFrontList from '../../../components/ItemFrontList.vue';
 import { usePagination } from '../../../composables/usePagination';
 import { useStaticContent } from '../../../composables/useStaticContent';
-import api from "../../../api";
 
 const { staticContent, loadingStatic, staticContentError, fetchStaticContent } = useStaticContent();
 
@@ -30,9 +29,8 @@ onMounted(async () => {
 <template>
   <div v-if="loadingStatic">Загрузка...</div>
   <div v-else-if="staticContentError">{{ staticContentError }}</div>
-  <div v-else v-html="staticContent.partners" class="p-4 bg-white rounded shadow" style="margin-bottom: 50px;"></div>
+  <div v-else v-html="staticContent['partners']" class="p-4 bg-white rounded shadow" style="margin-bottom: 50px;"></div>
 
-  <!-- Таблица партнёров -->
   <ItemFrontList
       :items="partnerList"
       :columns="columns"

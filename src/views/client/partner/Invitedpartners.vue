@@ -3,6 +3,9 @@ import { computed, onMounted } from 'vue';
 import { usePartnerStore } from '../../../store/client/partner.store';
 import ItemFrontList from '../../../components/ItemFrontList.vue';
 import { usePagination } from '../../../composables/usePagination';
+import { useStaticContent } from '../../../composables/useStaticContent';
+
+const { staticContent, loadingStatic, staticContentError, fetchStaticContent } = useStaticContent();
 
 const partnerStore = usePartnerStore();
 const { onNext, onPrev, goToPage } = usePagination(partnerStore);
@@ -23,10 +26,14 @@ onMounted(async () => {
   if (partnerId) {
     await partnerStore.fetchList({}, 1, `/partner/personal-invited/${partnerId}`);
   }
+  await fetchStaticContent(['invited-partners']);
 });
 </script>
 
 <template>
+  <div v-if="loadingStatic">Загрузка...</div>
+  <div v-else-if="staticContentError">{{ staticContentError }}</div>
+  <div v-else v-html="staticContent['invited-partners']" class="p-4 bg-white rounded shadow" style="margin-bottom: 50px;"></div>
   <ItemFrontList
       :items="partnerList"
       :columns="columns"
