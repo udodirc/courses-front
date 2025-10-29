@@ -8,5 +8,8 @@ export interface Partner {
     ip_address: string;
     password: string;
     status: boolean;
+    total_amount: number,
+    referrals_count: number,
+    courses_count: number,
     createdAt: string;
 }

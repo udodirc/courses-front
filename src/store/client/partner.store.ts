@@ -7,12 +7,10 @@ import type { Partner } from '../../types/Partner';
 const partnerApi = new FrontPartnerApi();
 
 export const usePartnerStore = defineStore('partner', () => {
-    // === авторизация ===
     const user = ref<Partner | null>(null);
     const token = ref(localStorage.getItem('partner_token') || '');
     const isAuthenticated = computed(() => !!token.value);
 
-    // === список партнёров ===
     const items = ref<Partner[]>([]);
     const loading = ref(false);
     const error = ref('');
@@ -21,7 +19,7 @@ export const usePartnerStore = defineStore('partner', () => {
     const perPage = ref(10);
     const filters = ref<Record<string, any>>({});
 
-    // === действия ===
+    // === авторизация ===
     async function login(login: string, password: string) {
         try {
             const response = await api.post('/login', { login, password });
@@ -29,12 +27,10 @@ export const usePartnerStore = defineStore('partner', () => {
             localStorage.setItem('partner_token', token.value);
             await fetchUser();
 
-            if (user.value?.id) {
-                localStorage.setItem('partner_id', user.value.id.toString());
-            }
-        } catch (error: any) {
-            console.error('Login error:', error.response?.data || error.message);
-            throw error;
+            if (user.value?.id) localStorage.setItem('partner_id', user.value.id.toString());
+        } catch (e: any) {
+            console.error('Login error:', e.response?.data || e.message);
+            throw e;
         }
     }
 
@@ -44,9 +40,9 @@ export const usePartnerStore = defineStore('partner', () => {
             token.value = response.data.token;
             localStorage.setItem('partner_token', token.value);
             await fetchUser();
-        } catch (error: any) {
-            console.error('Register error:', error.response?.data || error.message);
-            throw error;
+        } catch (e: any) {
+            console.error('Register error:', e.response?.data || e.message);
+            throw e;
         }
     }
 
@@ -57,8 +53,8 @@ export const usePartnerStore = defineStore('partner', () => {
                 headers: { Authorization: `Bearer ${token.value}` },
             });
             user.value = response.data;
-        } catch (error) {
-            console.error('Fetch user error:', error);
+        } catch (e) {
+            console.error('Fetch user error:', e);
             logout();
         }
     }
@@ -69,7 +65,8 @@ export const usePartnerStore = defineStore('partner', () => {
         localStorage.removeItem('partner_token');
     }
 
-    async function fetchList(f: Record<string, any> = {}, page = 1, url: string) {
+    // === список партнёров ===
+    async function fetchList(f: Record<string, any> = {}, page = 1, url?: string) {
         loading.value = true;
         error.value = '';
         try {
@@ -93,12 +90,26 @@ export const usePartnerStore = defineStore('partner', () => {
         }
     }
 
-    // === вычисляемые ===
-    const partnerList = computed(() =>
-        items.value.map(item => ({
-            ...item
-        }))
-    );
+    async function fetchStats() {
+        if (!user.value?.id) {
+            error.value = 'Партнер не найден';
+            return;
+        }
+
+        loading.value = true;
+        error.value = '';
+        try {
+            const res = await partnerApi.stats(user.value.id);
+            user.value = res.data;
+        } catch (e: any) {
+            error.value = e?.response?.data?.message || 'Ошибка загрузки статистики';
+            throw e;
+        } finally {
+            loading.value = false;
+        }
+    }
+
+    const partnerList = computed(() => items.value.map(item => ({ ...item })));
 
     return {
         // auth
@@ -120,5 +131,6 @@ export const usePartnerStore = defineStore('partner', () => {
         totalPages,
         perPage,
         fetchList,
+        fetchStats,
     };
 });

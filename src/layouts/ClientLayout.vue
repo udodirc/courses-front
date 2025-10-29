@@ -30,6 +30,7 @@ const allMenu: MenuItem[] = [
     children: [
       { name: "Партнеры", path: "/partner/structure" },
       { name: "Лично приглашеные", path: "/partner/invited-partners" },
+      { name: "Статистика", path: "/partner/stats" },
     ],
   },
 ];
