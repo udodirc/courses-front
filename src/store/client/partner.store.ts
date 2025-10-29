@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import api from '../../api';
-import { PartnerApi } from '../../api/admin/partner/partner.api';
+import { FrontPartnerApi } from '../../api/front/partner/partner.api';
 import type { Partner } from '../../types/Partner';
 
-const partnerApi = new PartnerApi();
+const partnerApi = new FrontPartnerApi();
 
 export const usePartnerStore = defineStore('partner', () => {
     // === авторизация ===
@@ -69,7 +69,6 @@ export const usePartnerStore = defineStore('partner', () => {
         localStorage.removeItem('partner_token');
     }
 
-    // === список партнёров ===
     async function fetchList(f: Record<string, any> = {}, page = 1, url: string) {
         loading.value = true;
         error.value = '';

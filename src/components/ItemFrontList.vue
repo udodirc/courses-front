@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, computed } from 'vue';
+import { defineProps, defineEmits, computed } from 'vue';
 import BaseTable from './BaseTable.vue';
 import BasePagination from './BasePagination.vue';
 import type { Column } from '../types/Column.ts';
@@ -12,6 +12,9 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+// ✅ вот это добавляем
+const emit = defineEmits(['prev', 'next', 'go']);
 
 const mappedItems = computed(() =>
     props.items.map(item => ({

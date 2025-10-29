@@ -7,13 +7,13 @@ const api = axios.create({
 });
 
 api.interceptors.request.use(config => {
-    const auth = useAuthStore();
-    const partner = usePartnerStore();
+    const authToken = useAuthStore().token;
+    const partnerToken = usePartnerStore().token;
 
-    if (auth.token && config.headers && config.url?.startsWith('/admin')) {
-        config.headers.Authorization = `Bearer ${auth.token}`;
-    } else if (partner.token && config.headers) {
-        config.headers.Authorization = `Bearer ${partner.token}`;
+    if (config.url?.startsWith('/admin') && authToken) {
+        config.headers.Authorization = `Bearer ${authToken}`;
+    } else if (partnerToken) {
+        config.headers.Authorization = `Bearer ${partnerToken}`;
     }
 
     return config;

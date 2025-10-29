@@ -5,12 +5,13 @@ import ItemFrontList from '../../../components/ItemFrontList.vue';
 import { usePagination } from '../../../composables/usePagination';
 
 const partnerStore = usePartnerStore();
-const { onNext, onPrev, goToPage } = usePagination(partnerStore);
+const { onNext, onPrev, goToPage } = usePagination(partnerStore, '/partner/structure');
 
 const columns = [
   { label: 'ID', field: 'id' },
   { label: 'Логин спонсора', field: 'sponsor_name' },
   { label: 'Логин', field: 'login' },
+  { label: 'Кол-во курсов', field: 'courses_count' },
   { label: 'Дата регистрации', field: 'createdAt' },
 ];
 
