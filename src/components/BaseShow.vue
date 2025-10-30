@@ -71,7 +71,7 @@ const renderValue = (key: string | number, value: any) => {
 
 <template>
   <div class="max-w-3xl mx-auto p-6 bg-white rounded shadow">
-    <h2 class="text-xl font-semibold mb-4">{{ label }} #{{ itemId }}</h2>
+    <h2 v-if="label != ''" class="text-xl font-semibold mb-4">{{ label }} #{{ itemId }}</h2>
     <p v-if="loading" class="text-gray-600">Загрузка...</p>
     <p v-else-if="error" class="text-red-600">{{ error }}</p>
 

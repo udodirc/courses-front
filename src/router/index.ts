@@ -92,6 +92,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
         meta: { layout: 'partner', requiresAuth: true },
         children: [
             { path: 'profile', name: 'PartnerProfile', component: () => import('../views/client/partner/Profile.vue') },
+            { path: ':id/edit', name: 'PartnerProfileEdit', component: () => import('../views/client/partner/ProfileEdit.vue') },
             { path: 'structure', name: 'Structure', component: () => import('../views/client/partner/Structure.vue') },
             { path: 'invited-partners', name: 'InvitedPartners', component: () => import('../views/client/partner/Invitedpartners.vue') },
             { path: 'stats', name: 'Stats', component: () => import('../views/client/partner/Stats.vue') }

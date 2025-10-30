@@ -20,23 +20,48 @@ export function useEntitySave<TForm extends Record<string, any>>() {
         error.value = null;
 
         try {
+            // === UPDATE ===
             if (options?.id) {
-                const payload = form instanceof FormData ? Object.fromEntries(form) : form;
-                await api.put(`${url}/${options.id}`, payload, {
-                    headers: options?.headers || { 'Content-Type': 'application/json' },
-                });
-            } else {
+                // Если передан FormData — Laravel должен принять _method=PUT
+                if (form instanceof FormData) {
+                    form.append('_method', 'PUT'); // Laravel обработает как PUT
+                    await api.post(`${url}/${options.id}`, form, {
+                        headers: {
+                            ...(options?.headers || {}),
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    });
+                } else {
+                    // JSON-запрос
+                    await api.put(`${url}/${options.id}`, form, {
+                        headers: {
+                            ...(options?.headers || {}),
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                }
+            }
+
+            // === CREATE ===
+            else {
                 let data: FormData;
+
                 if (form instanceof FormData) {
                     data = form;
                 } else {
                     data = new FormData();
                     Object.entries(form as Record<string, any>).forEach(([key, value]) => {
-                        if (value !== undefined && value !== null) data.append(key, value as any);
+                        if (value !== undefined && value !== null) {
+                            data.append(key, value as any);
+                        }
                     });
                 }
+
                 await api.post(url, data, {
-                    headers: options?.headers || { 'Content-Type': 'multipart/form-data' },
+                    headers: {
+                        ...(options?.headers || {}),
+                        'Content-Type': 'multipart/form-data',
+                    },
                 });
             }
         } catch (e: any) {
