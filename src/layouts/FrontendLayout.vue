@@ -6,6 +6,8 @@ import { useFetchList } from "../composables/useFetchList";
 import { useStaticContent } from "../composables/useStaticContent";
 import ContactModal from "../components/ContactModal.vue";
 import PartnerLoginModal from "../components/PartnerLoginModal.vue";
+import Cookies from "js-cookie";
+import api from "../api";
 
 const route = useRoute();
 
@@ -15,6 +17,9 @@ const menuOpen = ref(false);
 
 const showModal = ref(false);
 const showLoginModal = ref(false);
+
+// Для подстановки логина из cookie
+const formLoginLogin = ref("");
 
 const settings = ref<Record<string, string | boolean>>({});
 const loadingSettings = ref(false);
@@ -39,7 +44,9 @@ const fetchSettings = async () => {
   loadingSettings.value = true;
   settingsError.value = null;
   try {
-    const response = await api.post("/settings", { keys: [{ key: "send_message" }] });
+    const response = await api.post("/settings", {
+      keys: [{ key: "send_message" }],
+    });
 
     settings.value = response.data.data.reduce(
         (acc: Record<string, string | boolean>, item: { key: string; value: string }) => {
@@ -76,7 +83,9 @@ const handleClickOutside = (event: MouseEvent) => {
 const openModal = () => (showModal.value = true);
 const closeModal = () => (showModal.value = false);
 
-const openLoginModal = () => (showLoginModal.value = true);
+const openLoginModal = () => {
+  showLoginModal.value = true;
+};
 const closeLoginModal = () => (showLoginModal.value = false);
 
 // --- Подсветка активного маршрута ---
@@ -91,6 +100,13 @@ onMounted(async () => {
     fetchStaticContent(["main", "messenger_icons", "rights"]),
     fetchSettings(),
   ]);
+  const response = await api.get('/referral', {
+    withCredentials: true,
+  });
+  console.log(response.data);
+  if (response.data?.login) {
+    formLoginLogin.value = response.data.login;
+  }
 });
 
 onBeforeUnmount(() => {
@@ -241,6 +257,10 @@ onBeforeUnmount(() => {
     </footer>
 
     <ContactModal v-if="showModal" @close="closeModal" />
-    <PartnerLoginModal v-if="showLoginModal" @close="closeLoginModal" />
+    <PartnerLoginModal
+        v-if="showLoginModal"
+        @close="closeLoginModal"
+        :prefill-login="formLoginLogin"
+    />
   </div>
 </template>
