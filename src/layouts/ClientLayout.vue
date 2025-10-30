@@ -24,6 +24,15 @@ interface MenuItem {
 // Полное меню
 const allMenu: MenuItem[] = [
   { name: "Профиль", path: "/partner/profile", icon: "fas fa-tachometer-alt" },
+  {
+    name: "Партнерская программа",
+    icon: "fas fa-user",
+    children: [
+      { name: "Партнеры", path: "/partner/structure" },
+      { name: "Лично приглашеные", path: "/partner/invited-partners" },
+      { name: "Статистика", path: "/partner/stats" },
+    ],
+  },
 ];
 
 const expanded = ref<string | null>(null);

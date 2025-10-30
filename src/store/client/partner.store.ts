@@ -1,75 +1,136 @@
 import { defineStore } from 'pinia';
-import api from '../../api'; // общий axios
+import { ref, computed } from 'vue';
+import api from '../../api';
+import { FrontPartnerApi } from '../../api/front/partner/partner.api';
+import type { Partner } from '../../types/Partner';
 
-interface Partner {
-    id: number;
-    name: string;
-    login: string;
-}
+const partnerApi = new FrontPartnerApi();
 
-export const usePartnerStore = defineStore('partner', {
-    state: () => ({
-        user: null as Partner | null,
-        token: localStorage.getItem('partner_token') || '', // авто-загрузка
-    }),
-    getters: {
-        isAuthenticated: (state) => !!state.token,
-    },
-    actions: {
-        // Вход
-        async login(login: string, password: string) {
-            try {
-                const response = await api.post('/login', { login, password });
-                this.token = response.data.token;
-                localStorage.setItem('partner_token', this.token);
-                await this.fetchUser();
-            } catch (error: any) {
-                console.error('Partner login error:', error.response?.data || error.message);
-                throw error;
+export const usePartnerStore = defineStore('partner', () => {
+    const user = ref<Partner | null>(null);
+    const token = ref(localStorage.getItem('partner_token') || '');
+    const isAuthenticated = computed(() => !!token.value);
+
+    const items = ref<Partner[]>([]);
+    const loading = ref(false);
+    const error = ref('');
+    const currentPage = ref(1);
+    const totalPages = ref(1);
+    const perPage = ref(10);
+    const filters = ref<Record<string, any>>({});
+
+    // === авторизация ===
+    async function login(login: string, password: string) {
+        try {
+            const response = await api.post('/login', { login, password });
+            token.value = response.data.token;
+            localStorage.setItem('partner_token', token.value);
+            await fetchUser();
+
+            if (user.value?.id) localStorage.setItem('partner_id', user.value.id.toString());
+        } catch (e: any) {
+            console.error('Login error:', e.response?.data || e.message);
+            throw e;
+        }
+    }
+
+    async function register(sponsor: string, login: string, email: string, password: string) {
+        try {
+            const response = await api.post('/register', { sponsor, login, email, password });
+            token.value = response.data.token;
+            localStorage.setItem('partner_token', token.value);
+            await fetchUser();
+        } catch (e: any) {
+            console.error('Register error:', e.response?.data || e.message);
+            throw e;
+        }
+    }
+
+    async function fetchUser() {
+        if (!token.value) return;
+        try {
+            const response = await api.get('/partner/me', {
+                headers: { Authorization: `Bearer ${token.value}` },
+            });
+            user.value = response.data;
+        } catch (e) {
+            console.error('Fetch user error:', e);
+            logout();
+        }
+    }
+
+    function logout() {
+        token.value = '';
+        user.value = null;
+        localStorage.removeItem('partner_token');
+    }
+
+    // === список партнёров ===
+    async function fetchList(f: Record<string, any> = {}, page = 1, url?: string) {
+        loading.value = true;
+        error.value = '';
+        try {
+            filters.value = { ...f };
+            const res = await partnerApi.getList({ ...f, page, per_page: perPage.value }, url);
+            items.value = res.data;
+
+            if (res.meta) {
+                currentPage.value = res.meta.current_page ?? page;
+                totalPages.value = res.meta.last_page ?? 1;
+                perPage.value = Number(res.meta.per_page ?? perPage.value);
+            } else {
+                currentPage.value = page;
+                totalPages.value = 1;
             }
-        },
+        } catch (e: any) {
+            error.value = e?.response?.data?.message || 'Ошибка загрузки';
+            throw e;
+        } finally {
+            loading.value = false;
+        }
+    }
 
-        // Регистрация
-        async register(sponsor: string, login: string, email: string, password: string) {
-            try {
-                const response = await api.post('/register', { sponsor, login, email, password });
-                this.token = response.data.token;
-                localStorage.setItem('partner_token', this.token);
-                await this.fetchUser();
-            } catch (error: any) {
-                console.error('Partner register error:', error.response?.data || error.message);
-                throw error;
-            }
-        },
+    async function fetchStats() {
+        if (!user.value?.id) {
+            error.value = 'Партнер не найден';
+            return;
+        }
 
-        // Восстановление пароля
-        async forgotPassword(email: string) {
-            try {
-                await api.post('/password/email', { email });
-            } catch (error: any) {
-                console.error('Partner forgot password error:', error.response?.data || error.message);
-                throw error;
-            }
-        },
+        loading.value = true;
+        error.value = '';
+        try {
+            const res = await partnerApi.stats(user.value.id);
+            user.value = res.data;
+        } catch (e: any) {
+            error.value = e?.response?.data?.message || 'Ошибка загрузки статистики';
+            throw e;
+        } finally {
+            loading.value = false;
+        }
+    }
 
-        // Получение данных пользователя
-        async fetchUser() {
-            if (!this.token) return;
-            try {
-                const response = await api.get('/partner/me');
-                this.user = response.data;
-            } catch (error) {
-                console.error('Fetch partner user error:', error);
-                this.logout();
-            }
-        },
+    const partnerList = computed(() => items.value.map(item => ({ ...item })));
 
-        // Выход
-        logout() {
-            this.token = '';
-            this.user = null;
-            localStorage.removeItem('partner_token');
-        },
-    },
-    persist: true,
+    return {
+        // auth
+        user,
+        token,
+        isAuthenticated,
+        login,
+        register,
+        fetchUser,
+        logout,
+
+        // list
+        items,
+        partnerList,
+        loading,
+        error,
+        filters,
+        currentPage,
+        totalPages,
+        perPage,
+        fetchList,
+        fetchStats,
+    };
 });

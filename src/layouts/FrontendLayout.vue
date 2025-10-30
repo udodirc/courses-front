@@ -1,55 +1,28 @@
+<!-- components/MainLayout.vue -->
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { RouterLink, RouterView, useRoute } from "vue-router";
 import { useFetchList } from "../composables/useFetchList";
-import api from "../api";
+import { useStaticContent } from "../composables/useStaticContent";
 import ContactModal from "../components/ContactModal.vue";
-import PartnerLoginModal from "../components/PartnerLoginModal.vue"; // ✅ импорт
+import PartnerLoginModal from "../components/PartnerLoginModal.vue";
 
 const route = useRoute();
 
-// состояния
+// === Состояния ===
 const expanded = ref<string | null>(null);
-const showModal = ref(false);
-const showLoginModal = ref(false); // ✅ для модалки входа
+const menuOpen = ref(false);
 
-const staticContent = ref<Record<string, string>>({});
-const loadingStatic = ref(false);
-const staticContentError = ref<string | null>(null);
+const showModal = ref(false);
+const showLoginModal = ref(false);
 
 const settings = ref<Record<string, string | boolean>>({});
 const loadingSettings = ref(false);
 const settingsError = ref<string | null>(null);
-const isSendMessage = ref<boolean>(false);
+const isSendMessage = ref(false);
 
-const menuOpen = ref(false);
-
-// открыть / закрыть подменю
-const toggleExpand = (name: string) => {
-  expanded.value = expanded.value === name ? null : name;
-};
-
-// клик вне меню
-const handleClickOutside = (event: MouseEvent) => {
-  const target = event.target as HTMLElement;
-  if (!target.closest(".menu-item") && !target.closest(".burger-button")) {
-    expanded.value = null;
-  }
-};
-
-onMounted(() => {
-  document.addEventListener("click", handleClickOutside);
-});
-
-onBeforeUnmount(() => {
-  document.removeEventListener("click", handleClickOutside);
-});
-
-const openModal = () => (showModal.value = true);
-const closeModal = () => (showModal.value = false);
-
-const openLoginModal = () => (showLoginModal.value = true); // ✅ открыть вход
-const closeLoginModal = () => (showLoginModal.value = false); // ✅ закрыть вход
+// --- Статический контент ---
+const { staticContent, loadingStatic, staticContentError, fetchStaticContent } = useStaticContent();
 
 // --- Меню с API ---
 const { items: menus, fetchItems: fetchMenus } = useFetchList<{
@@ -61,41 +34,12 @@ const { items: menus, fetchItems: fetchMenus } = useFetchList<{
 
 const normalizeUrl = (url?: string) => (url && url !== "" ? `/${url}` : "#");
 
-// --- Статический контент ---
-const fetchStaticContent = async () => {
-  loadingStatic.value = true;
-  staticContentError.value = null;
-  try {
-    const response = await api.post("/static_content", {
-      names: [
-        { name: "main" },
-        { name: "social_networks" },
-        { name: "rights" },
-        { name: "messenger_icons" },
-      ],
-    });
-    staticContent.value = response.data.data.reduce(
-        (acc: Record<string, string>, item: { name: string; content: string }) => {
-          acc[item.name] = item.content;
-          return acc;
-        },
-        {}
-    );
-  } catch (e) {
-    staticContentError.value = "Не удалось загрузить контент. Попробуйте позже.";
-  } finally {
-    loadingStatic.value = false;
-  }
-};
-
 // --- Настройки ---
 const fetchSettings = async () => {
   loadingSettings.value = true;
   settingsError.value = null;
   try {
-    const response = await api.post("/settings", {
-      keys: [{ key: "send_message" }],
-    });
+    const response = await api.post("/settings", { keys: [{ key: "send_message" }] });
 
     settings.value = response.data.data.reduce(
         (acc: Record<string, string | boolean>, item: { key: string; value: string }) => {
@@ -108,7 +52,6 @@ const fetchSettings = async () => {
         {}
     );
 
-    // флаг для кнопки
     isSendMessage.value = Boolean(settings.value["send_message"]);
   } catch (e) {
     settingsError.value = "Не удалось загрузить настройки. Попробуйте позже.";
@@ -117,21 +60,50 @@ const fetchSettings = async () => {
   }
 };
 
+// --- Меню ---
+const toggleExpand = (name: string) => {
+  expanded.value = expanded.value === name ? null : name;
+};
+
+const handleClickOutside = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  if (!target.closest(".menu-item") && !target.closest(".burger-button")) {
+    expanded.value = null;
+  }
+};
+
+// --- Модалки ---
+const openModal = () => (showModal.value = true);
+const closeModal = () => (showModal.value = false);
+
+const openLoginModal = () => (showLoginModal.value = true);
+const closeLoginModal = () => (showLoginModal.value = false);
+
 // --- Подсветка активного маршрута ---
 const isActive = (url?: string) => route.path === normalizeUrl(url);
 const isChildActive = (children?: { url: string }[]) =>
     children?.some((sub) => route.path === normalizeUrl(sub.url));
 
 onMounted(async () => {
-  await Promise.all([fetchMenus(), fetchStaticContent(), fetchSettings()]);
+  document.addEventListener("click", handleClickOutside);
+  await Promise.all([
+    fetchMenus(),
+    fetchStaticContent(["main", "messenger_icons", "rights"]),
+    fetchSettings(),
+  ]);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleClickOutside);
 });
 </script>
 
 <template>
   <div class="min-h-screen flex flex-col font-sans">
+
+    <!-- Header -->
     <header class="bg-white shadow-md relative">
       <div class="container mx-auto flex items-center justify-between px-6 py-4">
-
         <!-- Мобильная версия -->
         <div class="flex items-center space-x-4 flex-grow justify-center md:hidden">
           <button
@@ -141,13 +113,14 @@ onMounted(async () => {
           >
             Связаться
           </button>
-          <!-- Кнопка Вход -->
+
           <button
               @click="openLoginModal"
               class="text-sm font-semibold text-gray-800 hover:text-black transition-colors duration-200"
           >
             Вход
           </button>
+
           <div v-if="staticContent.messenger_icons" v-html="staticContent.messenger_icons"></div>
         </div>
 
@@ -171,10 +144,7 @@ onMounted(async () => {
               <RouterLink
                   to="/"
                   class="block px-4 py-2 rounded-md transition-colors duration-200"
-                  :class="{
-                    'bg-gray-200 text-black font-semibold': isActive('/'),
-                    'hover:bg-gray-100': !isActive('/')
-                  }"
+                  :class="{ 'bg-gray-200 text-black font-semibold': isActive('/'), 'hover:bg-gray-100': !isActive('/') }"
               >
                 Главная
               </RouterLink>
@@ -189,10 +159,7 @@ onMounted(async () => {
                   v-if="!item.children?.length"
                   :to="normalizeUrl(item.url)"
                   class="block px-4 py-2 rounded-md transition-colors duration-200"
-                  :class="{
-                    'bg-gray-200 text-black font-semibold': isActive(item.url),
-                    'hover:bg-gray-100': !isActive(item.url)
-                  }"
+                  :class="{ 'bg-gray-200 text-black font-semibold': isActive(item.url), 'hover:bg-gray-100': !isActive(item.url) }"
               >
                 {{ item.name }}
               </RouterLink>
@@ -201,10 +168,7 @@ onMounted(async () => {
                 <button
                     @click.stop="toggleExpand(item.name)"
                     class="block w-full px-4 py-2 rounded-md transition-colors duration-200 text-left md:text-center"
-                    :class="{
-                      'bg-gray-200 text-black font-semibold': isChildActive(item.children),
-                      'hover:bg-gray-100': !isChildActive(item.children)
-                    }"
+                    :class="{ 'bg-gray-200 text-black font-semibold': isChildActive(item.children), 'hover:bg-gray-100': !isChildActive(item.children) }"
                 >
                   {{ item.name }}
                 </button>
@@ -217,10 +181,7 @@ onMounted(async () => {
                     <RouterLink
                         :to="normalizeUrl(sub.url)"
                         class="block px-4 py-2 rounded-md transition-colors duration-200"
-                        :class="{
-                          'bg-gray-200 text-black font-semibold': isActive(sub.url),
-                          'hover:bg-gray-100': !isActive(sub.url)
-                        }"
+                        :class="{ 'bg-gray-200 text-black font-semibold': isActive(sub.url), 'hover:bg-gray-100': !isActive(sub.url) }"
                     >
                       {{ sub.name }}
                     </RouterLink>
@@ -231,7 +192,7 @@ onMounted(async () => {
           </ul>
         </nav>
 
-        <!-- Десктопная версия -->
+        <!-- Десктоп -->
         <div class="hidden md:flex items-center space-x-4">
           <button
               v-if="isSendMessage && !loadingSettings"
@@ -241,7 +202,6 @@ onMounted(async () => {
             Связаться
           </button>
 
-          <!-- ✅ Кнопка входа -->
           <button
               @click="openLoginModal"
               class="text-sm font-semibold text-gray-800 hover:text-black transition-colors duration-200"
@@ -251,10 +211,10 @@ onMounted(async () => {
 
           <div v-if="staticContent.messenger_icons" v-html="staticContent.messenger_icons"></div>
         </div>
-
       </div>
     </header>
 
+    <!-- Main -->
     <main class="flex-1 max-w-6xl mx-auto px-6 py-12 w-full">
       <div
           v-if="staticContentError"
@@ -266,12 +226,13 @@ onMounted(async () => {
       <div
           v-if="route.path === '/' && staticContent.main"
           v-html="staticContent.main"
-          class="prose"
+          class="prose mb-12"
       ></div>
 
-      <RouterView v-else />
+      <RouterView />
     </main>
 
+    <!-- Footer -->
     <footer class="bg-black text-white py-6 px-6 text-center mt-auto">
       <div class="max-w-4xl mx-auto space-y-2">
         <div v-if="staticContent.social_networks" v-html="staticContent.social_networks"></div>
@@ -280,6 +241,6 @@ onMounted(async () => {
     </footer>
 
     <ContactModal v-if="showModal" @close="closeModal" />
-    <PartnerLoginModal v-if="showLoginModal" @close="closeLoginModal" /> <!-- ✅ модалка входа -->
+    <PartnerLoginModal v-if="showLoginModal" @close="closeLoginModal" />
   </div>
 </template>

@@ -30,6 +30,7 @@ const customLabels: Record<string, string> = {
   status: 'Статус',
   total_amount: 'Заработок',
   referrals_count: 'Количество рефералов',
+  courses_count: 'Количество купленных курсов',
   is_superadmin: 'Главный админ',
   meta_description: 'meta description',
   meta_keywords: 'meta keywords',
