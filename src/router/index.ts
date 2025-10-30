@@ -107,6 +107,9 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'projects', name: 'FrontendProjects', component: () => import('../views/front/projects/Project.vue') },
             { path: 'projects/:id', name: 'ProjectView', component: () => import('../views/front/projects/ProjectView.vue') },
             { path: ':slug', name: 'FrontendPage', component: () => import('../views/front/Page.vue'), props: true },
+            { path: '/ref/:login', name: 'ReferralLink', component: () => import('../views/front/ReferralRedirect.vue'),
+            }
+
         ],
     },
 
