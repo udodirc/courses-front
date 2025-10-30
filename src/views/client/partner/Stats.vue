@@ -1,23 +1,28 @@
 <script setup lang="ts">
 import { usePartnerStore } from '../../../store/client/partner.store';
 import { onMounted } from 'vue';
+import { computed } from 'vue';
 import { useStaticContent } from '../../../composables/useStaticContent';
 
 const { staticContent, loadingStatic, staticContentError, fetchStaticContent } = useStaticContent();
-
 const partnerStore = usePartnerStore();
 
 const loading = partnerStore.loading;
 const error = partnerStore.error;
-const stats = partnerStore.user;
+const stats = computed(() => partnerStore.user);
 
 onMounted(async () => {
   try {
+    if (!partnerStore.user && partnerStore.token) {
+      await partnerStore.fetchUser();
+    }
+
     await partnerStore.fetchStats();
+
+    await fetchStaticContent(['referrals_links', 'banner_advertisement']);
   } catch (e) {
-    console.error(e);
+    console.error('error:', e);
   }
-  await fetchStaticContent(['referrals_links', 'banner_advertisement']);
 });
 </script>
 
@@ -53,4 +58,8 @@ onMounted(async () => {
   <div v-if="loadingStatic">Загрузка...</div>
   <div v-else-if="staticContentError">{{ staticContentError }}</div>
   <div v-else v-html="staticContent['referrals_links']" class="p-4 bg-white rounded shadow" style="margin-bottom: 50px;"></div>
+
+  <div v-if="loadingStatic">Загрузка...</div>
+  <div v-else-if="staticContentError">{{ staticContentError }}</div>
+  <div v-else v-html="staticContent['banner_advertisement']" class="p-4 bg-white rounded shadow" style="margin-bottom: 50px;"></div>
 </template>
