@@ -2,7 +2,7 @@
 import { ref, reactive, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import {useProjectStore, useProjectStoreWithGetters} from '../../../store/admin/project/project.store';
+import {useProjectStore, useProjectStoreWithGetters} from '../../../store/admin/course/course.store.ts';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
 
 import BaseForm from '../../../components/ui/BaseForm.vue';

@@ -62,6 +62,23 @@ const allMenu: MenuItem[] = [
       { name: "Спонсорские выплаты", path: "/admin/sponsors-payouts" },
     ],
   },
+  {
+    name: "Партнеры",
+    icon: "fas fa-user",
+    superadmin: true,
+    children: [
+      { name: "Партнеры", path: "/admin/partners" },
+      { name: "Уровни", path: "/admin/levels" },
+    ],
+  },
+  {
+    name: "Курсы",
+    icon: "fa fa-money",
+    superadmin: true,
+    children: [
+      { name: "Курсы", path: "/admin/courses" },
+    ],
+  },
   { name: "Меню", path: "/admin/menus", icon: "fas fa-bars" },
   { name: "Контент", path: "/admin/content", icon: "fas fa-bars" },
   { name: "Статичный контент", path: "/admin/static-content", icon: "fas fa-bars" },

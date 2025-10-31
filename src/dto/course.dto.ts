@@ -1,8 +1,10 @@
-export interface CreateProjectDto {
-    menu_id: number;
-    content: string;
+export interface CreateCourseDto {
+    partner_id: number;
+    name: string;
+    short_description: string;
+    description: string;
+    price: number;
     status: boolean;
-    url: string;
     title: string;
     meta_description: string;
     meta_keywords: string;

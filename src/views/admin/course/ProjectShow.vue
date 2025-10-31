@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useProjectStoreWithGetters } from '../../../store/admin/project/project.store';
+import { useProjectStoreWithGetters } from '../../../store/admin/course/course.store.ts';
 import BaseShow from '../../../components/BaseShow.vue';
 
 const route = useRoute();

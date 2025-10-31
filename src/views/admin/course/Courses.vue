@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useProjectStoreWithGetters } from '../../../store/admin/project/project.store';
+import { useCourseStoreWithGetters } from '../../../store/admin/course/course.store.ts';
 import ItemList from '../../../components/ItemList.vue';
 import Filters from '../../../components/Filters.vue';
 import { useFilterList } from '../../../composables/useFilterList';
 import { usePagination } from '../../../composables/usePagination';
 import type { FilterSchemaItem } from '../../../types/Filters.ts';
 
-const projectStore = useProjectStoreWithGetters();
+const courseStore = useCourseStoreWithGetters();
 
 // схема фильтров
 const schema = ref<FilterSchemaItem[]>([
@@ -21,8 +21,8 @@ const schema = ref<FilterSchemaItem[]>([
 ]);
 
 // composables
-const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(projectStore, schema.value);
-const { onNext, onPrev, goToPage } = usePagination(projectStore, filters, toFilterObject);
+const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(courseStore, schema.value);
+const { onNext, onPrev, goToPage } = usePagination(courseStore, filters, toFilterObject);
 
 // загрузка данных
 onMounted(async () => {
@@ -57,13 +57,13 @@ const columns = [
       </router-link>
 
       <ItemList
-          :key="projectStore.currentPage.value"
-          :items="projectStore.projectList.value"
+          :key="courseStore.currentPage.value"
+          :items="courseStore.courseList.value"
           :columns="columns"
-          :basePath="'/admin/project'"
-          :deleteItem="projectStore.deleteItem"
-          :currentPage="projectStore.currentPage.value"
-          :totalPages="projectStore.totalPages.value"
+          :basePath="'/admin/course'"
+          :deleteItem="courseStore.deleteItem"
+          :currentPage="courseStore.currentPage.value"
+          :totalPages="courseStore.totalPages.value"
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"

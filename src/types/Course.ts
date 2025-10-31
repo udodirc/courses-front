@@ -1,9 +1,12 @@
-export interface  Project {
+export interface  Course {
     id: number;
+    partner_id: number;
     name: string;
-    content: string;
+    partner_name: string;
+    short_description: string;
+    description: string;
+    price: number;
     status: boolean;
-    url: string;
     title: string;
     meta_description: string;
     meta_keywords: string;
