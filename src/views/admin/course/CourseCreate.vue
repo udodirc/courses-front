@@ -10,8 +10,8 @@ import FormErrors from '../../../components/ui/FormErrors.vue';
 import type {Partner} from "../../../types/Partner.ts";
 
 const router = useRouter();
-const fileInputRef = ref<HTMLInputElement | null>(null);
 const ogFileInputRef = ref<HTMLInputElement | null>(null);
+const mainFileInputRef = ref<HTMLInputElement | null>(null);
 const user = ref<Partner | null>(null);
 if (user.value?.id) localStorage.setItem('partner_id', user.value.id.toString());
 
@@ -28,6 +28,7 @@ interface FormModel {
   og_title: string;
   og_description: string;
   og_image: File | string | null;
+  main_image: File | string | null;
   og_type: string;
   og_url: string;
   canonical_url: string;
@@ -49,6 +50,7 @@ const formModel = ref<FormModel>({
   og_title: '',
   og_description: '',
   og_image: null,
+  main_image: null,
   og_type: 'og_type',
   og_url: '',
   canonical_url: '',
@@ -59,6 +61,7 @@ const formModel = ref<FormModel>({
 
 // OG preview отдельно
 const ogPreview = ref<string>('');
+const mainPreview = ref<string>('');
 
 const { saveEntity, loading, error } = useEntitySave<FormData>();
 
@@ -78,6 +81,7 @@ onMounted(() => {
       og_title: data.og_title,
       og_description: data.og_description,
       og_image: data.og_image || null,
+      main_image: data.main_image || null,
       og_type: data.og_type,
       og_url: data.og_url,
       canonical_url: data.canonical_url,
@@ -86,28 +90,9 @@ onMounted(() => {
       previews: (data.images || []).map((f: string) => `${data.image_url}/${f}`),
     };
     ogPreview.value = data.og_image ? `${data.image_og_url}/${data.og_image}` : '';
+    mainPreview.value = data.main_image ? `${data.image_main_image_url}/${data.main_image}` : '';
   }
 });
-
-// Загрузка обычных изображений
-function handleFileChange(event: Event) {
-  const target = event.target as HTMLInputElement;
-  if (target.files) {
-    const files = Array.from(target.files);
-    formModel.value.images.push(...files);
-    formModel.value.previews.push(...files.map(f => URL.createObjectURL(f)));
-  }
-}
-
-function removeImage(index: number) {
-  formModel.value.images.splice(index, 1);
-  URL.revokeObjectURL(formModel.value.previews[index]);
-  formModel.value.previews.splice(index, 1);
-
-  if (formModel.value.images.length === 0 && fileInputRef.value) {
-    fileInputRef.value.value = '';
-  }
-}
 
 // Загрузка OG изображения
 function handleOgFileChange(event: Event) {
@@ -130,6 +115,29 @@ function removeOgImage() {
   ogPreview.value = '';
   if (ogFileInputRef.value) {
     ogFileInputRef.value.value = '';
+  }
+}
+
+function handleMainFileChange(event: Event) {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files[0]) {
+    const file = target.files[0];
+    if (mainPreview.value.startsWith('blob:')) {
+      URL.revokeObjectURL(mainPreview.value);
+    }
+    formModel.value.main_image = file;
+    mainPreview.value = URL.createObjectURL(file);
+  }
+}
+
+function removeMainImage() {
+  if (mainPreview.value.startsWith('blob:')) {
+    URL.revokeObjectURL(mainPreview.value);
+  }
+  formModel.value.main_image = null;
+  mainPreview.value = '';
+  if (mainFileInputRef.value) {
+    mainFileInputRef.value.value = '';
   }
 }
 
@@ -158,8 +166,8 @@ async function save() {
     payload.append('canonical_url', formModel.value.canonical_url || '');
     payload.append('robots', formModel.value.robots || '');
 
-    if (formModel.value.og_image instanceof File) {
-      payload.append('main_image', formModel.value.og_image);
+    if (formModel.value.main_image instanceof File) {
+      payload.append('main_image', formModel.value.main_image);
     }
 
     await saveEntity('/admin/course', payload, {
@@ -231,37 +239,31 @@ async function save() {
       </div>
     </div>
 
-    <!-- IMAGES UPLOAD -->
+    <!-- MAIN IMAGE UPLOAD -->
     <div class="mt-4">
-      <label class="block text-sm text-gray-600 mb-1">Изображения</label>
+      <label class="block text-sm text-gray-600 mb-1">Main Image</label>
       <label
-          class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg shadow cursor-pointer hover:bg-blue-700 transition"
+          class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg shadow cursor-pointer hover:bg-green-700 transition"
       >
-        <span>Выбрать файлы</span>
+        <span>Выбрать файл</span>
         <input
-            ref="fileInputRef"
+            ref="mainFileInputRef"
             type="file"
-            multiple
-            @change="handleFileChange"
+            accept="image/*"
+            @change="handleMainFileChange"
             class="hidden"
         />
       </label>
 
-      <div v-if="formModel.previews.length" class="flex flex-wrap gap-2 mt-2">
-        <div
-            v-for="(src, idx) in formModel.previews"
-            :key="idx"
-            class="relative group w-48 h-48 border rounded overflow-hidden"
+      <div v-if="mainPreview" class="relative group w-48 h-48 border rounded overflow-hidden mt-2">
+        <img :src="mainPreview" class="w-full h-full object-cover" alt="main_image"/>
+        <button
+            type="button"
+            class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
+            @click="removeMainImage"
         >
-          <img :src="src" class="w-full h-full object-cover" alt=""/>
-          <button
-              type="button"
-              class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
-              @click="removeImage(idx)"
-          >
-            ✕
-          </button>
-        </div>
+          ✕
+        </button>
       </div>
     </div>
   </BaseForm>
