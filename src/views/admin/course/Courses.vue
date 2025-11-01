@@ -54,7 +54,7 @@ const columns = [
       />
 
       <router-link
-          to="/admin/project/create"
+          to="/admin/course/create"
           class="inline-block mb-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded"
       >
         Создать

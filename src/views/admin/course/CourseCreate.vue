@@ -7,16 +7,21 @@ import BaseTextArea from "../../../components/ui/BaseTextArea.vue";
 import BaseTextAreaWithEditor from "../../../components/ui/BaseTextAreaWithEditor.vue";
 import BaseInput from "../../../components/ui/BaseInput.vue";
 import FormErrors from '../../../components/ui/FormErrors.vue';
+import type {Partner} from "../../../types/Partner.ts";
 
 const router = useRouter();
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const ogFileInputRef = ref<HTMLInputElement | null>(null);
+const user = ref<Partner | null>(null);
+if (user.value?.id) localStorage.setItem('partner_id', user.value.id.toString());
 
 // Тип формы
 interface FormModel {
+  partner_id: number;
   name: string;
-  content: string;
-  url: string;
+  short_description: string;
+  description: string;
+  price: string;
   title: string;
   meta_description: string;
   meta_keywords: string;
@@ -29,14 +34,15 @@ interface FormModel {
   robots: string;
   images: (File | string)[];
   previews: string[];
-  main_page: number | null;
 }
 
 // Инициализация формы
 const formModel = ref<FormModel>({
+  partner_id: 0,
   name: '',
-  content: '',
-  url: '',
+  short_description: '',
+  description: '',
+  price: '0',
   title: '',
   meta_description: '',
   meta_keywords: '',
@@ -49,7 +55,6 @@ const formModel = ref<FormModel>({
   robots: 'index, follow',
   images: [],
   previews: [],
-  main_page: null,
 });
 
 // OG preview отдельно
@@ -62,9 +67,11 @@ onMounted(() => {
   const data = window.initialProjectData;
   if (data) {
     formModel.value = {
+      partner_id: user.value?.id ?? 0,
       name: data.name,
-      content: data.content,
-      url: data.url,
+      short_description: data.short_description,
+      description: data.description,
+      price: data.price,
       title: data.title,
       meta_description: data.meta_description,
       meta_keywords: data.meta_keywords,
@@ -77,7 +84,6 @@ onMounted(() => {
       robots: data.robots,
       images: data.images || [],
       previews: (data.images || []).map((f: string) => `${data.image_url}/${f}`),
-      main_page: data.main_page,
     };
     ogPreview.value = data.og_image ? `${data.image_og_url}/${data.og_image}` : '';
   }
@@ -90,9 +96,6 @@ function handleFileChange(event: Event) {
     const files = Array.from(target.files);
     formModel.value.images.push(...files);
     formModel.value.previews.push(...files.map(f => URL.createObjectURL(f)));
-    if (formModel.value.main_page === null) {
-      formModel.value.main_page = 0;
-    }
   }
 }
 
@@ -100,12 +103,6 @@ function removeImage(index: number) {
   formModel.value.images.splice(index, 1);
   URL.revokeObjectURL(formModel.value.previews[index]);
   formModel.value.previews.splice(index, 1);
-
-  if (formModel.value.main_page === index) {
-    formModel.value.main_page = null;
-  } else if (formModel.value.main_page !== null && formModel.value.main_page > index) {
-    formModel.value.main_page--;
-  }
 
   if (formModel.value.images.length === 0 && fileInputRef.value) {
     fileInputRef.value.value = '';
@@ -140,10 +137,12 @@ function removeOgImage() {
 async function save() {
   try {
     const payload = new FormData();
+    payload.append('partner_id', 1);
     payload.append('name', formModel.value.name);
-    payload.append('content', formModel.value.content);
+    payload.append('short_description', formModel.value.short_description);
+    payload.append('description', formModel.value.description);
+    payload.append('price', formModel.value.price);
     payload.append('title', formModel.value.title || '');
-    payload.append('url', formModel.value.url);
     payload.append('meta_description', formModel.value.meta_description || '');
     payload.append('meta_keywords', formModel.value.meta_keywords || '');
     payload.append('og_title', formModel.value.og_title || '');
@@ -159,22 +158,15 @@ async function save() {
     payload.append('canonical_url', formModel.value.canonical_url || '');
     payload.append('robots', formModel.value.robots || '');
 
-    // только новые файлы
-    formModel.value.images.forEach(file => {
-      if (file instanceof File) {
-        payload.append('images[]', file);
-      }
-    });
-
-    if (formModel.value.main_page !== null) {
-      payload.append('main_page', String('new-' + formModel.value.main_page));
+    if (formModel.value.og_image instanceof File) {
+      payload.append('main_image', formModel.value.og_image);
     }
 
-    await saveEntity('/admin/project', payload, {
+    await saveEntity('/admin/course', payload, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
 
-    router.push('/admin/projects');
+    router.push('/admin/courses');
   } catch (e) {
     console.error('Ошибка при сохранении проектов:', e);
   }
@@ -187,12 +179,18 @@ async function save() {
 
     <BaseInput v-model="formModel.name" label="Имя"/>
     <BaseTextAreaWithEditor
-        v-model="formModel.content"
-        label="Контент"
+        v-model="formModel.short_description"
+        label="Краткое описание"
         required
         class="w-full mb-4"
     />
-    <BaseInput v-model="formModel.url" label="URL" required />
+    <BaseTextAreaWithEditor
+        v-model="formModel.description"
+        label="Описание"
+        required
+        class="w-full mb-4"
+    />
+    <BaseInput v-model="formModel.price" label="Цена" required />
 
     <!-- SEO / Open Graph -->
     <BaseTextArea v-model="formModel.title" label="SEO title"/>
@@ -263,17 +261,6 @@ async function save() {
           >
             ✕
           </button>
-
-          <!-- Чекбокс/радио для выбора главного -->
-          <label class="absolute bottom-1 left-1 bg-white px-2 py-1 rounded text-xs flex items-center gap-1 cursor-pointer">
-            <input
-                type="radio"
-                name="mainPage"
-                :value="idx"
-                v-model="formModel.main_page"
-            />
-            Главное
-          </label>
         </div>
       </div>
     </div>

@@ -80,7 +80,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'static_content/:id/edit', name: 'AdminStaticContentEdit', component: () => import('../views/admin/static-content/StaticContentEdit.vue') },
             { path: '/admin/static_content/:id', name: 'AdminStaticContentShow', component: () => import('../views/admin/static-content/StaticContentShow.vue') },
             { path: 'courses', name: 'AdminCourse', component: () => import('../views/admin/course/Courses.vue') },
-            { path: '/admin/course/create', name: 'AdminProjectCreate', component: () => import('../views/admin/course/ProjectCreate.vue') },
+            { path: '/admin/course/create', name: 'AdminProjectCreate', component: () => import('../views/admin/course/CourseCreate.vue') },
             { path: 'course/:id/edit', name: 'AdminProjectEdit', component: () => import('../views/admin/course/ProjectEdit.vue') },
             { path: '/admin/course/:id', name: 'AdminProjectShow', component: () => import('../views/admin/course/ProjectShow.vue') },
         ],
