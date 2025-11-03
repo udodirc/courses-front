@@ -120,7 +120,7 @@ const emit = defineEmits([
               :disabled="i === items.length - 1"
           >⬇️</button>
           <button
-              v-if="item.canDelete"
+              v-if="item.canDelete ?? true"
               @click="$emit('delete', item.id)"
           >❌</button>
         </td>
