@@ -34,7 +34,7 @@ onMounted(async () => {
 // колонки для таблицы
 const columns = [
   { label: 'ID', field: 'id' },
-  { label: 'Владелец', field: 'partner_name' },
+  { label: 'Владелец', field: 'author_name' },
   { label: 'Имя', field: 'name' },
   { label: 'Цена', field: 'price' },
 ];

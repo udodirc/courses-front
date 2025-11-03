@@ -17,7 +17,7 @@ const router = useRouter();
 const courseId = Number(route.params.id);
 
 const projectStore = useCourseStore();
-const { currentProject } = useCourseStoreWithGetters();
+const { currentCourse } = useCourseStoreWithGetters();
 const { error, setError } = useErrorHandler();
 
 const loading = ref(false);
@@ -52,7 +52,7 @@ const formModel = reactive({
 });
 
 // Заполнение формы при загрузке
-watch(currentProject, (val) => {
+watch(currentCourse, (val) => {
   if (!val) return;
 
   Object.assign(formModel, {

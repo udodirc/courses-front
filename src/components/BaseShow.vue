@@ -19,6 +19,10 @@ const mergedLabels = computed(() => ({
 
 const customLabels: Record<string, string> = {
   parent_name: 'Родительское меню',
+  author_name: 'Автор',
+  short_description: 'Краткое описание',
+  description: 'Описание',
+  price: 'Цена',
   permissions: 'Права',
   menu_name: 'Меню',
   content: 'Контент',

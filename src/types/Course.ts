@@ -2,7 +2,7 @@ export interface  Course {
     id: number;
     partner_id: number;
     name: string;
-    partner_name: string;
+    author_name: string;
     short_description: string;
     description: string;
     price: number;
@@ -23,7 +23,9 @@ export interface  Course {
     imagesFolderUrl: string;
     imagesDir: string;
     image_all_dir: string;
+    image_main_image: string;
     image_og_dir: string;
+    image_og_image: string;
     existingImages: [];
     main_image: string;
     image_og_url: string;

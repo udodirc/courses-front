@@ -255,7 +255,7 @@ async function save() {
         />
       </label>
 
-      <div v-if="mainPreview" class="relative group w-48 h-48 border rounded overflow-hidden mt-2">
+      <div v-if="mainPreview" class="relative group w-85 h-48 border rounded overflow-hidden mt-2">
         <img :src="mainPreview" class="w-full h-full object-cover" alt="main_image"/>
         <button
             type="button"
