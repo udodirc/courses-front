@@ -3,9 +3,9 @@ import type { FilterItem } from './useFilterList';
 
 export function usePagination(
     store: any,
-    url?: string,
     filters?: Ref<FilterItem[]>,
-    toFilterObject?: (arr: FilterItem[]) => Record<string, any>
+    toFilterObject?: (arr: FilterItem[]) => Record<string, any>,
+    url?: string
 ) {
     const onNext = async () => {
         const current = store.currentPage?.value ?? store.currentPage;

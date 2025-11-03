@@ -1,9 +1,12 @@
-export interface  Project {
+export interface  Course {
     id: number;
+    partner_id: number;
     name: string;
-    content: string;
+    author_name: string;
+    short_description: string;
+    description: string;
+    price: number;
     status: boolean;
-    url: string;
     title: string;
     meta_description: string;
     meta_keywords: string;
@@ -20,10 +23,14 @@ export interface  Project {
     imagesFolderUrl: string;
     imagesDir: string;
     image_all_dir: string;
+    image_main_image: string;
     image_og_dir: string;
+    image_og_image: string;
     existingImages: [];
-    main_page: string;
+    main_image: string;
     image_og_url: string;
+    image_main_dir: string;
+    image_main_url: string;
     image_url: string;
     image_dir: string;
     createdAt: string;
