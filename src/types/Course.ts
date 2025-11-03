@@ -25,8 +25,10 @@ export interface  Course {
     image_all_dir: string;
     image_og_dir: string;
     existingImages: [];
-    main_page: string;
+    main_image: string;
     image_og_url: string;
+    image_main_dir: string;
+    image_main_url: string;
     image_url: string;
     image_dir: string;
     createdAt: string;
