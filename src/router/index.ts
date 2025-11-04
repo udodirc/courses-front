@@ -84,6 +84,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'course/:id/edit', name: 'AdminCourseEdit', component: () => import('../views/admin/course/CourseEdit.vue') },
             { path: '/admin/course/:id', name: 'AdminCourseShow', component: () => import('../views/admin/course/CourseShow.vue') },
             { path: 'course-section', name: 'AdminCourseSection', component: () => import('../views/admin/course-section/CoursesSection.vue') },
+            { path: '/admin/course-section/create', name: 'AdminCourseSectionCreate', component: () => import('../views/admin/course-section/CourseSectionCreate.vue') },
         ],
     },
 
