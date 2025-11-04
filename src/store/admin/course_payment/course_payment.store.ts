@@ -1,4 +1,4 @@
-// store/admin/course/course.store.ts
+// store/admin/course/course_section.store.ts
 import { computed } from 'vue';
 import { CoursePaymentApi } from '../../../api/admin/course_payment/course_payment.api';
 import type {CoursePayment} from '../../../types/CoursePayment';

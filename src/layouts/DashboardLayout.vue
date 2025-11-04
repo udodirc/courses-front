@@ -77,6 +77,7 @@ const allMenu: MenuItem[] = [
     superadmin: true,
     children: [
       { name: "Курсы", path: "/admin/courses" },
+      { name: "Разделы курсов", path: "/admin/course-section" },
     ],
   },
   { name: "Меню", path: "/admin/menus", icon: "fas fa-bars" },
