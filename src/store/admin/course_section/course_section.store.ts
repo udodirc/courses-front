@@ -22,14 +22,14 @@ export function useCourseSectionStoreWithGetters() {
         }))
     );
 
-    const currentSectionCourse = computed(() => store.item);
+    const currentCourseSection = computed(() => store.item);
     const totalPages = computed(() => store.totalPages);
     const currentPage = computed(() => store.currentPage);
 
     return {
         ...store,
         courseSectionList,
-        currentSectionCourse,
+        currentCourseSection,
         totalPages,
         currentPage,
     };
