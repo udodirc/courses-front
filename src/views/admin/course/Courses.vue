@@ -16,7 +16,7 @@ const schema = ref<FilterSchemaItem[]>([
       { label: 'Активный', value: 1 },
       { label: 'Неактивный', value: 0 },
     ] },
-  { field: 'partner', label: 'Владелец', type: 'text', col: 'left' },
+  { field: 'user', label: 'Владелец', type: 'text', col: 'left' },
   { field: 'price', label: 'Цена', type: 'text', col: 'middle' },
   { field: 'created_from', label: 'Создано с', type: 'date', col: 'left' },
   { field: 'created_to', label: 'Создано по', type: 'date', col: 'middle' },
