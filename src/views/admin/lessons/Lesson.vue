@@ -33,9 +33,10 @@ onMounted(async () => {
 // колонки для таблицы
 const columns = [
   { label: 'ID', field: 'id' },
+  { label: 'Название курса', field: 'course_name' },
   { label: 'Раздел курса', field: 'course_section_name' },
   { label: 'Имя', field: 'name' },
-  { label: 'Длительность', field: 'duration' },
+  { label: 'Длительность', field: 'formatted_duration' },
 ];
 </script>
 
