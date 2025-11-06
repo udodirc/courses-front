@@ -19,6 +19,7 @@ const emit = defineEmits([
   'view',
   'edit',
   'toggleStatus',
+  'toggleFreePay',
   'changeOrderUp',
   'changeOrderDown',
   'canDelete',
@@ -108,6 +109,13 @@ const emit = defineEmits([
               :class="item.status ? 'text-green-600' : 'text-red-600'"
           >
             {{ item.status ? '✅' : '❌' }}
+          </button>
+          <button
+              v-if="item.canToggleFreePay"
+              @click="$emit('toggleFreePay', item.id)"
+              :class="item.free_pay ? 'text-green-600' : 'text-red-600'"
+          >
+            {{ item.free_pay ? '✅' : '❌' }}
           </button>
           <button
               v-if="item.canChangeOrder"

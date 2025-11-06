@@ -19,6 +19,7 @@ export function useLessonStoreWithGetters() {
         store.items.map(item => ({
             ...item,
             canToggleStatus: true,
+            canToggleFreePay: true
         }))
     );
 

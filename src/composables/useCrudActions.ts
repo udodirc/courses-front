@@ -22,6 +22,17 @@ export function useCrudActions(
         }
     };
 
+    const toggleFreePay = async (id: number) => {
+        try {
+            await api.post(`${baseRoute}/free-pay/${id}`);
+            return id;
+        } catch (error) {
+            console.error('Ошибка обновления статуса бесплатного урока:', error);
+            alert('Не удалось обновить статус бесплатного урока');
+            return null;
+        }
+    };
+
     const changeOrder = async (id: number, direction: 'up' | 'down') => {
         try {
             await api.post(`${baseRoute}/order/${id}/${direction}`);
@@ -41,5 +52,5 @@ export function useCrudActions(
         emit?.('payment', id);
     };
 
-    return { view, edit, toggleStatus, changeOrder, delete: destroy, payment };
+    return { view, edit, toggleStatus, toggleFreePay, changeOrder, delete: destroy, payment };
 }
