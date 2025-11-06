@@ -68,7 +68,7 @@ const getCourseImage = (course: Course) => {
         <router-link
             v-for="course in courses"
             :key="course.id"
-            :to="`/projects/${course.url}`"
+            :to="`/courses/${course.url}`"
             class="bg-white rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-1 transition duration-300 overflow-hidden flex flex-col"
         >
           <!-- Изображение -->

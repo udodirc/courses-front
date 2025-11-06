@@ -113,7 +113,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
         meta: { layout: 'front' },
         children: [
             { path: 'courses', name: 'FrontendCourses', component: () => import('../views/front/courses/Course.vue') },
-            { path: 'courses/:id', name: 'ProjectView', component: () => import('../views/front/courses/ProjectView.vue') },
+            { path: 'courses/:slug', name: 'FrontendCourseView', component: () => import('../views/front/courses/CourseView.vue') },
             { path: ':slug', name: 'FrontendPage', component: () => import('../views/front/Page.vue'), props: true },
             { path: '/ref/:login', name: 'ReferralLink', component: () => import('../views/front/ReferralRedirect.vue'),
             }
