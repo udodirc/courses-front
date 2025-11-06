@@ -205,6 +205,15 @@ onBeforeUnmount(() => {
                 </ul>
               </div>
             </li>
+            <li class="relative menu-item w-full md:w-auto">
+              <RouterLink
+                  to="/courses"
+                  class="block px-4 py-2 rounded-md transition-colors duration-200"
+                  :class="{ 'bg-gray-200 text-black font-semibold': isActive('/courses'), 'hover:bg-gray-100': !isActive('/courses') }"
+              >
+                Курсы
+              </RouterLink>
+            </li>
           </ul>
         </nav>
 
