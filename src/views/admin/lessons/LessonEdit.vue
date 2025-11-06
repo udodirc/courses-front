@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, reactive, watch } from 'vue';
+import { ref, reactive, watch, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useLessonStore, useLessonStoreWithGetters } from '../../../store/admin/lesson/lesson.store.ts';
 import { useErrorHandler } from '../../../composables/useErrorHandler';
@@ -15,32 +15,44 @@ const route = useRoute();
 const router = useRouter();
 const lessonId = Number(route.params.id);
 
-// Используем store с геттерами
 const { currentLesson } = useLessonStoreWithGetters();
 const { error, setError } = useErrorHandler();
 const loading = ref(false);
 
-// реактивная модель формы
 const formModel = reactive({
   name: '',
   content: '',
-  duration: '',
+  duration: 0, // в секундах
   status: 1,
-  free_pay: 1,
+  free_pay: true,
   course_section_id: null as number | null,
 });
 
-// при изменении currentMenu заполняем форму
+// заполняем форму при изменении currentLesson
 watch(currentLesson, (val) => {
   if (!val) return;
   Object.assign(formModel, {
     name: val.name,
     content: val.content,
-    duration: val.duration,
+    duration: val.duration ?? 0,
     status: val.status ?? 1,
     free_pay: val.free_pay ?? 1,
     course_section_id: val.course_section_id ?? null,
   });
+});
+
+// 🔥 computed для редактирования duration в формате "мм:сс"
+const formattedDuration = computed({
+  get: () => {
+    const totalSeconds = formModel.duration || 0;
+    const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+    const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`;
+  },
+  set: (value: string) => {
+    const [m, s] = value.split(':').map(v => parseInt(v || '0', 10));
+    formModel.duration = (m || 0) * 60 + (s || 0);
+  },
 });
 
 // сохранение формы
@@ -58,7 +70,6 @@ const save = async () => {
   }
 };
 
-// загрузка данных меню при монтировании
 onMounted(() => {
   if (!isNaN(lessonId)) {
     useLessonStore().fetchItem(lessonId);
@@ -74,7 +85,15 @@ onMounted(() => {
 
     <BaseInput v-model="formModel.name" label="Имя" required class="mb-4" />
     <BaseTextAreaWithEditor v-model="formModel.content" label="Контент" required class="w-full mb-4" />
-    <BaseInput v-model="formModel.duration" label="Длительность" required class="mb-4" />
+
+    <!-- Duration в формате мм:сс -->
+    <BaseInput
+        v-model="formattedDuration"
+        label="Длительность (мин:сек)"
+        placeholder="Например: 02:15"
+        required
+        class="mb-4"
+    />
 
     <BaseToggle
         v-model="formModel.status"
