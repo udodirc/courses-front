@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css?family=Karla:400,700&display=swap');
 .font-family-karla { font-family: karla; }
-.bg-sidebar { background: #3d68ff; }
+.bg-sidebar { background: #242635; }
 .cta-btn { color: #3d68ff; }
-.upgrade-btn { background: #1947ee; }
-.upgrade-btn:hover { background: #0038fd; }
-.active-nav-link { background: #1947ee; }
-.nav-item:hover { background: #1947ee; }
+.upgrade-btn { background: #2c2f41; }
+.upgrade-btn:hover { background: #2c2f41; }
+.active-nav-link { background: #2c2f41; }
+.nav-item:hover { background: #2c2f41; }
 .account-link:hover { background: #3d68ff; }
