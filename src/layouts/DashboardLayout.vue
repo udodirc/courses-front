@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { RouterView, RouterLink, useRoute, useRouter } from "vue-router";
+// Убедитесь, что этот путь к хранилищу верный
 import { useAuthStore } from "../store/admin/auth/auth.store";
 import '../../public/styles/admin.css';
 
@@ -8,9 +9,23 @@ const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
 
+// Состояния для управления UI
+const expanded = ref<string | null>(null);
+const sidebarOpen = ref(true); // Состояние для переключения сайдбара на десктопе
+const mobileOpen = ref(false); // Состояние для мобильного меню
+
+// Логика
 function logout() {
   auth.logout();
   router.push("/admin/login");
+}
+
+function toggleExpand(name: string) {
+  expanded.value = expanded.value === name ? null : name;
+}
+
+function toggleSidebar() {
+  sidebarOpen.value = !sidebarOpen.value;
 }
 
 // Типизация меню
@@ -88,13 +103,6 @@ const allMenu: MenuItem[] = [
   { name: "Настройки", path: "/admin/settings", icon: "fas fa-cogs" },
 ];
 
-const expanded = ref<string | null>(null);
-const mobileOpen = ref(false);
-
-function toggleExpand(name: string) {
-  expanded.value = expanded.value === name ? null : name;
-}
-
 // Фильтруем меню для обычных админов
 const menu = computed<MenuItem[]>(() => {
   return allMenu
@@ -112,9 +120,12 @@ const menu = computed<MenuItem[]>(() => {
 </script>
 
 <template>
-  <div class="bg-gray-100 font-family-karla flex">
-    <!-- Sidebar -->
-    <aside class="relative bg-sidebar h-screen w-64 hidden sm:block shadow-xl">
+  <div class="bg-gray-100 font-family-karla flex min-h-screen">
+
+    <aside
+        v-if="sidebarOpen"
+        class="relative bg-sidebar h-screen w-64 shadow-xl transition-all duration-300 transform -translate-x-0 hidden sm:block"
+    >
       <div class="p-6">
         <RouterLink
             to="/admin/content"
@@ -126,7 +137,6 @@ const menu = computed<MenuItem[]>(() => {
 
       <nav class="text-white text-base font-semibold pt-3">
         <template v-for="item in menu" :key="item.name">
-          <!-- Обычный пункт -->
           <RouterLink
               v-if="!item.children"
               :key="item.name + '-link'"
@@ -138,7 +148,6 @@ const menu = computed<MenuItem[]>(() => {
             {{ item.name }}
           </RouterLink>
 
-          <!-- Пункт с подменю -->
           <div v-else :key="item.name + '-submenu'">
             <div
                 @click="toggleExpand(item.name)"
@@ -166,7 +175,6 @@ const menu = computed<MenuItem[]>(() => {
         </template>
       </nav>
 
-      <!-- Logout -->
       <button
           @click="logout"
           class="absolute w-full bottom-0 upgrade-btn text-white flex items-center justify-center py-4"
@@ -176,14 +184,21 @@ const menu = computed<MenuItem[]>(() => {
       </button>
     </aside>
 
-    <!-- Content -->
-    <div class="relative w-full flex flex-col h-screen overflow-y-hidden">
-      <!-- Header -->
+    <div
+        class="relative w-full flex flex-col h-screen overflow-y-hidden"
+    >
+
       <header class="w-full items-center bg-white py-2 px-6 hidden sm:flex">
+        <button
+            @click="toggleSidebar"
+            class="text-xl mr-4 p-2 rounded-lg hover:bg-gray-200 focus:outline-none"
+        >
+          <i :class="sidebarOpen ? 'fas fa-times' : 'fas fa-bars'"></i>
+        </button>
+
         <h1 class="text-xl font-bold">Админка</h1>
       </header>
 
-      <!-- Mobile Header -->
       <header class="w-full bg-sidebar py-5 px-6 sm:hidden">
         <div class="flex items-center justify-between">
           <RouterLink
@@ -198,7 +213,6 @@ const menu = computed<MenuItem[]>(() => {
           </button>
         </div>
 
-        <!-- Mobile Nav -->
         <nav v-if="mobileOpen" class="flex flex-col pt-4">
           <template v-for="item in menu" :key="item.name + '-mobile'">
             <RouterLink
@@ -236,7 +250,6 @@ const menu = computed<MenuItem[]>(() => {
         </nav>
       </header>
 
-      <!-- Main -->
       <div class="w-full h-screen overflow-x-hidden border-t flex flex-col">
         <main class="w-full flex-grow p-6">
           <RouterView />
