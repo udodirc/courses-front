@@ -64,7 +64,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <BaseForm label="Редактировать меню" :loading="loading" :onSubmit="save">
+  <BaseForm label="Редактировать раздел курса" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
 
     <BaseInput v-model="formModel.name" label="Имя" required class="mb-4" />

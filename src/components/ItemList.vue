@@ -19,7 +19,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits(['prev', 'next', 'go', 'refresh', 'payment']);
 
-const { view, edit, toggleStatus, changeOrder, delete: destroy, payment } =
+const { view, edit, toggleStatus, toggleFreePay, changeOrder, delete: destroy, payment } =
     useCrudActions(props.basePath, props.deleteItem, emit);
 </script>
 
@@ -37,6 +37,7 @@ const { view, edit, toggleStatus, changeOrder, delete: destroy, payment } =
       @view="view"
       @edit="edit"
       @toggleStatus="async (id) => { await toggleStatus(id); emit('refresh'); }"
+      @toggleFreePay="async (id) => { await toggleFreePay(id); emit('refresh'); }"
       @changeOrderUp="async (id) => { await changeOrder(id, 'up'); emit('refresh'); }"
       @changeOrderDown="async (id) => { await changeOrder(id, 'down'); emit('refresh'); }"
       @delete="destroy"
