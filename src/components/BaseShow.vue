@@ -43,7 +43,11 @@ const customLabels: Record<string, string> = {
   og_image: 'og image',
   og_type: 'og type',
   og_url: 'og url',
-  canonical_url: 'canonical_url'
+  canonical_url: 'canonical_url',
+  course_name: 'Название курса',
+  course_section_name: 'Название раздела курса',
+  formatted_duration: 'Длительность',
+  free_pay: 'Бесплатный урок',
 };
 
 // visibleFields с фильтром exclude
@@ -61,6 +65,9 @@ const renderValue = (key: string | number, value: any) => {
   const keyStr = String(key); // Явное приведение к строке
   if (keyStr === 'status') {
     return value == 1 ? 'Активный' : 'Неактивный';
+  }
+  if (keyStr === 'free_pay') {
+    return value == 1 ? 'Да' : 'Нет';
   }
   if (keyStr === 'is_superadmin') {
     return value == 1 ? 'Да' : 'Нет';
