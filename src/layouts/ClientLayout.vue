@@ -48,6 +48,13 @@ const allMenu: MenuItem[] = [
       { name: "Статистика", path: "/partner/stats" },
     ],
   },
+  {
+    name: "Курсы",
+    icon: "fas fa-user",
+    children: [
+      { name: "Все курсы", path: "/partner/courses" },
+    ],
+  },
 ];
 
 // Фильтруем меню (оставлено как есть, без фильтрации по ролям)
