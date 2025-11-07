@@ -22,6 +22,7 @@ interface FormModel {
   short_description: string;
   description: string;
   price: string;
+  url: string;
   title: string;
   meta_description: string;
   meta_keywords: string;
@@ -44,6 +45,7 @@ const formModel = ref<FormModel>({
   short_description: '',
   description: '',
   price: '0',
+  url: '',
   title: '',
   meta_description: '',
   meta_keywords: '',
@@ -75,6 +77,7 @@ onMounted(() => {
       short_description: data.short_description,
       description: data.description,
       price: data.price,
+      url: data.url,
       title: data.title,
       meta_description: data.meta_description,
       meta_keywords: data.meta_keywords,
@@ -150,6 +153,7 @@ async function save() {
     payload.append('short_description', formModel.value.short_description);
     payload.append('description', formModel.value.description);
     payload.append('price', formModel.value.price);
+    payload.append('url', formModel.value.url);
     payload.append('title', formModel.value.title || '');
     payload.append('meta_description', formModel.value.meta_description || '');
     payload.append('meta_keywords', formModel.value.meta_keywords || '');
@@ -199,6 +203,7 @@ async function save() {
         class="w-full mb-4"
     />
     <BaseInput v-model="formModel.price" label="Цена" required />
+    <BaseInput v-model="formModel.url" label="URL" required />
 
     <!-- SEO / Open Graph -->
     <BaseTextArea v-model="formModel.title" label="SEO title"/>

@@ -1,11 +1,12 @@
 export interface  Course {
     id: number;
-    partner_id: number;
+    user_id: number;
     name: string;
     author_name: string;
     short_description: string;
     description: string;
     price: number;
+    url: string;
     status: boolean;
     title: string;
     meta_description: string;

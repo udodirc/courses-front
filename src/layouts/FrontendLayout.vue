@@ -1,4 +1,3 @@
-<!-- components/MainLayout.vue -->
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { RouterLink, RouterView, useRoute } from "vue-router";
@@ -6,7 +5,6 @@ import { useFetchList } from "../composables/useFetchList";
 import { useStaticContent } from "../composables/useStaticContent";
 import ContactModal from "../components/ContactModal.vue";
 import PartnerLoginModal from "../components/PartnerLoginModal.vue";
-import Cookies from "js-cookie";
 import api from "../api";
 
 const route = useRoute();
@@ -14,11 +12,8 @@ const route = useRoute();
 // === Состояния ===
 const expanded = ref<string | null>(null);
 const menuOpen = ref(false);
-
 const showModal = ref(false);
 const showLoginModal = ref(false);
-
-// Для подстановки логина из cookie
 const formLoginLogin = ref("");
 
 const settings = ref<Record<string, string | boolean>>({});
@@ -44,24 +39,18 @@ const fetchSettings = async () => {
   loadingSettings.value = true;
   settingsError.value = null;
   try {
-    const response = await api.post("/settings", {
-      keys: [{ key: "send_message" }],
-    });
-
-    settings.value = response.data.data.reduce(
-        (acc: Record<string, string | boolean>, item: { key: string; value: string }) => {
-          let value: string | boolean = item.value;
-          if (item.value === "true") value = true;
-          else if (item.value === "false") value = false;
-          acc[item.key] = value;
-          return acc;
-        },
-        {}
-    );
-
+    const response = await api.post("/settings", { keys: [{ key: "send_message" }] });
+    settings.value = response.data.data.reduce((acc: Record<string, string | boolean>, item: { key: string; value: string }) => {
+      let value: string | boolean = item.value;
+      if (item.value === "true") value = true;
+      else if (item.value === "false") value = false;
+      acc[item.key] = value;
+      return acc;
+    }, {});
     isSendMessage.value = Boolean(settings.value["send_message"]);
   } catch (e) {
     settingsError.value = "Не удалось загрузить настройки. Попробуйте позже.";
+    console.error(e);
   } finally {
     loadingSettings.value = false;
   }
@@ -82,10 +71,7 @@ const handleClickOutside = (event: MouseEvent) => {
 // --- Модалки ---
 const openModal = () => (showModal.value = true);
 const closeModal = () => (showModal.value = false);
-
-const openLoginModal = () => {
-  showLoginModal.value = true;
-};
+const openLoginModal = () => (showLoginModal.value = true);
 const closeLoginModal = () => (showLoginModal.value = false);
 
 // --- Подсветка активного маршрута ---
@@ -94,18 +80,18 @@ const isChildActive = (children?: { url: string }[]) =>
     children?.some((sub) => route.path === normalizeUrl(sub.url));
 
 onMounted(async () => {
-  document.addEventListener("click", handleClickOutside);
-  await Promise.all([
-    fetchMenus(),
-    fetchStaticContent(["main", "messenger_icons", "rights"]),
-    fetchSettings(),
-  ]);
-  const response = await api.get('/referral', {
-    withCredentials: true,
-  });
-  console.log(response.data);
-  if (response.data?.login) {
-    formLoginLogin.value = response.data.login;
+  try {
+    document.addEventListener("click", handleClickOutside);
+    await Promise.all([
+      fetchMenus(),
+      fetchStaticContent(["main", "messenger_icons", "rights"]),
+      fetchSettings(),
+    ]);
+
+    // const response = await api.get('/referral', { withCredentials: true });
+    // if (response.data?.login) formLoginLogin.value = response.data.login;
+  } catch (e) {
+    console.error("Ошибка в MainLayout onMounted:", e);
   }
 });
 
@@ -116,7 +102,6 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="min-h-screen flex flex-col font-sans">
-
     <!-- Header -->
     <header class="bg-white shadow-md relative">
       <div class="container mx-auto flex items-center justify-between px-6 py-4">
@@ -204,6 +189,16 @@ onBeforeUnmount(() => {
                   </li>
                 </ul>
               </div>
+            </li>
+
+            <li class="relative menu-item w-full md:w-auto">
+              <RouterLink
+                  to="/courses"
+                  class="block px-4 py-2 rounded-md transition-colors duration-200"
+                  :class="{ 'bg-gray-200 text-black font-semibold': isActive('/courses'), 'hover:bg-gray-100': !isActive('/courses') }"
+              >
+                Курсы
+              </RouterLink>
             </li>
           </ul>
         </nav>

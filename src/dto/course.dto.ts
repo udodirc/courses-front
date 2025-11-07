@@ -4,6 +4,7 @@ export interface CreateCourseDto {
     short_description: string;
     description: string;
     price: number;
+    url: string;
     status: boolean;
     title: string;
     meta_description: string;

@@ -29,6 +29,7 @@ const formModel = reactive({
   short_description: '',
   description: '',
   price: '0',
+  url: '',
   status: 1,
   title: '',
   meta_description: '',
@@ -60,6 +61,7 @@ watch(currentCourse, (val) => {
     short_description: val.short_description ?? '',
     description: val.description ?? '',
     price: val.price ?? '',
+    url: val.url ?? '',
     status: val.status ?? 1,
     title: val.title ?? '',
     meta_description: val.meta_description ?? '',
@@ -213,6 +215,7 @@ onMounted(() => projectStore.fetchItem(courseId));
     <BaseTextAreaWithEditor v-model="formModel.short_description" label="Краткое описание" required class="w-full mb-4" />
     <BaseTextAreaWithEditor v-model="formModel.description" label="Описание" required class="w-full mb-4" />
     <BaseInput v-model="formModel.price" label="Цена" required />
+    <BaseInput v-model="formModel.url" label="URL" required />
     <BaseToggle v-model="formModel.status" label="Статус" :activeLabel="'Активный'" :inactiveLabel="'Неактивный'" class="mb-4" />
 
     <!-- SEO / Open Graph -->
