@@ -87,6 +87,12 @@ const emit = defineEmits([
               }}
             </a>
           </template>
+          <template v-else-if="col.field === 'percentage'">
+            {{ col.format
+              ? col.format(col.field.split('.').reduce((acc, key) => acc?.[key], item), item)
+              : col.field.split('.').reduce((acc, key) => acc?.[key], item) + '%'
+            }}
+          </template>
           <template v-else>
             {{ col.format
               ? col.format(col.field.split('.').reduce((acc, key) => acc?.[key], item), item)
