@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { RouterView, RouterLink, useRoute, useRouter } from "vue-router";
-// Убедитесь, что этот путь к хранилищу верный
 import { useAuthStore } from "../store/admin/auth/auth.store";
 import '../../public/styles/admin.css';
 
@@ -9,12 +8,10 @@ const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
 
-// Состояния для управления UI
 const expanded = ref<string | null>(null);
-const sidebarOpen = ref(true); // Состояние для переключения сайдбара на десктопе
-const mobileOpen = ref(false); // Состояние для мобильного меню
+const sidebarOpen = ref(true);
+const mobileOpen = ref(false);
 
-// Логика
 function logout() {
   auth.logout();
   router.push("/admin/login");
@@ -28,16 +25,15 @@ function toggleSidebar() {
   sidebarOpen.value = !sidebarOpen.value;
 }
 
-// Типизация меню
 interface MenuItem {
   name: string;
   path?: string;
   icon?: string;
   superadmin?: boolean;
   children?: MenuItem[];
+  class?: string;
 }
 
-// Полное меню
 const allMenu: MenuItem[] = [
   { name: "Профиль", path: "/admin/profile", icon: "fas fa-tachometer-alt" },
   { name: "Пользователи", path: "/admin/users", icon: "fas fa-users", superadmin: true },
@@ -99,11 +95,10 @@ const allMenu: MenuItem[] = [
   { name: "Меню", path: "/admin/menus", icon: "fas fa-bars" },
   { name: "Контент", path: "/admin/content", icon: "fas fa-bars" },
   { name: "Статичный контент", path: "/admin/static-content", icon: "fas fa-bars" },
-  { name: "Проекты", path: "/admin/courses", icon: "fas fa-bars" },
+  { name: "Проекты", path: "/admin/courses", icon: "fas fa-bars", class: "mt-2" }, // ✅ добавлен отступ сверху
   { name: "Настройки", path: "/admin/settings", icon: "fas fa-cogs" },
 ];
 
-// Фильтруем меню для обычных админов
 const menu = computed<MenuItem[]>(() => {
   return allMenu
       .filter(item => !item.superadmin || auth.user?.is_superadmin)
@@ -122,6 +117,7 @@ const menu = computed<MenuItem[]>(() => {
 <template>
   <div class="bg-gray-100 font-family-karla flex min-h-screen">
 
+    <!-- SIDEBAR -->
     <aside
         v-if="sidebarOpen"
         class="relative bg-sidebar h-screen w-64 shadow-xl transition-all duration-300 transform -translate-x-0 hidden sm:block"
@@ -137,17 +133,19 @@ const menu = computed<MenuItem[]>(() => {
 
       <nav class="text-white text-base font-semibold pt-3">
         <template v-for="item in menu" :key="item.name">
+          <!-- Обычный пункт -->
           <RouterLink
               v-if="!item.children"
               :key="item.name + '-link'"
               :to="item.path!"
               class="flex items-center py-4 pl-6 nav-item opacity-75 hover:opacity-100"
-              :class="{ 'active-nav-link': route.path === item.path }"
+              :class="[{ 'active-nav-link': route.path === item.path }, item.class]"
           >
             <i :class="[item.icon, 'mr-3']"></i>
             {{ item.name }}
           </RouterLink>
 
+          <!-- Подменю -->
           <div v-else :key="item.name + '-submenu'">
             <div
                 @click="toggleExpand(item.name)"
@@ -184,10 +182,10 @@ const menu = computed<MenuItem[]>(() => {
       </button>
     </aside>
 
-    <div
-        class="relative w-full flex flex-col h-screen overflow-y-hidden"
-    >
+    <!-- MAIN CONTENT -->
+    <div class="relative w-full flex flex-col h-screen overflow-y-hidden">
 
+      <!-- HEADER -->
       <header class="w-full items-center bg-white py-2 px-6 hidden sm:flex">
         <button
             @click="toggleSidebar"
@@ -199,6 +197,7 @@ const menu = computed<MenuItem[]>(() => {
         <h1 class="text-xl font-bold">Админка</h1>
       </header>
 
+      <!-- MOBILE HEADER -->
       <header class="w-full bg-sidebar py-5 px-6 sm:hidden">
         <div class="flex items-center justify-between">
           <RouterLink
@@ -232,7 +231,7 @@ const menu = computed<MenuItem[]>(() => {
                   class="flex justify-between items-center py-2 cursor-pointer text-white"
               >
                 <span>{{ item.name }}</span>
-                <span>{{ expanded === item.name ? "▲" : "▼" }}</span>
+                <span>{{ expanded === item.name ? '▲' : '▼' }}</span>
               </div>
               <div v-if="expanded === item.name" class="ml-4">
                 <RouterLink
@@ -250,6 +249,7 @@ const menu = computed<MenuItem[]>(() => {
         </nav>
       </header>
 
+      <!-- MAIN -->
       <div class="w-full h-screen overflow-x-hidden border-t flex flex-col">
         <main class="w-full flex-grow p-6">
           <RouterView />
