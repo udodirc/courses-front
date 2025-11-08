@@ -8,7 +8,7 @@ import { useStaticContent } from '../../../composables/useStaticContent';
 const { staticContent, loadingStatic, staticContentError, fetchStaticContent } = useStaticContent();
 
 const partnerStore = usePartnerStore();
-const { onNext, onPrev, goToPage } = usePagination(partnerStore, '/partner/structure');
+const { onNext, onPrev, goToPage } = usePagination(partnerStore, undefined, undefined, '/partner/structure');
 
 const columns = [
   { label: 'ID', field: 'id' },
