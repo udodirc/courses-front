@@ -54,7 +54,6 @@ export abstract class BaseStore<TCreate, TEntity extends Record<string, any>> {
                 error.value = '';
                 try {
                     filters.value = { ...f };
-                    //const res = await api.getList({ ...f, page, per_page: perPage.value });
                     const res = await api.getList({ ...f, page });
                     items.value = res.data;
 

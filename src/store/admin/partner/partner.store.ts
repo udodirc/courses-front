@@ -29,7 +29,7 @@ export function usePartnerStoreWithGetters() {
             ...item,
             canToggleStatus: true,
             canDelete: false,
-            structure: 'partners/structure/' + item.id,
+            structure: true,
             canPay: true
         }))
     );

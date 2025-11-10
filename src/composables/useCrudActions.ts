@@ -7,13 +7,16 @@ export function useCrudActions(
     emit?: (event: any, ...args: any[]) => void
 ) {
     const router = useRouter();
+    const mainRoute = (baseRoute == '/admin/structure')
+    ? '/admin/partners'
+    : baseRoute;
 
-    const view = (id: number) => router.push(`${baseRoute}/${id}`);
-    const edit = (id: number) => router.push(`${baseRoute}/${id}/edit`);
+    const view = (id: number) => router.push(`${mainRoute}/${id}`);
+    const edit = (id: number) => router.push(`${mainRoute}/${id}/edit`);
 
     const toggleStatus = async (id: number) => {
         try {
-            await api.post(`${baseRoute}/status/${id}`);
+            await api.post(`${mainRoute}/status/${id}`);
             return id;
         } catch (error) {
             console.error('Ошибка обновления статуса:', error);
@@ -52,5 +55,7 @@ export function useCrudActions(
         emit?.('payment', id);
     };
 
-    return { view, edit, toggleStatus, toggleFreePay, changeOrder, delete: destroy, payment };
+    const structure = (id: number) => router.push(`${mainRoute}/structure/${id}`);
+
+    return { view, edit, toggleStatus, toggleFreePay, changeOrder, delete: destroy, payment, structure };
 }
