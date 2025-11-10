@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import ItemList from '../../../components/ItemList.vue';
 import Filters from '../../../components/Filters.vue';
@@ -10,12 +10,18 @@ import type { FilterSchemaItem } from '../../../types/Filters.ts';
 import api from '../../../api';
 import { useStructureStore } from "../../../store/admin/partner/structure.store.ts";
 
+// ----- реактивный партнер ID (нужен для :key в ItemList) -----
 const route = useRoute();
-const partnerId = Number(route.params.id);
-const structureStore = useStructureStore(partnerId);
+const partnerId = ref(Number(route.params.id));
+
+// ----- реактивный store -----
+// ✅ Используем CONST, чтобы предотвратить переприсваивание
+const structureStore = useStructureStore(partnerId.value);
+
+// ----- курсы -----
 const { items: courses, fetchItems: fetchCourses } = useFetchList<{ id: number; name: string }>('/admin/course');
 
-// схема фильтров
+// ----- фильтры -----
 const schema = ref<FilterSchemaItem[]>([
   { field: 'login', label: 'Логин', type: 'text', col: 'left' },
   { field: 'email', label: 'Email', type: 'email', col: 'middle' },
@@ -37,21 +43,43 @@ const schema = ref<FilterSchemaItem[]>([
 const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(structureStore, schema.value);
 const { onNext, onPrev, goToPage } = usePagination(structureStore, filters, toFilterObject);
 
-onMounted(async () => {
+// ----- загрузка данных -----
+const loadStructure = async () => {
   await fetchCourses();
-  applyFilters();
-});
+  // applyFilters вызывает fetchItems в store, который теперь использует новый ID
+  await applyFilters();
+};
 
-// колонки таблицы
+// ----- отслеживаем смену route.params.id -----
+watch(
+    () => route.params.id,
+    async (newId) => {
+      const newPartnerId = Number(newId);
+
+      // Обновляем локальный ref для ключа ItemList (заставит ItemList пересоздаться)
+      partnerId.value = newPartnerId;
+
+      // ✅ Вызываем метод обновления ID в СУЩЕСТВУЮЩЕМ store
+      structureStore.updatePartnerId(newPartnerId);
+
+      // Загружаем данные
+      await loadStructure();
+    }
+);
+
+// ----- initial load -----
+onMounted(() => loadStructure());
+
+// ----- колонки таблицы -----
 const columns = [
   { label: 'ID', field: 'id' },
   { label: 'Логин', field: 'login' },
-  { label: 'Кол0во рефераллов', field: 'referrals_count' },
+  { label: 'Кол-во рефераллов', field: 'referrals_count' },
   { label: 'Email', field: 'email' },
   { label: 'Телефон', field: 'phone' },
 ];
 
-// ==== модалка оплаты ====
+// ----- модалка оплаты -----
 const showPaymentModal = ref(false);
 const paymentUserId = ref<number | null>(null);
 const selectedCourseId = ref<number | null>(null);
@@ -69,7 +97,7 @@ const closePaymentModal = () => {
   selectedCourseId.value = null;
 };
 
-// ✅ обработка оплаты
+// ----- подтверждение оплаты -----
 const confirmPayment = async () => {
   if (!selectedCourseId.value || !paymentUserId.value) {
     alert('Выберите курс');
@@ -85,6 +113,8 @@ const confirmPayment = async () => {
 
     alert(`Оплата пользователя #${paymentUserId.value} за курс #${selectedCourseId.value} успешно выполнена`);
     closePaymentModal();
+    // обновляем список после оплаты
+    await applyFilters();
   } catch (error: any) {
     console.error(error);
     alert('Ошибка при оплате. Проверьте консоль.');
@@ -99,6 +129,7 @@ const confirmPayment = async () => {
     <main class="w-full flex-grow p-6">
       <h1 class="text-3xl text-black pb-6">Пользователи</h1>
 
+      <!-- фильтры -->
       <Filters
           v-model:filters="filters"
           :schema="schema"
@@ -106,8 +137,9 @@ const confirmPayment = async () => {
           @reset="resetFilters"
       />
 
+      <!-- таблица -->
       <ItemList
-          :key="structureStore.currentPage.value"
+          :key="partnerId"
           :items="structureStore.structureList.value"
           :columns="columns"
           :basePath="'/admin/structure'"
@@ -121,7 +153,7 @@ const confirmPayment = async () => {
           @payment="openPaymentModal"
       />
 
-      <!-- ✅ Модалка оплаты -->
+      <!-- модалка оплаты -->
       <div
           v-if="showPaymentModal"
           class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
@@ -131,14 +163,12 @@ const confirmPayment = async () => {
             Оплата пользователя #{{ paymentUserId }}
           </h2>
 
-          <!-- скрытое поле partner_id -->
           <input type="hidden" :value="paymentUserId" />
 
-          <!-- выбор курса -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2"
-            >Выберите курс</label
-            >
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Выберите курс
+            </label>
             <select
                 v-model="selectedCourseId"
                 class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"

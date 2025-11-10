@@ -55,7 +55,17 @@ export function useCrudActions(
         emit?.('payment', id);
     };
 
-    const structure = (id: number) => router.push(`${mainRoute}/structure/${id}`);
+    const structure = (id: number) => {
+        const url = `/admin/partners/structure/${id}`;
+        const current = router.currentRoute.value.path;
+
+        if (current === url) {
+            // принудительно перезагружаем страницу
+            window.location.href = url;
+        } else {
+            router.push(url);
+        }
+    };
 
     return { view, edit, toggleStatus, toggleFreePay, changeOrder, delete: destroy, payment, structure };
 }
