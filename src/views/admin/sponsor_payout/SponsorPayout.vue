@@ -72,6 +72,7 @@ onMounted(async () => {
 const columns = [
   { label: 'ID', field: 'id' },
   { label: 'Название курса', field: 'course_name' },
+  { label: 'Цена курса', field: 'course_price' },
   { label: 'Покупатель', field: 'partner_name' },
   { label: 'Спонсор', field: 'sponsor_name' },
   { label: 'Сумма', field: 'amount' },
