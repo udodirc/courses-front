@@ -91,7 +91,40 @@ const renderValue = (key: string | number, value: any) => {
         <span class="font-bold mr-2">
           {{ (customLabels[key] || mergedLabels[key] || key).charAt(0).toUpperCase() + (customLabels[key] || mergedLabels[key] || key).slice(1) }}:
         </span>
-        <span>{{ renderValue(key, value) }}</span>
+        <span v-if="key == 'total_amount'">
+          {{ renderValue(key, value) }}
+          <RouterLink
+              v-if="value > 0"
+              :to="`/admin/sponsors-payouts?sponsor=${item.login}&page=1`"
+              target="_blank"
+              class="partner-show"
+          >
+           - Смотреть
+          </RouterLink>
+        </span>
+        <span v-else-if="key == 'referrals_count'">
+          {{ renderValue(key, value) }}
+          <RouterLink
+              v-if="value > 0"
+              :to="`/admin/partners/structure/${item.id}`"
+              target="_blank"
+              class="partner-show"
+          >
+           - Смотреть
+          </RouterLink>
+        </span>
+        <span v-else-if="key == 'courses_count'">
+          {{ renderValue(key, value) }}
+          <RouterLink
+              v-if="value > 0"
+              :to="`/admin/courses-payments?customer=${item.login}&page=1`"
+              target="_blank"
+              class="partner-show"
+          >
+           - Смотреть
+          </RouterLink>
+        </span>
+        <span v-else>{{ renderValue(key, value) }}</span>
       </div>
     </div>
 

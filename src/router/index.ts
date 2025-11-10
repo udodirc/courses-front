@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../store/admin/auth/auth.store';
 import { usePartnerStore } from '../store/client/partner.store';
 import type { RouteRecordRaw } from 'vue-router';
+import { computed } from 'vue'; // Добавлен, если не было
 
 // Layout
 import FrontendLayout from '../layouts/FrontendLayout.vue';
@@ -50,13 +51,13 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'roles/assign-role', name: 'AdminAssignRole', component: () => import('../views/admin/role/AssignRole.vue'), meta: { superadmin: true } },
             { path: 'permissions/give-permissions', name: 'AdminGivePermissions', component: () => import('../views/admin/permissions/GivePermissions.vue'), meta: { superadmin: true } },
             { path: 'permissions/create-permissions', name: 'AdminCreatePermissions', component: () => import('../views/admin/permissions/CreatePermissions.vue'), meta: { superadmin: true } },
-            { path: 'partners', name: 'AdminPartners', component: () => import('../views/admin/partner/Partners.vue'), meta: { superadmin: true } },
             {
-                path: 'partners/structure/:id(\\d+)',
-                name: 'AdminPartnerStructure',
-                component: () => import('../views/admin/partner/Partners.vue'),
-                meta: { superadmin: true },
+                path: 'partners/structure/:id',
+                name: 'AdminPartnersStructure',
+                component: () => import('../views/admin/partner/Structure.vue'),
+                meta: { superadmin: true }
             },
+            { path: 'partners', name: 'AdminPartners', component: () => import('../views/admin/partner/Partners.vue'), meta: { superadmin: true } },
             {
                 path: 'partners/:id(\\d+)',
                 name: 'AdminPartnerShow',
@@ -166,7 +167,7 @@ router.beforeEach(async (to, _from, next) => {
     next()
 })
 
-import { computed } from 'vue';
+
 export const visibleAdminRoutes = computed(() => {
     const auth = useAuthStore();
     const adminRoute = routes.find(r => r.path === '/admin');

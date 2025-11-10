@@ -19,7 +19,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits(['prev', 'next', 'go', 'refresh', 'payment']);
 
-const { view, edit, toggleStatus, toggleFreePay, changeOrder, delete: destroy, payment } =
+const { view, edit, toggleStatus, toggleFreePay, changeOrder, delete: destroy, payment, structure } =
     useCrudActions(props.basePath, props.deleteItem, emit);
 </script>
 
@@ -42,5 +42,6 @@ const { view, edit, toggleStatus, toggleFreePay, changeOrder, delete: destroy, p
       @changeOrderDown="async (id) => { await changeOrder(id, 'down'); emit('refresh'); }"
       @delete="destroy"
       @payment="payment"
+      @structure="structure"
   />
 </template>

@@ -24,7 +24,8 @@ const emit = defineEmits([
   'changeOrderDown',
   'canDelete',
   'delete',
-  'payment'
+  'payment',
+  'structure'
 ]);
 </script>
 
@@ -103,6 +104,10 @@ const emit = defineEmits([
 
         <!-- Действия -->
         <td v-if="showActions" class="flex gap-2 justify-center">
+          <button
+              v-if="item.structure"
+              @click="$emit('structure', item.id)"
+          >structure</button>
           <button
           v-if="item.canPay"
           @click="$emit('payment', item.id)"
