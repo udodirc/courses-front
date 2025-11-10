@@ -1,6 +1,7 @@
 // CoursePayment.vue (script setup)
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useCoursePaymentStoreWithGetters } from '../../../store/admin/course_payment/course_payment.store.ts';
 import ItemList from '../../../components/ItemList.vue';
 import Filters from '../../../components/Filters.vue';
@@ -9,6 +10,8 @@ import { usePagination } from '../../../composables/usePagination';
 import type { FilterSchemaItem } from '../../../types/Filters.ts';
 
 const paymentStore = useCoursePaymentStoreWithGetters();
+const route = useRoute();
+const router = useRouter();
 
 // схема фильтров
 const schema = ref<FilterSchemaItem[]>([
@@ -22,12 +25,45 @@ const schema = ref<FilterSchemaItem[]>([
 ]);
 
 // composables
-const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(paymentStore, schema.value);
-const { onNext, onPrev, goToPage } = usePagination(paymentStore, filters, toFilterObject);
+const { filters, applyFilters: rawApplyFilters, resetFilters } = useFilterList(paymentStore, schema.value);
+const { onNext, onPrev, goToPage } = usePagination(paymentStore, filters, (arr) => {
+  return arr.reduce<Record<string, any>>((acc, f) => {
+    if (f.value !== '' && f.value !== null && f.value !== undefined) acc[f.field] = f.value;
+    return acc;
+  }, {});
+});
 
-// загрузка меню и добавление в schema
-onMounted(async () => {
-  applyFilters();
+// --- Обёртка для applyFilters с синхронизацией с URL ---
+function applyFilters() {
+  rawApplyFilters();
+
+  // Обновляем URL
+  const query: Record<string, string> = {};
+  filters.value.forEach(f => {
+    if (f.value !== null && f.value !== '') query[f.field] = String(f.value);
+  });
+  router.replace({ query });
+}
+
+// --- Подстановка фильтров из URL при монтировании ---
+onMounted(() => {
+  let hasQuery = false;
+
+  filters.value.forEach(f => {
+    const queryValue = route.query[f.field];
+    if (queryValue !== undefined) {
+      f.value = queryValue as string;
+      hasQuery = true;
+    }
+  });
+
+  // Если есть хотя бы один query-параметр — сразу применяем фильтры
+  if (hasQuery) {
+    applyFilters();
+  } else {
+    // Иначе обычная загрузка без фильтров
+    applyFilters();
+  }
 });
 
 // колонки для таблицы
