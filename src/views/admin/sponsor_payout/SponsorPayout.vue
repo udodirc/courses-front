@@ -77,7 +77,8 @@ const columns = [
   { label: 'Спонсор', field: 'sponsor_name' },
   { label: 'Сумма', field: 'amount' },
   { label: 'Процент', field: 'percentage' },
-  { label: 'Уровень', field: 'level' },
+  { label: 'Процентный уровень', field: 'percentage_level' },
+  { label: 'Уровень партнера', field: 'partner_level' },
 ];
 </script>
 <template>

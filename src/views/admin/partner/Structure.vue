@@ -74,7 +74,7 @@ onMounted(() => loadStructure());
 const columns = [
   { label: 'ID', field: 'id' },
   { label: 'Логин', field: 'login' },
-  { label: 'Кол-во рефераллов', field: 'referrals_count' },
+  { label: 'Личных рефералов', field: 'referrals_count' },
   { label: 'Email', field: 'email' },
   { label: 'Телефон', field: 'phone' },
 ];

@@ -90,8 +90,8 @@ onMounted(() => {
     <BaseToggle
         v-model="formModel.status"
         label="Статус"
-        :activeLabel="'Активный'"
-        :inactiveLabel="'Неактивный'"
+        :activeLabel="'Включен'"
+        :inactiveLabel="'Выключен'"
     />
   </BaseForm>
 </template>
