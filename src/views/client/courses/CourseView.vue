@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import api from '../../../api';
 import { useRoute } from 'vue-router';
+import { storeToRefs } from 'pinia';
+import api from '../../../api';
 import seoState from '../../../seo/seo.js';
+import { usePartnerStore } from '../../../store/client/partner.store.ts';
 
 interface Course {
   id: number;
@@ -10,19 +12,7 @@ interface Course {
   short_description: string;
   description: string;
   price: number;
-  url: string;
-  meta_title?: string;
-  meta_description?: string;
-  meta_keywords?: string;
-  og_title?: string;
-  og_description?: string;
-  og_keywords?: string;
-  og_image?: string;
-  og_type?: string;
-  og_url?: string;
-  canonical_url?: string;
-  robots?: string;
-  createdAt: string;
+  currency?: string;
 }
 
 interface Lessons {
@@ -35,20 +25,29 @@ interface Lessons {
   formatted_duration: string;
   free_pay: boolean;
   status: boolean;
-  createdAt: string;
 }
 
 interface LessonGroup {
   section: string;
   lessons: Lessons[];
-  open: boolean; // состояние аккордеона
+  open: boolean;
 }
 
 const route = useRoute();
+const partnerStore = usePartnerStore();
+const { user } = storeToRefs(partnerStore);
+
 const course = ref<Course | null>(null);
 const groupedLessons = ref<LessonGroup[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
+
+const purchaseLoading = ref(false);
+const purchaseError = ref<string | null>(null);
+const purchaseModal = ref(false); // для модального окна
+const purchaseModalMessage = ref('');
+
+const userLoading = ref(false);
 
 const fetchCourse = async (slug: string | number) => {
   loading.value = true;
@@ -56,26 +55,6 @@ const fetchCourse = async (slug: string | number) => {
   try {
     const response = await api.get(`/courses/${slug}`);
     course.value = response.data.data;
-    const APP_URL = import.meta.env.VITE_APP_URL || '';
-    const VITE_PUBLIC_PROJECTS_OG_IMAGE_BASE_PATH = import.meta.env.VITE_PUBLIC_PROJECTS_OG_IMAGE_BASE_PATH || '';
-
-    if (course.value) {
-      const ogImage = (course.value.og_image != 'Og image')
-          ? APP_URL + VITE_PUBLIC_PROJECTS_OG_IMAGE_BASE_PATH + "/" + course.value.id + "/" + course.value.og_image
-          : '';
-
-      seoState.title = course.value.meta_title || '';
-      seoState.meta_description = course.value.meta_description || '';
-      seoState.meta_keywords = course.value.meta_keywords || '';
-      seoState.og_title = course.value.og_title || '';
-      seoState.og_description = course.value.og_description || '';
-      seoState.og_keywords = course.value.og_keywords || '';
-      seoState.og_image =  ogImage;
-      seoState.og_type = course.value.og_type || 'website';
-      seoState.og_url = course.value.og_url || window.location.href;
-      seoState.canonical_url = course.value.canonical_url || window.location.href;
-      seoState.robots = course.value.robots || 'index, follow';
-    }
   } catch (err: any) {
     error.value = err.response?.data?.message || 'Ошибка загрузки курса';
   } finally {
@@ -90,7 +69,6 @@ const fetchLessons = async (id: number) => {
     const response = await api.get(`/lessons/course/${id}`);
     const rawLessons = response.data.data as Lessons[];
 
-    // Группировка уроков по разделам и добавляем состояние "open"
     const grouped: LessonGroup[] = rawLessons.reduce((acc, lesson) => {
       const sectionName = lesson.course_section_name || 'Без раздела';
       let group = acc.find(g => g.section === sectionName);
@@ -114,7 +92,58 @@ const toggleSection = (group: LessonGroup) => {
   group.open = !group.open;
 };
 
+async function buyCourse() {
+  if (!course.value) return;
+
+  if (!user.value?.id) {
+    purchaseModalMessage.value = 'Вы должны быть авторизованы для покупки курса';
+    purchaseModal.value = true;
+    return;
+  }
+
+  purchaseLoading.value = true;
+  purchaseError.value = null;
+
+  try {
+    await api.post('/partner/payment', {
+      course_id: course.value.id,
+      partner_id: user.value.id,
+      order_number: crypto.randomUUID(),
+      amount: course.value.price,
+      payment_method: 'mybank',
+      metadata: [],
+      currency: course.value.currency || 'USD',
+      status: 'pending',
+    });
+
+    purchaseModalMessage.value = 'Курс успешно куплен!';
+    purchaseModal.value = true;
+
+  } catch (err: any) {
+    if (err.response?.data?.errors?.course_id) {
+      purchaseModalMessage.value = err.response.data.errors.course_id.join(', ');
+    } else if (err.response?.data?.message) {
+      purchaseModalMessage.value = err.response.data.message;
+    } else {
+      purchaseModalMessage.value = 'Ошибка при оплате';
+    }
+    purchaseModal.value = true;
+  } finally {
+    purchaseLoading.value = false;
+  }
+}
+
 onMounted(async () => {
+  userLoading.value = true;
+  if (partnerStore.token && !user.value) {
+    try {
+      await partnerStore.fetchUser();
+    } catch (e) {
+      console.error('Ошибка загрузки пользователя', e);
+    }
+  }
+  userLoading.value = false;
+
   await fetchCourse(route.params.slug as string);
   if (course.value) {
     await fetchLessons(course.value.id);
@@ -124,7 +153,7 @@ onMounted(async () => {
 
 <template>
   <main class="max-w-4xl mx-auto py-12 px-6">
-    <div v-if="loading" class="text-gray-500 text-center">Загрузка курса...</div>
+    <div v-if="loading || userLoading" class="text-gray-500 text-center">Загрузка курса...</div>
     <div v-else-if="error" class="text-red-500 text-center">{{ error }}</div>
 
     <div v-else-if="course">
@@ -132,7 +161,6 @@ onMounted(async () => {
       <div class="mb-6 prose" v-html="course.short_description"></div>
       <div class="mb-6 prose" v-html="course.description"></div>
 
-      <!-- Аккордеон уроков -->
       <div v-for="group in groupedLessons" :key="group.section" class="mb-4 border rounded-lg overflow-hidden">
         <button
             @click="toggleSection(group)"
@@ -152,14 +180,36 @@ onMounted(async () => {
           </li>
         </ul>
       </div>
+
+      <div class="mt-8 text-center">
+        <button
+            class="w-full max-w-md mx-auto px-6 py-4 bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-100 disabled:opacity-50"
+            :disabled="purchaseLoading"
+            @click="buyCourse"
+        >
+          {{ purchaseLoading ? 'Обработка...' : `Купить курс за ${course.price} ${course.currency || 'USD'}` }}
+        </button>
+      </div>
     </div>
 
     <div v-else class="text-gray-500 text-center">Курс не найден</div>
+
+    <!-- Модальное окно ошибок -->
+    <div v-if="purchaseModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div class="bg-white p-6 rounded-lg max-w-sm w-full">
+        <p class="mb-4">{{ purchaseModalMessage }}</p>
+        <button
+            class="bg-blue-500 text-white px-4 py-2 rounded"
+            @click="purchaseModal = false"
+        >
+          Закрыть
+        </button>
+      </div>
+    </div>
   </main>
 </template>
 
 <style scoped>
-/* Можно добавить плавное раскрытие аккордеона */
 ul {
   transition: max-height 0.3s ease-in-out;
 }
