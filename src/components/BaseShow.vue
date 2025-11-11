@@ -27,6 +27,7 @@ const customLabels: Record<string, string> = {
   menu_name: 'Меню',
   content: 'Контент',
   sponsor_name: 'Логин спонсора',
+  partner_name: 'Логин партнера',
   login: 'Логин',
   first_name: 'Имя',
   last_name: 'Фамилия',
@@ -48,6 +49,10 @@ const customLabels: Record<string, string> = {
   course_section_name: 'Название раздела курса',
   formatted_duration: 'Длительность',
   free_pay: 'Бесплатный урок',
+  order_number: 'Номер заказа',
+  amount: 'Сумма',
+  currency: 'Валюта',
+  payment_method: 'Система платежа',
 };
 
 // visibleFields с фильтром exclude
