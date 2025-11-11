@@ -33,6 +33,7 @@ onMounted(async () => {
 // колонки для таблицы
 const columns = [
   { label: 'ID', field: 'id' },
+  { label: 'Номер заказа', field: 'order_number' },
   { label: 'Название курса', field: 'course_name' },
   { label: 'Покупатель', field: 'partner_name' },
   { label: 'Сумма', field: 'amount' },
@@ -62,6 +63,7 @@ const columns = [
           :deleteItem="orderStore.deleteItem"
           :currentPage="orderStore.currentPage.value"
           :totalPages="orderStore.totalPages.value"
+          :showActions="false"
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"

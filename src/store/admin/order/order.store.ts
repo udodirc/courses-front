@@ -18,8 +18,8 @@ export function useOrderStoreWithGetters() {
     const orderList = computed(() =>
         store.items.map(item => ({
             ...item,
-            canToggleStatus: false,
-            canShowActions: false,
+            canToggleStatus: false,   // если тебе не нужно — оставь false
+            canShowActions: true,     // <--- включаем показывать колонку действий
             canEditAction: false,
         }))
     );
