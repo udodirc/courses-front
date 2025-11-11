@@ -92,6 +92,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: '/admin/lessons/create', name: 'AdminLessonCreate', component: () => import('../views/admin/lessons/LessonCreate.vue') },
             { path: 'lessons/:id/edit', name: 'AdminLessonEdit', component: () => import('../views/admin/lessons/LessonEdit.vue') },
             { path: '/admin/lessons/:id', name: 'AdminLessonShow', component: () => import('../views/admin/lessons/LessonShow.vue') },
+            { path: 'orders', name: 'AdminOrder', component: () => import('../views/admin/order/order.vue') },
         ],
     },
 
