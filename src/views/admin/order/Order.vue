@@ -6,19 +6,26 @@ import Filters from '../../../components/Filters.vue';
 import { useFilterList } from '../../../composables/useFilterList.ts';
 import { usePagination } from '../../../composables/usePagination.ts';
 import type { FilterSchemaItem } from '../../../types/Filters.ts';
+import { useFetchList } from '../../../composables/useFetchList';
+
+// Указываем тип, который соответствует ответу бэкенда
+type StatusOption = { label: string; value: string };
 
 const orderStore = useOrderStoreWithGetters();
+// ✅ Используем новый тип StatusOption
+const { items: statuses, fetchItems: fetchStatuses } = useFetchList<StatusOption>('/admin/orders/statuses');
+const { items: currencies, fetchItems: fetchCurrencies } = useFetchList<StatusOption>('/admin/orders/currencies');
 
 // схема фильтров
 const schema = ref<FilterSchemaItem[]>([
-  { field: 'order_number', label: 'Имя', type: 'text', col: 'left' },
-  { field: 'course_id', label: 'Раздел курса', type: 'text', col: 'middle' },
+  { field: 'order_number', label: 'Номер заказа', type: 'text', col: 'left' },
+  { field: 'course', label: 'Название курса', type: 'text', col: 'middle' },
+  { field: 'partner', label: 'Логин партнера', type: 'text', col: 'left' },
+  { field: 'amount', label: 'Сумма', type: 'text', col: 'middle' },
+  { field: 'pay_status', label: 'Статус', type: 'select', col: 'left', options: [] },
+  { field: 'currency', label: 'Валюта', type: 'select', col: 'middle', options: [] },
   { field: 'created_from', label: 'Создано с', type: 'date', col: 'left' },
   { field: 'created_to', label: 'Создано по', type: 'date', col: 'middle' },
-  { field: 'status', label: 'Статус', type: 'select', col: 'left', options: [
-      { label: 'Активный', value: 1 },
-      { label: 'Неактивный', value: 0 },
-    ] },
 ]);
 
 // composables
@@ -27,6 +34,21 @@ const { onNext, onPrev, goToPage } = usePagination(orderStore, filters, toFilter
 
 // загрузка данных
 onMounted(async () => {
+  await fetchStatuses();
+  await fetchCurrencies();
+
+  const statusFilter = schema.value.find(f => f.field === 'pay_status');
+
+  if (statusFilter) {
+    statusFilter.options = statuses.value;
+  }
+
+  const currencyFilter = schema.value.find(f => f.field === 'currency');
+
+  if (currencyFilter) {
+    currencyFilter.options = currencies.value;
+  }
+
   await applyFilters();
 });
 
@@ -47,7 +69,6 @@ const columns = [
     <main class="w-full flex-grow p-6">
       <h1 class="text-3xl text-black pb-6">Уроки</h1>
 
-      <!-- Фильтры -->
       <Filters
           v-model:filters="filters"
           :schema="schema"
