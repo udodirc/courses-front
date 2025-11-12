@@ -40,12 +40,6 @@ const course = ref<Course | null>(null);
 const groupedLessons = ref<LessonGroup[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
-
-const purchaseLoading = ref(false);
-const purchaseError = ref<string | null>(null);
-const purchaseModal = ref(false); // для модального окна
-const purchaseModalMessage = ref('');
-
 const userLoading = ref(false);
 
 const fetchCourse = async (slug: string | number) => {
@@ -91,47 +85,6 @@ const toggleSection = (group: LessonGroup) => {
   group.open = !group.open;
 };
 
-async function buyCourse() {
-  if (!course.value) return;
-
-  if (!user.value?.id) {
-    purchaseModalMessage.value = 'Вы должны быть авторизованы для покупки курса';
-    purchaseModal.value = true;
-    return;
-  }
-
-  purchaseLoading.value = true;
-  purchaseError.value = null;
-
-  try {
-    await api.post('/partner/payment', {
-      course_id: course.value.id,
-      partner_id: user.value.id,
-      order_number: crypto.randomUUID(),
-      amount: course.value.price,
-      payment_method: 'mybank',
-      metadata: [],
-      currency: course.value.currency || 'USD',
-      status: 'pending',
-    });
-
-    purchaseModalMessage.value = 'Курс успешно куплен!';
-    purchaseModal.value = true;
-
-  } catch (err: any) {
-    if (err.response?.data?.errors?.course_id) {
-      purchaseModalMessage.value = err.response.data.errors.course_id.join(', ');
-    } else if (err.response?.data?.message) {
-      purchaseModalMessage.value = err.response.data.message;
-    } else {
-      purchaseModalMessage.value = 'Ошибка при оплате';
-    }
-    purchaseModal.value = true;
-  } finally {
-    purchaseLoading.value = false;
-  }
-}
-
 onMounted(async () => {
   userLoading.value = true;
   if (partnerStore.token && !user.value) {
@@ -174,37 +127,17 @@ onMounted(async () => {
               :key="lesson.id"
               class="flex justify-between items-center px-4 py-3 border-t hover:bg-gray-50 transition"
           >
-            <span>{{ lesson.name }}</span>
+            <router-link
+                :to="`/partner/lesson/${lesson.id}`"
+            >
+              <span>{{ lesson.name }}</span>
+            </router-link>
             <span class="text-gray-500 text-sm">{{ lesson.formatted_duration }}</span>
           </li>
         </ul>
       </div>
-
-      <div class="mt-8 text-center">
-        <button
-            class="w-full max-w-md mx-auto px-6 py-4 bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-100 disabled:opacity-50"
-            :disabled="purchaseLoading"
-            @click="buyCourse"
-        >
-          {{ purchaseLoading ? 'Обработка...' : `Купить курс за ${course.price} ${course.currency || 'USD'}` }}
-        </button>
-      </div>
     </div>
-
     <div v-else class="text-gray-500 text-center">Курс не найден</div>
-
-    <!-- Модальное окно ошибок -->
-    <div v-if="purchaseModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div class="bg-white p-6 rounded-lg max-w-sm w-full">
-        <p class="mb-4">{{ purchaseModalMessage }}</p>
-        <button
-            class="bg-blue-500 text-white px-4 py-2 rounded"
-            @click="purchaseModal = false"
-        >
-          Закрыть
-        </button>
-      </div>
-    </div>
   </main>
 </template>
 
