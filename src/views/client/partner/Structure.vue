@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {computed, onMounted, ref} from 'vue';
-import { usePartnerStore } from '../../../store/client/partner.store';
+import { computed, onMounted } from 'vue';
+import { usePartnerStore } from '../../../store/client/partner/partner.store.ts';
 import ItemFrontList from '../../../components/ItemFrontList.vue';
 import { usePagination } from '../../../composables/usePagination';
 import { useStaticContent } from '../../../composables/useStaticContent';

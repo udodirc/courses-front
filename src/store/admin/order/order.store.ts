@@ -5,7 +5,7 @@ import type { CreateOrderDto } from '../../../dto/order.dto.ts';
 import { BaseStore } from '../../BaseStore';
 
 class OrderStore extends BaseStore<CreateOrderDto, Order> {
-    public storeId = 'admin-orders';
+    public storeId = 'admin-order';
     public api = new OrderApi();
 }
 

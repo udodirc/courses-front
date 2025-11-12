@@ -132,7 +132,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { usePartnerStore } from "../store/client/partner.store";
+import { usePartnerStore } from "../store/client/partner/partner.store.ts";
 import { useRouter } from "vue-router";
 
 const emit = defineEmits(["close"]);

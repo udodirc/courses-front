@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import api from '../../../api';
 import seoState from '../../../seo/seo.js';
-import { usePartnerStore } from '../../../store/client/partner.store.ts';
+import { usePartnerStore } from '../../../store/client/partner/partner.store.ts';
 
 interface Course {
   id: number;

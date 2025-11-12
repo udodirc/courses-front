@@ -4,4 +4,5 @@ import type { Order } from "../../../types/Order.ts";
 
 export class OrderApi extends BaseApi<CreateOrderDto, Order> {
     protected resource = 'orders';
+    protected urlPrefix = '/partner';
 }

@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../store/admin/auth/auth.store';
-import { usePartnerStore } from '../store/client/partner.store';
+import { usePartnerStore } from '../store/client/partner/partner.store.ts';
 import type { RouteRecordRaw } from 'vue-router';
 import { computed } from 'vue'; // Добавлен, если не было
 
@@ -92,8 +92,8 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: '/admin/lessons/create', name: 'AdminLessonCreate', component: () => import('../views/admin/lessons/LessonCreate.vue') },
             { path: 'lessons/:id/edit', name: 'AdminLessonEdit', component: () => import('../views/admin/lessons/LessonEdit.vue') },
             { path: '/admin/lessons/:id', name: 'AdminLessonShow', component: () => import('../views/admin/lessons/LessonShow.vue') },
-            { path: 'orders', name: 'AdminOrder', component: () => import('../views/admin/order/Order.vue') },
-            { path: '/admin/orders/:id', name: 'AdminOrderShow', component: () => import('../views/admin/order/OrderShow.vue') },
+            { path: 'order', name: 'AdminOrder', component: () => import('../views/admin/order/Order.vue') },
+            { path: '/admin/order/:id', name: 'AdminOrderShow', component: () => import('../views/admin/order/OrderShow.vue') },
         ],
     },
 
@@ -109,6 +109,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'stats', name: 'Stats', component: () => import('../views/client/partner/Stats.vue') },
             { path: 'courses', name: 'ClientCourses', component: () => import('../views/client/courses/Course.vue') },
             { path: 'courses/:slug', name: 'ClientCourseView', component: () => import('../views/client/courses/CourseView.vue') },
+            { path: 'orders', name: 'ClientOrders', component: () => import('../views/client/order/Order.vue') },
         ],
     },
     {

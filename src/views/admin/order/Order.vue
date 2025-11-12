@@ -13,8 +13,8 @@ type StatusOption = { label: string; value: string };
 
 const orderStore = useOrderStoreWithGetters();
 // ✅ Используем новый тип StatusOption
-const { items: statuses, fetchItems: fetchStatuses } = useFetchList<StatusOption>('/admin/orders/statuses');
-const { items: currencies, fetchItems: fetchCurrencies } = useFetchList<StatusOption>('/admin/orders/currencies');
+const { items: statuses, fetchItems: fetchStatuses } = useFetchList<StatusOption>('/admin/order/statuses');
+const { items: currencies, fetchItems: fetchCurrencies } = useFetchList<StatusOption>('/admin/order/currencies');
 
 // схема фильтров
 const schema = ref<FilterSchemaItem[]>([
@@ -80,7 +80,7 @@ const columns = [
           :key="orderStore.currentPage.value"
           :items="orderStore.orderList.value"
           :columns="columns"
-          :basePath="'/admin/orders'"
+          :basePath="'/admin/order'"
           :deleteItem="orderStore.deleteItem"
           :currentPage="orderStore.currentPage.value"
           :totalPages="orderStore.totalPages.value"

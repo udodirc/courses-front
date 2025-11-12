@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { usePartnerStore } from '../../../store/client/partner.store';
+import { usePartnerStore } from '../../../store/client/partner/partner.store.ts';
 import { useEntitySave } from '../../../composables/useEntitySave';
 
 import BaseInput from '../../../components/ui/BaseInput.vue';

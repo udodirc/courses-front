@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
-import { usePartnerStore } from '../../../store/client/partner.store';
+import { usePartnerStore } from '../../../store/client/partner/partner.store.ts';
 import BaseShow from '../../../components/BaseShow.vue';
 
 const partnerStore = usePartnerStore();

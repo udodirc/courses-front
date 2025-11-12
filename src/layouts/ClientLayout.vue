@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { RouterView, RouterLink, useRoute, useRouter } from "vue-router";
-import { usePartnerStore } from '../store/client/partner.store';
+import { usePartnerStore } from '../store/client/partner/partner.store.ts';
 import '../../public/styles/admin.css';
 
 const route = useRoute();
@@ -53,6 +53,7 @@ const allMenu: MenuItem[] = [
     icon: "fas fa-user",
     children: [
       { name: "Все курсы", path: "/partner/courses" },
+      { name: "Заказы", path: "/partner/orders" },
     ],
   },
 ];

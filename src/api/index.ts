@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/admin/auth/auth.store';
-import { usePartnerStore } from '../store/client/partner.store';
+import { usePartnerStore } from '../store/client/partner/partner.store.ts';
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,

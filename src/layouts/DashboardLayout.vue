@@ -71,7 +71,7 @@ const allMenu: MenuItem[] = [
     children: [
       { name: "Оплаченные курсы", path: "/admin/courses-payments" },
       { name: "Спонсорские выплаты", path: "/admin/sponsors-payouts" },
-      { name: "Заказы", path: "/admin/orders" },
+      { name: "Заказы", path: "/admin/order" },
     ],
   },
   {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { usePartnerStore } from '../../../store/client/partner.store';
+import { usePartnerStore } from '../../../store/client/partner/partner.store.ts';
 import { onMounted } from 'vue';
 import { computed } from 'vue';
 import { useStaticContent } from '../../../composables/useStaticContent';
