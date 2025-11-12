@@ -76,6 +76,17 @@ const emit = defineEmits([
               }}
             </a>
           </template>
+          <template v-else-if="col.field === 'order_number'">
+            <a
+                :href="`/admin/orders/${item.id}`"
+                class="text-blue-600 hover:underline"
+            >
+              {{ col.format
+                ? col.format(col.field.split('.').reduce((acc, key) => acc?.[key], item), item)
+                : col.field.split('.').reduce((acc, key) => acc?.[key], item)
+              }}
+            </a>
+          </template>
           <template v-else-if="col.field === 'sponsor_name'">
             <a
                 :href="`/admin/partners/${item.sponsor_id}`"

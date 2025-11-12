@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import api from '../../api';
-import { FrontPartnerApi } from '../../api/front/partner/partner.api';
-import type { Partner } from '../../types/Partner';
+import api from '../../../api';
+import { FrontPartnerApi } from '../../../api/front/partner/partner.api.ts';
+import type { Partner } from '../../../types/Partner.ts';
 
 const partnerApi = new FrontPartnerApi();
 
