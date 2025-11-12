@@ -108,6 +108,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'invited-partners', name: 'InvitedPartners', component: () => import('../views/client/partner/Invitedpartners.vue') },
             { path: 'stats', name: 'Stats', component: () => import('../views/client/partner/Stats.vue') },
             { path: 'courses', name: 'ClientCourses', component: () => import('../views/client/courses/Course.vue') },
+            { path: 'my-courses', name: 'ClientMyCourses', component: () => import('../views/client/courses/MyCourse.vue') },
             { path: 'courses/:slug', name: 'ClientCourseView', component: () => import('../views/client/courses/CourseView.vue') },
             { path: 'orders', name: 'ClientOrders', component: () => import('../views/client/order/Order.vue') },
         ],

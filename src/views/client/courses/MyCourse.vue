@@ -27,7 +27,7 @@ const fetchCourses = async (page = 1) => {
   error.value = null;
 
   try {
-    const response = await api.get(`/courses?page=${page}`);
+    const response = await api.get(`/partner/my-courses?page=${page}`);
     courses.value = response.data.data;
 
     currentPage.value = response.data.meta.current_page;
@@ -83,9 +83,6 @@ const getCourseImage = (course: Course) => {
             <div>
               <h2 class="font-semibold text-lg mb-1 line-clamp-2">{{ course.name }}</h2>
               <p class="text-gray-600 text-sm mb-2 line-clamp-3">{{ course.short_description }}</p>
-            </div>
-            <div class="mt-auto flex items-center justify-end">
-              <span class="font-bold text-indigo-600 text-lg">${{ course.price }}</span>
             </div>
           </div>
         </router-link>

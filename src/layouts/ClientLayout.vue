@@ -53,6 +53,7 @@ const allMenu: MenuItem[] = [
     icon: "fas fa-user",
     children: [
       { name: "Все курсы", path: "/partner/courses" },
+      { name: "Мои курсы", path: "/partner/my-courses" },
       { name: "Заказы", path: "/partner/orders" },
     ],
   },
