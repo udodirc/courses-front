@@ -15,13 +15,14 @@ const router = useRouter();
 
 // схема фильтров
 const schema = ref<FilterSchemaItem[]>([
-  { field: 'customer', label: 'Покупатель', type: 'text', col: 'left' },
-  { field: 'status', label: 'Статус', type: 'select', col: 'middle', options: [
-      { label: 'Активный', value: 1 },
-      { label: 'Неактивный', value: 0 },
-    ] },
+  { field: 'course', label: 'Курс', type: 'text', col: 'left' },
+  { field: 'customer', label: 'Покупатель', type: 'text', col: 'middle' },
   { field: 'created_from', label: 'Создано с', type: 'date', col: 'left' },
   { field: 'created_to', label: 'Создано по', type: 'date', col: 'middle' },
+  { field: 'status', label: 'Статус', type: 'select', col: 'left', options: [
+      { label: 'Активный', value: 1 },
+      { label: 'Неактивный', value: 0 },
+  ]},
 ]);
 
 // composables
