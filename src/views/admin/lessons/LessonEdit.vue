@@ -19,6 +19,8 @@ const { currentLesson } = useLessonStoreWithGetters();
 const { error, setError } = useErrorHandler();
 const loading = ref(false);
 
+const videoFileInputRef = ref<HTMLInputElement | null>(null);
+
 const formModel = reactive({
   name: '',
   content: '',
@@ -26,11 +28,17 @@ const formModel = reactive({
   status: 1,
   free_pay: true,
   course_section_id: null as number | null,
+  video: null as File | string | null,
+  video_dir: '',
+  video_url: '',
+  video_all_dir: '',
+  video_preview: '',
 });
 
-// заполняем форму при изменении currentLesson
+// --- Заполнение формы при загрузке данных ---
 watch(currentLesson, (val) => {
   if (!val) return;
+
   Object.assign(formModel, {
     name: val.name,
     content: val.content,
@@ -38,10 +46,16 @@ watch(currentLesson, (val) => {
     status: val.status ?? 1,
     free_pay: val.free_pay ?? 1,
     course_section_id: val.course_section_id ?? null,
+    video: val.video ?? null,
+    video_dir: val.video_dir ?? '',
+    video_all_dir: val.video_all_dir ?? '',
+    video_preview: val.video_url
+        ? `${val.video_url}/${val.video}`
+        : '',
   });
 });
 
-// 🔥 computed для редактирования duration в формате "мм:сс"
+// --- computed для duration (мм:сс) ---
 const formattedDuration = computed({
   get: () => {
     const totalSeconds = formModel.duration || 0;
@@ -55,13 +69,76 @@ const formattedDuration = computed({
   },
 });
 
-// сохранение формы
+// --- Загрузка нового видео ---
+const handleVideoFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (!target.files || !target.files[0]) return;
+
+  const file = target.files[0];
+
+  // 🔍 Проверка формата
+  if (!file.type.startsWith('video/')) {
+    alert('Пожалуйста, выберите видеофайл.');
+    if (videoFileInputRef.value) videoFileInputRef.value.value = '';
+    return;
+  }
+
+  if (formModel.video_preview.startsWith('blob:')) {
+    URL.revokeObjectURL(formModel.video_preview);
+  }
+
+  formModel.video = file;
+  formModel.video_preview = URL.createObjectURL(file);
+};
+
+// --- Удаление видео ---
+const removeVideo = async () => {
+  try {
+    if (typeof formModel.video === 'string' && formModel.video !== '') {
+      await api.delete(`/admin/files/${formModel.video_dir}/${lessonId}` , {
+        data: { dir: formModel.video_all_dir, filename: formModel.video }
+      });
+    }
+
+    if (formModel.video_preview.startsWith('blob:'))
+      URL.revokeObjectURL(formModel.video_preview);
+
+    formModel.video = null;
+    formModel.video_preview = '';
+
+    if (videoFileInputRef.value) videoFileInputRef.value.value = '';
+  } catch (e) {
+    console.error('Ошибка при удалении видео', e);
+  }
+};
+
+// --- Сохранение формы ---
 const save = async () => {
   loading.value = true;
   error.value = null;
 
   try {
-    await api.put(`/admin/lessons/${lessonId}`, { ...formModel });
+    const payload = new FormData();
+    payload.append('name', formModel.name);
+    payload.append('content', formModel.content);
+    payload.append('duration', String(formModel.duration));
+    payload.append('status', String(formModel.status));
+    payload.append('free_pay', formModel.free_pay ? '1' : '0');
+
+    if (formModel.course_section_id) {
+      payload.append('course_section_id', String(formModel.course_section_id));
+    }
+
+    if (formModel.video instanceof File) {
+      payload.append('video', formModel.video);
+    } else if (formModel.video === null) {
+      payload.append('video', '');
+    }
+
+    await api.post(`/admin/lessons/${lessonId}`, payload, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+
     router.push('/admin/lessons');
   } catch (e: any) {
     setError(e);
@@ -70,6 +147,7 @@ const save = async () => {
   }
 };
 
+// --- При монтировании ---
 onMounted(() => {
   if (!isNaN(lessonId)) {
     useLessonStore().fetchItem(lessonId);
@@ -86,7 +164,6 @@ onMounted(() => {
     <BaseInput v-model="formModel.name" label="Имя" required class="mb-4" />
     <BaseTextAreaWithEditor v-model="formModel.content" label="Контент" required class="w-full mb-4" />
 
-    <!-- Duration в формате мм:сс -->
     <BaseInput
         v-model="formattedDuration"
         label="Длительность (мин:сек)"
@@ -102,6 +179,7 @@ onMounted(() => {
         :inactiveLabel="'Неактивный'"
         class="mb-4"
     />
+
     <BaseToggle
         v-model="formModel.free_pay"
         label="Бесплатный просмотр"
@@ -109,5 +187,40 @@ onMounted(() => {
         :inactiveLabel="'Неактивный'"
         class="mb-4"
     />
+
+    <!-- Видео урок -->
+    <div class="mb-4">
+      <label class="block text-sm text-gray-600 mb-1">Видео урок</label>
+
+      <label
+          class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg shadow cursor-pointer hover:bg-green-700 transition"
+      >
+        <span>Выбрать видео</span>
+        <input
+            ref="videoFileInputRef"
+            type="file"
+            accept="video/*"
+            class="hidden"
+            @change="handleVideoFileChange"
+        />
+      </label>
+
+      <!-- Превью видео -->
+      <div v-if="formModel.video_preview" class="relative group mt-3">
+        <video
+            :src="formModel.video_preview"
+            controls
+            class="w-full max-h-64 rounded-lg border"
+        ></video>
+
+        <button
+            type="button"
+            class="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
+            @click="removeVideo"
+        >
+          ✕ Удалить
+        </button>
+      </div>
+    </div>
   </BaseForm>
 </template>
