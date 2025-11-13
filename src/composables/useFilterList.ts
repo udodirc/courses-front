@@ -1,21 +1,21 @@
-// composables/useFilterList.ts
 import { ref } from 'vue';
 import type { Ref } from 'vue';
 
+export type FilterSchemaItem = { field: string; label: string; type: 'text' | 'email' | 'select' | 'date'; col?: string; options?: { label: string; value: any }[] };
 export type FilterItem = { field: string; value: string | number };
-export type SchemaItem = { field: string; label: string; type: 'text' | 'email' | 'select' | 'date'; col?: string; options?: { label: string; value: any }[] };
 
-export function useFilterList(store: any, schema: SchemaItem[]) {
+export function useFilterList(store: any, schema: FilterSchemaItem[], baseUrl: string = '') {
     const filters: Ref<FilterItem[]> = ref(schema.map(f => ({ field: f.field, value: '' })));
 
-    function toFilterObject(arr: FilterItem[]) {
+    function toFilterObject(arr: FilterItem[]): Record<string, any> {
         return arr.reduce<Record<string, any>>((acc, f) => {
             if (f.value !== '' && f.value !== null && f.value !== undefined) acc[f.field] = f.value;
             return acc;
         }, {});
     }
 
-    const applyFilters = () => store.fetchList(toFilterObject(filters.value), 1);
+    // ✅ Теперь applyFilters передает baseUrl
+    const applyFilters = () => store.fetchList(toFilterObject(filters.value), 1, baseUrl);
 
     const resetFilters = () => {
         filters.value = schema.map(f => ({ field: f.field, value: '' }));
