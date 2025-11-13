@@ -103,7 +103,7 @@ const confirmPayment = async () => {
       />
 
       <router-link
-          to="/admin/partner/create"
+          to="/admin/partners/create"
           class="inline-block mb-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded"
       >
         Создать
