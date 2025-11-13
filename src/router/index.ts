@@ -111,6 +111,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'my-courses', name: 'ClientMyCourses', component: () => import('../views/client/courses/MyCourse.vue') },
             { path: 'courses/:slug', name: 'ClientCourseView', component: () => import('../views/client/courses/CourseView.vue') },
             { path: 'my-courses/:slug', name: 'ClientMyCourseView', component: () => import('../views/client/courses/MyCourseView.vue') },
+            { path: 'lesson/:id', name: 'ClientMyLessonView', component: () => import('../views/client/courses/LessonView.vue') },
             { path: 'orders', name: 'ClientOrders', component: () => import('../views/client/order/Order.vue') },
         ],
     },

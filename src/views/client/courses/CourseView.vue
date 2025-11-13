@@ -174,8 +174,18 @@ onMounted(async () => {
               :key="lesson.id"
               class="flex justify-between items-center px-4 py-3 border-t hover:bg-gray-50 transition"
           >
-            <span>{{ lesson.name }}</span>
-            <span class="text-gray-500 text-sm">{{ lesson.formatted_duration }}</span>
+            <template v-if="lesson.free_pay">
+              <router-link
+                  :to="`/partner/lesson/${lesson.id}`"
+                  class="text-blue-600 hover:underline"
+              >
+                {{ lesson.name }}
+              </router-link>
+              - Бесплатный просмотр!
+            </template>
+            <template v-else>
+              <span>{{ lesson.name }}</span>
+            </template>
           </li>
         </ul>
       </div>

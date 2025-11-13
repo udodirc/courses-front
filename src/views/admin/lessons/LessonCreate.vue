@@ -9,6 +9,7 @@ import FormErrors from '../../../components/ui/FormErrors.vue';
 import BaseSelect from '../../../components/ui/BaseSelect.vue';
 import BaseTextAreaWithEditor from '../../../components/ui/BaseTextAreaWithEditor.vue';
 import BaseToggle from '../../../components/ui/BaseToggle.vue';
+import BaseFileUpload from '../../../components/ui/BaseFileUpload.vue';
 
 const router = useRouter();
 
@@ -19,6 +20,7 @@ interface FormModel {
   content: string;
   duration: number;
   free_pay: boolean;
+  video: File | null; // Добавили видео
 }
 
 const formModel = ref<FormModel>({
@@ -27,7 +29,8 @@ const formModel = ref<FormModel>({
   name: '',
   content: '',
   duration: 0,
-  free_pay: 1,
+  free_pay: false,
+  video: null,
 });
 
 const { items: courses, fetchItems: fetchCourses } = useFetchList<{ id: number; name: string }>('/admin/course');
@@ -52,9 +55,7 @@ watch(
 const formattedDuration = computed({
   get: () => {
     const totalSeconds = formModel.value.duration || 0;
-    const minutes = Math.floor(totalSeconds / 60)
-        .toString()
-        .padStart(2, '0');
+    const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
     const seconds = (totalSeconds % 60).toString().padStart(2, '0');
     return `${minutes}:${seconds}`;
   },
@@ -64,9 +65,40 @@ const formattedDuration = computed({
   },
 });
 
+// Загрузка видео
+const videoPreview = ref<string>('');
+const videoFileInputRef = ref<HTMLInputElement | null>(null);
+
+const handleVideoFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files[0]) {
+    formModel.value.video = target.files[0];
+    videoPreview.value = URL.createObjectURL(target.files[0]);
+  }
+};
+
+const removeVideo = () => {
+  formModel.value.video = null;
+  if (videoPreview.value.startsWith('blob:')) URL.revokeObjectURL(videoPreview.value);
+  videoPreview.value = '';
+  if (videoFileInputRef.value) videoFileInputRef.value.value = '';
+};
+
 async function save() {
   try {
-    await saveEntity('/admin/lessons', formModel.value);
+    const payload = new FormData();
+    payload.append('course_id', String(formModel.value.course_id));
+    payload.append('course_section_id', String(formModel.value.course_section_id));
+    payload.append('name', formModel.value.name);
+    payload.append('content', formModel.value.content);
+    payload.append('duration', String(formModel.value.duration));
+    payload.append('free_pay', formModel.value.free_pay ? '1' : '0');
+
+    if (formModel.value.video) {
+      payload.append('video', formModel.value.video);
+    }
+
+    await saveEntity('/admin/lessons', payload);
     router.push('/admin/lessons');
   } catch (e) {
     console.error('Ошибка при сохранении урока:', e);
@@ -94,7 +126,6 @@ async function save() {
     <BaseInput v-model="formModel.name" label="Имя" required class="mb-4" />
     <BaseTextAreaWithEditor v-model="formModel.content" label="Контент" required class="w-full mb-4" />
 
-    <!-- 🔥 Duration отображается как ММ:СС -->
     <BaseInput
         v-model="formattedDuration"
         label="Длительность (мин:сек)"
@@ -110,5 +141,33 @@ async function save() {
         inactiveLabel="Неактивный"
         class="mb-4"
     />
+
+    <!-- Видео -->
+    <div class="mb-4">
+      <label class="block text-sm text-gray-600 mb-1">Загрузить видео урок</label>
+
+      <BaseFileUpload
+          v-model="formModel.video"
+          label="Выбрать видео"
+          accept="video/*"
+          @change="handleVideoFileChange"
+          ref="videoFileInputRef"
+      />
+
+      <video
+          v-if="videoPreview"
+          :src="videoPreview"
+          controls
+          class="mt-2 w-full max-h-64"
+      ></video>
+      <button
+          v-if="videoPreview"
+          type="button"
+          class="mt-2 text-red-500"
+          @click="removeVideo"
+      >
+        Удалить видео
+      </button>
+    </div>
   </BaseForm>
 </template>
