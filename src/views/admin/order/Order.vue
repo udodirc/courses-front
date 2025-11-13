@@ -13,8 +13,8 @@ type StatusOption = { label: string; value: string };
 
 const orderStore = useOrderStoreWithGetters();
 // ✅ Используем новый тип StatusOption
-const { items: statuses, fetchItems: fetchStatuses } = useFetchList<StatusOption>('/admin/order/statuses');
-const { items: currencies, fetchItems: fetchCurrencies } = useFetchList<StatusOption>('/admin/order/currencies');
+const { items: statuses, fetchItems: fetchStatuses } = useFetchList<StatusOption>('/admin/orders/statuses');
+const { items: currencies, fetchItems: fetchCurrencies } = useFetchList<StatusOption>('/admin/orders/currencies');
 
 // схема фильтров
 const schema = ref<FilterSchemaItem[]>([
@@ -67,7 +67,7 @@ const columns = [
 <template>
   <div class="w-full h-screen overflow-x-hidden border-t flex flex-col">
     <main class="w-full flex-grow p-6">
-      <h1 class="text-3xl text-black pb-6">Уроки</h1>
+      <h1 class="text-3xl text-black pb-6">Заказы</h1>
 
       <Filters
           v-model:filters="filters"
