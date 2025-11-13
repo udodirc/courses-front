@@ -64,6 +64,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
                 component: () => import('../views/admin/partner/PartnerShow.vue'),
                 meta: { superadmin: true },
             },
+            { path: '/admin/partners/create', name: 'AdminPartnerCreate', component: () => import('../views/admin/partner/PartnerCreate.vue'), meta: { superadmin: true } },
             { path: 'partners/:id/edit', name: 'AdminPartnerEdit', component: () => import('../views/admin/partner/PartnerEdit.vue'), meta: { superadmin: true } },
             { path: 'levels', name: 'AdminLevels', component: () => import('../views/admin/level/Levels.vue') },
             { path: 'courses-payments', name: 'AdminCoursesPayments', component: () => import('../views/admin/course_payment/CoursePayment.vue') },
@@ -93,7 +94,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'lessons/:id/edit', name: 'AdminLessonEdit', component: () => import('../views/admin/lessons/LessonEdit.vue') },
             { path: '/admin/lessons/:id', name: 'AdminLessonShow', component: () => import('../views/admin/lessons/LessonShow.vue') },
             { path: 'order', name: 'AdminOrder', component: () => import('../views/admin/order/Order.vue') },
-            { path: '/admin/order/:id', name: 'AdminOrderShow', component: () => import('../views/admin/order/OrderShow.vue') },
+            { path: '/admin/orders/:id', name: 'AdminOrderShow', component: () => import('../views/admin/order/OrderShow.vue') },
         ],
     },
 
