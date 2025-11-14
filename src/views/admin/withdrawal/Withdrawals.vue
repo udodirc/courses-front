@@ -12,17 +12,17 @@ import { useFetchList } from '../../../composables/useFetchList';
 type StatusOption = { label: string; value: string };
 
 const withdrawalStore = useWithdrawalStoreWithGetters();
-const { items: statuses, fetchItems: fetchStatuses } = useFetchList<StatusOption>('/admin/orders/statuses');
-const { items: currencies, fetchItems: fetchCurrencies } = useFetchList<StatusOption>('/admin/orders/currencies');
+const { items: statuses, fetchItems: fetchStatuses } = useFetchList<StatusOption>('/admin/withdrawals/statuses');
+//const { items: currencies, fetchItems: fetchCurrencies } = useFetchList<StatusOption>('/admin/orders/currencies');
 
 // схема фильтров
 const schema = ref<FilterSchemaItem[]>([
   { field: 'partner', label: 'Логин партнера', type: 'text', col: 'left' },
   { field: 'amount', label: 'Сумма', type: 'text', col: 'middle' },
-  // { field: 'pay_status', label: 'Статус', type: 'select', col: 'left', options: [] },
   // { field: 'currency', label: 'Валюта', type: 'select', col: 'middle', options: [] },
   { field: 'created_from', label: 'Создано с', type: 'date', col: 'left' },
   { field: 'created_to', label: 'Создано по', type: 'date', col: 'middle' },
+  { field: 'withdrawal_status', label: 'Статус', type: 'select', col: 'left', options: [] },
 ]);
 
 // composables
@@ -32,19 +32,19 @@ const { onNext, onPrev, goToPage } = usePagination(withdrawalStore, filters, toF
 // загрузка данных
 onMounted(async () => {
   await fetchStatuses();
-  await fetchCurrencies();
+  // await fetchCurrencies();
 
-  const statusFilter = schema.value.find(f => f.field === 'pay_status');
+  const statusFilter = schema.value.find(f => f.field === 'withdrawal_status');
 
   if (statusFilter) {
     statusFilter.options = statuses.value;
   }
 
-  const currencyFilter = schema.value.find(f => f.field === 'currency');
-
-  if (currencyFilter) {
-    currencyFilter.options = currencies.value;
-  }
+  // const currencyFilter = schema.value.find(f => f.field === 'currency');
+  //
+  // if (currencyFilter) {
+  //   currencyFilter.options = currencies.value;
+  // }
 
   await applyFilters();
 });
