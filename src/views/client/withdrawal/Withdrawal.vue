@@ -12,11 +12,9 @@ const { staticContent, loadingStatic, staticContentError, fetchStaticContent } =
 
 const withdrawalStore = useWithdrawalStore();
 const schema = ref<FilterSchemaItem[]>([
-  { field: 'partner', label: 'Логин партнера', type: 'text', col: 'left' },
-  { field: 'amount', label: 'Сумма', type: 'text', col: 'middle' },
-  // { field: 'currency', label: 'Валюта', type: 'select', col: 'middle', options: [] },
   { field: 'created_from', label: 'Создано с', type: 'date', col: 'left' },
   { field: 'created_to', label: 'Создано по', type: 'date', col: 'middle' },
+  { field: 'amount', label: 'Сумма', type: 'text', col: 'left' },
   //{ field: 'withdrawal_status', label: 'Статус', type: 'select', col: 'left', options: [] },
 ]);
 
