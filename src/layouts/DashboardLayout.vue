@@ -72,6 +72,7 @@ const allMenu: MenuItem[] = [
       { name: "Оплаченные курсы", path: "/admin/courses-payments" },
       { name: "Спонсорские выплаты", path: "/admin/sponsors-payouts" },
       { name: "Заказы", path: "/admin/order" },
+      { name: "Запросы на вывод", path: "/admin/withdrawals" },
     ],
   },
   {

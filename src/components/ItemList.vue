@@ -10,6 +10,7 @@ interface Props {
   currentPage: number;
   totalPages: number;
   showActions?: boolean;
+  listID?: string
 }
 
 // ✅ Задаём дефолтное значение через withDefaults
@@ -17,7 +18,7 @@ const props = withDefaults(defineProps<Props>(), {
   showActions: true,
 });
 
-const emit = defineEmits(['prev', 'next', 'go', 'refresh', 'payment']);
+const emit = defineEmits(['prev', 'next', 'go', 'refresh', 'payment', 'changeStatus']);
 
 const { view, edit, toggleStatus, toggleFreePay, changeOrder, delete: destroy, payment, structure } =
     useCrudActions(props.basePath, props.deleteItem, emit);
@@ -25,6 +26,7 @@ const { view, edit, toggleStatus, toggleFreePay, changeOrder, delete: destroy, p
 
 <template>
   <CrudList
+      :listID="props.listID"
       :key="currentPage"
       :items="items"
       :columns="columns"
@@ -43,5 +45,6 @@ const { view, edit, toggleStatus, toggleFreePay, changeOrder, delete: destroy, p
       @delete="destroy"
       @payment="payment"
       @structure="structure"
+      @changeStatus="(data) => emit('changeStatus', data)"
   />
 </template>

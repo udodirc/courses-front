@@ -95,6 +95,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: '/admin/lessons/:id', name: 'AdminLessonShow', component: () => import('../views/admin/lessons/LessonShow.vue') },
             { path: 'order', name: 'AdminOrder', component: () => import('../views/admin/order/Order.vue') },
             { path: '/admin/orders/:id', name: 'AdminOrderShow', component: () => import('../views/admin/order/OrderShow.vue') },
+            { path: 'withdrawals', name: 'AdminWithdrawal', component: () => import('../views/admin/withdrawal/Withdrawals.vue') },
         ],
     },
 
@@ -114,6 +115,8 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'my-courses/:slug', name: 'ClientMyCourseView', component: () => import('../views/client/courses/MyCourseView.vue') },
             { path: 'lesson/:id', name: 'ClientMyLessonView', component: () => import('../views/client/courses/LessonView.vue') },
             { path: 'orders', name: 'ClientOrders', component: () => import('../views/client/order/Order.vue') },
+            { path: 'withdrawals', name: 'ClientWithdrawal', component: () => import('../views/client/withdrawal/Withdrawal.vue') },
+            { path: 'withdrawal/create', name: 'ClientWithdrawalCreate', component: () => import('../views/client/withdrawal/CreateWithdrawal.vue') },
         ],
     },
     {

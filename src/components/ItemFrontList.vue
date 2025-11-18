@@ -13,8 +13,8 @@ interface Props {
 
 const props = defineProps<Props>();
 
-// ✅ вот это добавляем
-const emit = defineEmits(['prev', 'next', 'go']);
+// ✅ ИСПРАВЛЕНИЕ: Добавляем 'refresh' в список событий, которые может испускать компонент
+const emit = defineEmits(['prev', 'next', 'go', 'refresh']);
 
 const mappedItems = computed(() =>
     props.items.map(item => ({
