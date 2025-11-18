@@ -13,7 +13,6 @@ type StatusOption = { label: string; value: string };
 
 const withdrawalStore = useWithdrawalStoreWithGetters();
 const { items: statuses, fetchItems: fetchStatuses } = useFetchList<StatusOption>('/admin/withdrawals/statuses');
-//const { items: currencies, fetchItems: fetchCurrencies } = useFetchList<StatusOption>('/admin/orders/currencies');
 
 // схема фильтров
 const schema = ref<FilterSchemaItem[]>([
@@ -31,7 +30,6 @@ const { onNext, onPrev, goToPage } = usePagination(withdrawalStore, filters, toF
 // загрузка данных
 onMounted(async () => {
   await fetchStatuses();
-  // await fetchCurrencies();
 
   const statusFilter = schema.value.find(f => f.field === 'withdrawal_status');
 
@@ -39,14 +37,10 @@ onMounted(async () => {
     statusFilter.options = statuses.value;
   }
 
-  // const currencyFilter = schema.value.find(f => f.field === 'currency');
-  //
-  // if (currencyFilter) {
-  //   currencyFilter.options = currencies.value;
-  // }
-
   await applyFilters();
 });
+
+const listID = 'withdrawals';
 
 // колонки для таблицы
 const columns = [
@@ -71,6 +65,7 @@ const columns = [
       />
 
       <ItemList
+          :listID="listID"
           :key="withdrawalStore.currentPage.value"
           :items="withdrawalStore.withdrawalList.value"
           :columns="columns"
@@ -83,6 +78,10 @@ const columns = [
           @prev="onPrev"
           @go="goToPage"
           @refresh="applyFilters"
+          @changeStatus="async ({ id, newStatus }) => {
+              await withdrawalStore.changeStatus(id, newStatus);
+              await applyFilters();
+          }"
       />
     </main>
   </div>
