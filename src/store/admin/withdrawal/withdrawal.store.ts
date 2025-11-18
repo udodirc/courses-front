@@ -24,15 +24,24 @@ export function useWithdrawalStoreWithGetters() {
     );
 
     async function changeStatus(id: number, status: string) {
-        await saveEntity(
-            '/admin/withdrawals/change-status',
-            { id, status },
-            {
-                headers: {
-                    'Content-Type': 'application/json'
+        try {
+            await saveEntity(
+                '/admin/withdrawals/change-status',
+                { id, status },
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 }
-            }
-        );
+            );
+        } catch (e: any) {
+            const message =
+                e?.response?.data?.message ||
+                e?.response?.data?.error ||
+                'Неизвестная ошибка';
+
+            alert(message);
+        }
     }
 
     const currentWithdrawal = computed(() => store.item);
