@@ -14,6 +14,9 @@ const lesson = ref<any | null>(null);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
+const partnerId = Number(localStorage.getItem('partner_id'));
+console.log(partnerId);
+
 const fetchLesson = async () => {
   loading.value = true;
   try {
@@ -197,7 +200,7 @@ onMounted(fetchLesson);
                 </div>
 
                 <button
-                    v-if="editingCommentId !== c.id"
+                    v-if="((editingCommentId !== c.id) && (partnerId == c.author_id))"
                     @click="startEdit(c)"
                     class="text-blue-600 hover:underline text-sm ml-4"
                 >
