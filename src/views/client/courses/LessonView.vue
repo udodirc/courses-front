@@ -15,7 +15,6 @@ const loading = ref(true);
 const error = ref<string | null>(null);
 
 const partnerId = Number(localStorage.getItem('partner_id'));
-console.log(partnerId);
 
 const fetchLesson = async () => {
   loading.value = true;
