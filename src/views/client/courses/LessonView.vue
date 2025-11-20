@@ -2,7 +2,11 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '../../../api';
+import { useLessonComments } from '../../../composables/useLessonComments';
 
+// -----------------------------
+// БАЗОВЫЕ ДАННЫЕ УРОКА
+// -----------------------------
 const route = useRoute();
 const lessonId = Number(route.params.id);
 
@@ -15,15 +19,20 @@ const fetchLesson = async () => {
   try {
     const { data } = await api.get(`/partner/lessons/${lessonId}`);
     lesson.value = data.data;
+
+    // загружаем комментарии после получения урока
+    await fetchComments(lessonId);
+
   } catch (e: any) {
-    console.error('Ошибка загрузки урока:', e);
     error.value = 'Не удалось загрузить урок';
   } finally {
     loading.value = false;
   }
 };
 
-// 🎬 Формируем ссылку на видео
+// -----------------------------
+// ВИДЕО
+// -----------------------------
 const videoSrc = computed(() => {
   if (!lesson.value) return '';
   if (lesson.value.video_url && lesson.value.video)
@@ -33,31 +42,70 @@ const videoSrc = computed(() => {
   return '';
 });
 
+// -----------------------------
+// КОММЕНТАРИИ
+// -----------------------------
+const {
+  comments,
+  loading: commentsLoading,
+  error: commentsError,
+  fetchComments,
+} = useLessonComments();
+
+const newComment = ref('');
+const sending = ref(false);
+const sendError = ref<string | null>(null);
+
+const sendComment = async () => {
+  if (!newComment.value.trim()) return;
+
+  sending.value = true;
+  sendError.value = null;
+
+  try {
+    await api.post('/partner/lesson-comment', {
+      lesson_id: lessonId,
+      comment: newComment.value,
+    });
+
+    newComment.value = '';
+
+    // обновить список комментариев
+    await fetchComments(lessonId);
+
+  } catch (e: any) {
+    sendError.value = e?.response?.data?.message || 'Ошибка отправки';
+  } finally {
+    sending.value = false;
+  }
+};
+
 onMounted(fetchLesson);
 </script>
 
 <template>
   <div class="p-6">
+    <!-- Загрузка -->
     <div v-if="loading" class="text-gray-500 text-center py-10">
       Загрузка урока...
     </div>
 
+    <!-- Ошибка -->
     <div v-else-if="error" class="text-red-500 text-center py-10">
       {{ error }}
     </div>
 
+    <!-- Контент урока -->
     <div v-else-if="lesson" class="max-w-4xl mx-auto space-y-6">
-      <!-- Название курса -->
       <div class="text-sm text-gray-500">
         Курс: <span class="font-semibold text-gray-800">{{ lesson.course_name }}</span>
       </div>
 
-      <!-- Название урока -->
       <h1 class="text-3xl font-bold text-gray-900">
         {{ lesson.name }}
       </h1>
 
-      <!-- Видео урока -->
+      <!-- Видео -->
       <div v-if="videoSrc" class="mt-4">
         <video
             :src="videoSrc"
@@ -73,16 +121,75 @@ onMounted(fetchLesson);
         🎥 Видео недоступно
       </div>
 
-      <!-- Длительность -->
       <div class="text-gray-500 text-sm">
         Длительность: {{ lesson.formatted_duration }}
       </div>
 
-      <!-- Контент урока -->
+      <!-- Контент -->
       <div
           class="prose prose-gray max-w-none border-t pt-6"
           v-html="lesson.content"
       ></div>
+
+      <!-- ========================= -->
+      <!--       КОММЕНТАРИИ         -->
+      <!-- ========================= -->
+
+      <div class="mt-10 border-t pt-6">
+
+        <h2 class="text-2xl font-semibold mb-4">Комментарии</h2>
+
+        <!-- Ошибка -->
+        <div v-if="commentsError[lessonId]" class="text-red-500">
+          {{ commentsError[lessonId] }}
+        </div>
+
+        <!-- Лоадер -->
+        <div v-else-if="commentsLoading[lessonId]" class="text-gray-400">
+          Загрузка комментариев...
+        </div>
+
+        <!-- Список -->
+        <div v-else>
+          <div v-if="comments[lessonId]?.length" class="space-y-4">
+            <div
+                v-for="c in comments[lessonId]"
+                :key="c.id"
+                class="p-4 bg-gray-50 border rounded-lg"
+            >
+              <div class="font-semibold text-gray-800 comment_author">{{ c.author }}</div>
+              <div class="font-semibold text-gray-800">{{ c.user_name }}</div>
+              <div class="text-gray-700 mt-1">{{ c.comment }}</div>
+              <div class="text-xs text-gray-400 mt-2">{{ c.createdAt }}</div>
+            </div>
+          </div>
+
+          <div v-else class="text-gray-400 italic">
+            Нет комментариев
+          </div>
+        </div>
+
+        <!-- Форма -->
+        <div class="mt-6 p-4 border rounded-lg bg-white shadow-sm">
+          <textarea
+              v-model="newComment"
+              class="w-full border rounded p-3 focus:outline-none"
+              placeholder="Напишите комментарий..."
+              rows="3"
+          ></textarea>
+
+          <div v-if="sendError" class="text-red-500 mt-1">{{ sendError }}</div>
+
+          <button
+              @click="sendComment"
+              :disabled="sending"
+              class="mt-3 px-4 py-2 bg-blue-600 text-white rounded disabled:bg-gray-400"
+          >
+            {{ sending ? 'Отправка...' : 'Отправить' }}
+          </button>
+        </div>
+
+      </div>
     </div>
 
     <div v-else class="text-red-500 text-center py-10">
@@ -95,5 +202,8 @@ onMounted(fetchLesson);
 .prose :where(img, video) {
   max-width: 100%;
   border-radius: 8px;
+}
+.comment_author {
+  font-size: 12px;
 }
 </style>
