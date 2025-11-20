@@ -18,6 +18,9 @@ export function useLessonCommentsStoreWithGetters() {
     const lessonCommentsList = computed(() =>
         store.items.map(item => ({
             ...item,
+            canToggleStatus: false,
+            canShowAction: false,
+            canEditAction: false,
         }))
     );
 
