@@ -8,6 +8,7 @@ import { usePagination } from '../../../composables/usePagination.ts';
 import type { FilterSchemaItem } from '../../../types/Filters.ts';
 
 const lessonCommentsStore = useLessonCommentsStoreWithGetters();
+const listID = 'lesson-comments';
 
 // схема фильтров
 const schema = ref<FilterSchemaItem[]>([
@@ -48,6 +49,7 @@ const columns = [
       />
 
       <ItemList
+          :listID="listID"
           :key="lessonCommentsStore.currentPage.value"
           :items="lessonCommentsStore.lessonCommentsList.value"
           :columns="columns"

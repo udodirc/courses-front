@@ -124,6 +124,15 @@ function handleStatusChange(event: Event, item: any) {
             </a>
           </template>
 
+          <template v-else-if="col.field === 'lesson' && props.listID === 'lesson-comments'">
+            <a
+                :href="`/admin/lessons-comments/${item.lesson_id}`"
+                class="text-blue-600 hover:underline"
+            >
+              {{ item[col.field] }}
+            </a>
+          </template>
+
           <!-- ORDER -->
           <template v-else-if="col.field === 'order_number'">
             <a
