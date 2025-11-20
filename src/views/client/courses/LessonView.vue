@@ -80,22 +80,64 @@ const sendComment = async () => {
   }
 };
 
+// -----------------------------
+// ЛОГИКА РЕДАКТИРОВАНИЯ
+// -----------------------------
+const editingCommentId = ref<number | null>(null);
+const editedCommentText = ref('');
+const savingComment = ref(false);
+const editError = ref<string | null>(null);
+
+// Переключает комментарий в режим редактирования
+const startEdit = (comment: any) => {
+  editingCommentId.value = comment.id;
+  editedCommentText.value = comment.comment;
+  editError.value = null;
+};
+
+// Отменяет режим редактирования
+const cancelEdit = () => {
+  editingCommentId.value = null;
+  editedCommentText.value = '';
+};
+
+// Сохраняет отредактированный комментарий
+const saveEditedComment = async () => {
+  if (!editedCommentText.value.trim()) return;
+
+  savingComment.value = true;
+  editError.value = null;
+
+  try {
+    // Используем PATCH или PUT запрос для обновления ресурса
+    await api.put(`/partner/lesson-comment/${editingCommentId.value}`, {
+      comment: editedCommentText.value,
+    });
+
+    // Очищаем и обновляем список
+    await fetchComments(lessonId);
+    cancelEdit();
+
+  } catch (e: any) {
+    editError.value = e?.response?.data?.message || 'Ошибка сохранения';
+  } finally {
+    savingComment.value = false;
+  }
+};
+
 onMounted(fetchLesson);
 </script>
 
 <template>
   <div class="p-6">
-    <!-- Загрузка -->
     <div v-if="loading" class="text-gray-500 text-center py-10">
       Загрузка урока...
     </div>
 
-    <!-- Ошибка -->
     <div v-else-if="error" class="text-red-500 text-center py-10">
       {{ error }}
     </div>
 
-    <!-- Контент урока -->
     <div v-else-if="lesson" class="max-w-4xl mx-auto space-y-6">
       <div class="text-sm text-gray-500">
         Курс: <span class="font-semibold text-gray-800">{{ lesson.course_name }}</span>
@@ -105,7 +147,6 @@ onMounted(fetchLesson);
         {{ lesson.name }}
       </h1>
 
-      <!-- Видео -->
       <div v-if="videoSrc" class="mt-4">
         <video
             :src="videoSrc"
@@ -125,31 +166,23 @@ onMounted(fetchLesson);
         Длительность: {{ lesson.formatted_duration }}
       </div>
 
-      <!-- Контент -->
       <div
           class="prose prose-gray max-w-none border-t pt-6"
           v-html="lesson.content"
       ></div>
 
-      <!-- ========================= -->
-      <!--       КОММЕНТАРИИ         -->
-      <!-- ========================= -->
-
       <div class="mt-10 border-t pt-6">
 
         <h2 class="text-2xl font-semibold mb-4">Комментарии</h2>
 
-        <!-- Ошибка -->
         <div v-if="commentsError[lessonId]" class="text-red-500">
           {{ commentsError[lessonId] }}
         </div>
 
-        <!-- Лоадер -->
         <div v-else-if="commentsLoading[lessonId]" class="text-gray-400">
           Загрузка комментариев...
         </div>
 
-        <!-- Список -->
         <div v-else>
           <div v-if="comments[lessonId]?.length" class="space-y-4">
             <div
@@ -157,10 +190,53 @@ onMounted(fetchLesson);
                 :key="c.id"
                 class="p-4 bg-gray-50 border rounded-lg"
             >
-              <div class="font-semibold text-gray-800 comment_author">{{ c.author }}</div>
-              <div class="font-semibold text-gray-800">{{ c.user_name }}</div>
-              <div class="text-gray-700 mt-1">{{ c.comment }}</div>
-              <div class="text-xs text-gray-400 mt-2">{{ c.createdAt }}</div>
+              <div class="font-semibold text-gray-800 comment_author flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                  <span>{{ c.author }}</span>
+                  <span v-if="c.user_name" class="text-sm text-gray-600">({{ c.user_name }})</span>
+                </div>
+
+                <button
+                    v-if="editingCommentId !== c.id"
+                    @click="startEdit(c)"
+                    class="text-blue-600 hover:underline text-sm ml-4"
+                >
+                  Редактировать
+                </button>
+              </div>
+
+              <div class="text-xs text-gray-400 mt-1 mb-2">{{ c.createdAt }}</div>
+
+              <div v-if="editingCommentId !== c.id" class="text-gray-700">
+                {{ c.comment }}
+              </div>
+
+              <div v-else>
+                <textarea
+                    v-model="editedCommentText"
+                    class="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows="3"
+                ></textarea>
+
+                <div v-if="editError" class="text-red-500 text-sm mt-1">{{ editError }}</div>
+
+                <div class="flex space-x-2 mt-2">
+                  <button
+                      @click="saveEditedComment"
+                      :disabled="savingComment || !editedCommentText.trim()"
+                      class="px-3 py-1 bg-green-600 text-white rounded text-sm disabled:bg-gray-400"
+                  >
+                    {{ savingComment ? 'Сохранение...' : 'Сохранить' }}
+                  </button>
+                  <button
+                      @click="cancelEdit"
+                      :disabled="savingComment"
+                      class="px-3 py-1 bg-red-600 text-white rounded text-sm disabled:bg-gray-400"
+                  >
+                    Отмена
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -169,7 +245,6 @@ onMounted(fetchLesson);
           </div>
         </div>
 
-        <!-- Форма -->
         <div class="mt-6 p-4 border rounded-lg bg-white shadow-sm">
           <textarea
               v-model="newComment"
@@ -204,6 +279,6 @@ onMounted(fetchLesson);
   border-radius: 8px;
 }
 .comment_author {
-  font-size: 12px;
+  font-size: 14px;
 }
 </style>
