@@ -5,7 +5,7 @@ import type { LessonComments } from "../../../types/LessonComments.ts";
 import { LessonCommentsApi } from "../../../api/admin/lesson-comments/lesson_comments.api.ts";
 
 class LessonCommentsStore extends BaseStore<CreateLessonCommentsDto, LessonComments> {
-    public storeId = 'admin-lesson-comments';
+    public storeId = 'admin-lesson-comment';
     public api = new LessonCommentsApi();
 }
 
