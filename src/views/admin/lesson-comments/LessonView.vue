@@ -14,12 +14,13 @@ const lesson = ref<any | null>(null);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
-const partnerId = Number(localStorage.getItem('partner_id'));
+const raw = localStorage.getItem('admin_data');
+const adminData = raw ? JSON.parse(raw) : null;
 
 const fetchLesson = async () => {
   loading.value = true;
   try {
-    const { data } = await api.get(`/partner/lessons/${lessonId}`);
+    const { data } = await api.get(`/admin/lessons/${lessonId}`);
     lesson.value = data.data;
 
     // загружаем комментарии после получения урока
@@ -65,7 +66,7 @@ const sendComment = async () => {
   sendError.value = null;
 
   try {
-    await api.post('/partner/lesson-comment', {
+    await api.post('/admin/lesson-comment', {
       lesson_id: lessonId,
       comment: newComment.value,
     });
@@ -112,7 +113,7 @@ const saveEditedComment = async () => {
 
   try {
     // Используем PATCH или PUT запрос для обновления ресурса
-    await api.put(`/partner/lesson-comment/${editingCommentId.value}`, {
+    await api.put(`/admin/lesson-comment/${editingCommentId.value}`, {
       comment: editedCommentText.value,
     });
 
@@ -199,7 +200,7 @@ onMounted(fetchLesson);
                 </div>
 
                 <button
-                    v-if="((editingCommentId !== c.id) && (partnerId == c.author_id))"
+                    v-if="((editingCommentId !== c.id) && (adminData?.id == c.author_id))"
                     @click="startEdit(c)"
                     class="text-blue-600 hover:underline text-sm ml-4"
                 >
