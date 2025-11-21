@@ -76,8 +76,6 @@ const sendComment = async () => {
   }
 };
 
-// ❌ ЛОГИКА РЕДАКТИРОВАНИЯ УДАЛЕНА (editingCommentId, startEdit, saveEditedComment и т.д.)
-
 onMounted(fetchLesson);
 </script>
 
