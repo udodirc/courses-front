@@ -7,7 +7,8 @@ export function useLessonComments() {
     const error = ref<Record<number, string | null>>({});
 
     // Определяем роль пользователя
-    const role = localStorage.getItem('admin_data') ? 'admin' : 'partner';
+    const partner = localStorage.getItem('partner_data');
+    const role = (partner) ? 'partner' : 'admin';
 
     async function fetchComments(lessonId: number) {
         loading.value[lessonId] = true;

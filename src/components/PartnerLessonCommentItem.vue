@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+// ⚠️ ПРОВЕРЬТЕ ПУТЬ К ВАШЕМУ API
 import api from '../api';
 
 const props = defineProps<{
   comment: any;
-  adminData: any;
+  partnerId: number; // ID текущего авторизованного партнера
   lessonId: number;
   // Функция для обновления всего списка после действия
   onCommentAction: (lessonId: number) => Promise<void>;
@@ -20,12 +21,14 @@ const displayAuthor = computed(() => {
   if (!author) return 'Неизвестный автор';
 
   if (authorType === 'App\\Models\\User') {
-    return author.name;
+    // Для User (обычно админ): используем поле name
+    return author.name || 'Администратор';
   }
 
   if (authorType === 'App\\Models\\Partner') {
+    // Для Partner: используем first_name + last_name или login
     const fullName = `${author.first_name || ''} ${author.last_name || ''}`.trim();
-    return fullName || author.login;
+    return fullName || author.login || 'Партнер';
   }
 
   return 'Автор';
@@ -57,7 +60,8 @@ const saveEditedComment = async () => {
   editError.value = null;
 
   try {
-    await api.put(`/admin/lesson-comment/${editingCommentId.value}`, {
+    // Используем ПАРТНЕРСКИЙ API-маршрут для обновления
+    await api.put(`/partner/lesson-comment/${editingCommentId.value}`, {
       comment: editedCommentText.value,
     });
 
@@ -71,75 +75,35 @@ const saveEditedComment = async () => {
     savingComment.value = false;
   }
 };
-
-// -----------------------------
-// ЛОГИКА УДАЛЕНИЯ
-// -----------------------------
-const deletingCommentId = ref<number | null>(null);
-const deleteError = ref<string | null>(null);
-
-const deleteComment = async (commentId: number) => {
-  if (!confirm('Вы уверены, что хотите удалить этот комментарий?')) {
-    return;
-  }
-
-  deletingCommentId.value = commentId;
-  deleteError.value = null;
-
-  try {
-    await api.delete(`/admin/lesson-comment/${commentId}`);
-
-    // Обновляем родительский список
-    await props.onCommentAction(props.lessonId);
-
-  } catch (e: any) {
-    deleteError.value = e?.response?.data?.message || 'Ошибка удаления';
-  } finally {
-    deletingCommentId.value = null;
-  }
-};
 </script>
 
 <template>
   <div class="comment-wrapper">
     <div
         class="p-2"
-        :class="{ 'mt-2': props.comment.parent_id }"
+        :class="{ 'mt-2': comment.parent_id }"
     >
       <div class="font-semibold text-gray-800 comment_author flex justify-between items-center">
         <div class="flex items-center space-x-2">
           <span>{{ displayAuthor }}</span>
+          <span class="text-sm text-gray-600">
+              ({{ comment.author_type.includes('Partner') ? 'Партнер' : 'Админ' }})
+          </span>
         </div>
 
-        <div
-            class="flex items-center space-x-3"
+        <button
+            v-if="editingCommentId !== comment.id && partnerId == comment.author_id && comment.author_type === 'App\\Models\\Partner'"
+            @click="startEdit(comment)"
+            class="text-blue-600 hover:underline text-sm ml-4"
         >
-          <button
-              v-if="editingCommentId !== props.comment.id"
-              @click="startEdit(props.comment)"
-              :disabled="deletingCommentId === props.comment.id"
-              class="text-blue-600 hover:underline text-sm disabled:text-gray-500"
-          >
-            Редактировать
-          </button>
-
-          <button
-              v-if="editingCommentId !== props.comment.id"
-              @click="deleteComment(props.comment.id)"
-              :disabled="deletingCommentId === props.comment.id"
-              class="text-red-600 hover:underline text-sm disabled:text-gray-500"
-          >
-            {{ deletingCommentId === props.comment.id ? 'Удаление...' : 'Удалить' }}
-          </button>
-        </div>
+          Редактировать
+        </button>
       </div>
 
-      <div class="text-xs text-gray-400 mt-1 mb-2">{{ props.comment.created_at }}</div>
+      <div class="text-xs text-gray-400 mt-1 mb-2">{{ comment.created_at }}</div>
 
-      <div v-if="deleteError" class="text-red-500 text-sm mb-2">{{ deleteError }}</div>
-
-      <div v-if="editingCommentId !== props.comment.id" class="text-gray-700">
-        {{ props.comment.comment }}
+      <div v-if="editingCommentId !== comment.id" class="text-gray-700">
+        {{ comment.comment }}
       </div>
 
       <div v-else>
@@ -170,12 +134,12 @@ const deleteComment = async (commentId: number) => {
       </div>
     </div>
 
-    <div v-if="props.comment.replies && props.comment.replies.length" class="ml-6 border-l pl-4">
-      <LessonCommentItem
-          v-for="reply in props.comment.replies"
+    <div v-if="comment.replies && comment.replies.length" class="ml-6 border-l pl-4">
+      <PartnerLessonCommentItem
+          v-for="reply in comment.replies"
           :key="reply.id"
           :comment="reply"
-          :admin-data="adminData"
+          :partner-id="partnerId"
           :lesson-id="lessonId"
           :on-comment-action="onCommentAction"
       />

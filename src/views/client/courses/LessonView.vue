@@ -3,10 +3,8 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '../../../api';
 import { useLessonComments } from '../../../composables/useLessonComments';
+import PartnerLessonCommentItem from '../../../components/PartnerLessonCommentItem.vue';
 
-// -----------------------------
-// БАЗОВЫЕ ДАННЫЕ УРОКА
-// -----------------------------
 const route = useRoute();
 const lessonId = Number(route.params.id);
 
@@ -22,7 +20,6 @@ const fetchLesson = async () => {
     const { data } = await api.get(`/partner/lessons/${lessonId}`);
     lesson.value = data.data;
 
-    // загружаем комментарии после получения урока
     await fetchComments(lessonId);
 
   } catch (e: any) {
@@ -44,9 +41,6 @@ const videoSrc = computed(() => {
   return '';
 });
 
-// -----------------------------
-// КОММЕНТАРИИ
-// -----------------------------
 const {
   comments,
   loading: commentsLoading,
@@ -82,50 +76,7 @@ const sendComment = async () => {
   }
 };
 
-// -----------------------------
-// ЛОГИКА РЕДАКТИРОВАНИЯ
-// -----------------------------
-const editingCommentId = ref<number | null>(null);
-const editedCommentText = ref('');
-const savingComment = ref(false);
-const editError = ref<string | null>(null);
-
-// Переключает комментарий в режим редактирования
-const startEdit = (comment: any) => {
-  editingCommentId.value = comment.id;
-  editedCommentText.value = comment.comment;
-  editError.value = null;
-};
-
-// Отменяет режим редактирования
-const cancelEdit = () => {
-  editingCommentId.value = null;
-  editedCommentText.value = '';
-};
-
-// Сохраняет отредактированный комментарий
-const saveEditedComment = async () => {
-  if (!editedCommentText.value.trim()) return;
-
-  savingComment.value = true;
-  editError.value = null;
-
-  try {
-    // Используем PATCH или PUT запрос для обновления ресурса
-    await api.put(`/partner/lesson-comment/${editingCommentId.value}`, {
-      comment: editedCommentText.value,
-    });
-
-    // Очищаем и обновляем список
-    await fetchComments(lessonId);
-    cancelEdit();
-
-  } catch (e: any) {
-    editError.value = e?.response?.data?.message || 'Ошибка сохранения';
-  } finally {
-    savingComment.value = false;
-  }
-};
+// ❌ ЛОГИКА РЕДАКТИРОВАНИЯ УДАЛЕНА (editingCommentId, startEdit, saveEditedComment и т.д.)
 
 onMounted(fetchLesson);
 </script>
@@ -187,59 +138,15 @@ onMounted(fetchLesson);
 
         <div v-else>
           <div v-if="comments[lessonId]?.length" class="space-y-4">
-            <div
+            <PartnerLessonCommentItem
                 v-for="c in comments[lessonId]"
                 :key="c.id"
-                class="p-4 bg-gray-50 border rounded-lg"
-            >
-              <div class="font-semibold text-gray-800 comment_author flex justify-between items-center">
-                <div class="flex items-center space-x-2">
-                  <span>{{ c.author }}</span>
-                  <span v-if="c.user_name" class="text-sm text-gray-600">({{ c.user_name }})</span>
-                </div>
-
-                <button
-                    v-if="((editingCommentId !== c.id) && (partnerId == c.author_id))"
-                    @click="startEdit(c)"
-                    class="text-blue-600 hover:underline text-sm ml-4"
-                >
-                  Редактировать
-                </button>
-              </div>
-
-              <div class="text-xs text-gray-400 mt-1 mb-2">{{ c.createdAt }}</div>
-
-              <div v-if="editingCommentId !== c.id" class="text-gray-700">
-                {{ c.comment }}
-              </div>
-
-              <div v-else>
-                <textarea
-                    v-model="editedCommentText"
-                    class="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    rows="3"
-                ></textarea>
-
-                <div v-if="editError" class="text-red-500 text-sm mt-1">{{ editError }}</div>
-
-                <div class="flex space-x-2 mt-2">
-                  <button
-                      @click="saveEditedComment"
-                      :disabled="savingComment || !editedCommentText.trim()"
-                      class="px-3 py-1 bg-green-600 text-white rounded text-sm disabled:bg-gray-400"
-                  >
-                    {{ savingComment ? 'Сохранение...' : 'Сохранить' }}
-                  </button>
-                  <button
-                      @click="cancelEdit"
-                      :disabled="savingComment"
-                      class="px-3 py-1 bg-red-600 text-white rounded text-sm disabled:bg-gray-400"
-                  >
-                    Отмена
-                  </button>
-                </div>
-              </div>
-            </div>
+                :comment="c"
+                :partner-id="partnerId"
+                :lesson-id="lessonId"
+                :on-comment-action="fetchComments"
+                class="bg-gray-50 border rounded-lg shadow-sm"
+            />
           </div>
 
           <div v-else class="text-gray-400 italic">
