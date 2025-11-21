@@ -4,7 +4,7 @@ import api from '../api';
 
 const props = defineProps<{
   comment: any;
-  adminData: any;
+  adminData: any; // Данные администратора, возможно, содержащие его ID
   lessonId: number;
   // Функция для обновления всего списка после действия
   onCommentAction: (lessonId: number) => Promise<void>;
@@ -40,6 +40,7 @@ const savingComment = ref(false);
 const editError = ref<string | null>(null);
 
 const startEdit = (comment: any) => {
+  cancelReply(); // Отключаем форму ответа, если она активна
   editingCommentId.value = comment.id;
   editedCommentText.value = comment.comment;
   editError.value = null;
@@ -98,6 +99,51 @@ const deleteComment = async (commentId: number) => {
     deletingCommentId.value = null;
   }
 };
+
+// -----------------------------
+// ЛОГИКА ОТВЕТА (REPLY)
+// -----------------------------
+const replyingToId = ref<number | null>(null);
+const replyText = ref('');
+const sendingReply = ref(false);
+const replyError = ref<string | null>(null);
+
+const startReply = (commentId: number) => {
+  cancelEdit(); // Отключаем режим редактирования
+  replyingToId.value = commentId;
+  replyText.value = '';
+  replyError.value = null;
+};
+
+const cancelReply = () => {
+  replyingToId.value = null;
+  replyText.value = '';
+};
+
+const sendReply = async () => {
+  if (!replyText.value.trim() || !replyingToId.value) return;
+
+  sendingReply.value = true;
+  replyError.value = null;
+
+  try {
+    // Используем АДМИНСКИЙ API-маршрут для создания ответа
+    await api.post('/admin/lesson-comment', {
+      lesson_id: props.lessonId,
+      parent_id: replyingToId.value, // Указываем ID родительского комментария
+      comment: replyText.value,
+    });
+
+    // Обновляем родительский список
+    await props.onCommentAction(props.lessonId);
+    cancelReply();
+
+  } catch (e: any) {
+    replyError.value = e?.response?.data?.message || 'Ошибка отправки ответа';
+  } finally {
+    sendingReply.value = false;
+  }
+};
 </script>
 
 <template>
@@ -109,6 +155,14 @@ const deleteComment = async (commentId: number) => {
       <div class="font-semibold text-gray-800 comment_author flex justify-between items-center">
         <div class="flex items-center space-x-2">
           <span>{{ displayAuthor }}</span>
+
+          <button
+              v-if="editingCommentId !== props.comment.id && props.comment.author_type === 'App\\Models\\Partner'"
+              @click="startReply(props.comment.id)"
+              class="text-green-600 hover:underline text-sm"
+          >
+            Ответить
+          </button>
         </div>
 
         <div
@@ -167,6 +221,34 @@ const deleteComment = async (commentId: number) => {
             Отмена
           </button>
         </div>
+      </div>
+    </div>
+
+    <div v-if="replyingToId === props.comment.id" class="mt-3 ml-4 p-3 border rounded-lg bg-gray-100">
+        <textarea
+            v-model="replyText"
+            class="w-full border rounded p-2 focus:outline-none"
+            placeholder="Напишите ответ..."
+            rows="2"
+        ></textarea>
+
+      <div v-if="replyError" class="text-red-500 mt-1 text-sm">{{ replyError }}</div>
+
+      <div class="flex space-x-2 mt-2 justify-end">
+        <button
+            @click="sendReply"
+            :disabled="sendingReply || !replyText.trim()"
+            class="px-3 py-1 bg-blue-600 text-white rounded text-sm disabled:bg-gray-400"
+        >
+          {{ sendingReply ? 'Отправка...' : 'Отправить ответ' }}
+        </button>
+        <button
+            @click="cancelReply"
+            :disabled="sendingReply"
+            class="px-3 py-1 bg-gray-500 text-white rounded text-sm disabled:bg-gray-400"
+        >
+          Отмена
+        </button>
       </div>
     </div>
 
