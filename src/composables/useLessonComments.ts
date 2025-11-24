@@ -1,14 +1,10 @@
 import { ref } from 'vue';
 import api from '../api';
 
-export function useLessonComments() {
+export function useLessonComments(role: string) {
     const comments = ref<Record<number, any[]>>({});
     const loading = ref<Record<number, boolean>>({});
     const error = ref<Record<number, string | null>>({});
-
-    // Определяем роль пользователя
-    const partner = localStorage.getItem('partner_data');
-    const role = (partner) ? 'partner' : 'admin';
 
     async function fetchComments(lessonId: number) {
         loading.value[lessonId] = true;

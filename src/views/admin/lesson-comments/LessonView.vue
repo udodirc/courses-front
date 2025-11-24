@@ -44,7 +44,7 @@ const {
   loading: commentsLoading,
   error: commentsError,
   fetchComments, // Эту функцию мы передаем вниз для обновления
-} = useLessonComments();
+} = useLessonComments('admin');
 
 const newComment = ref('');
 const sending = ref(false);
@@ -60,6 +60,7 @@ const sendComment = async () => {
     await api.post('/admin/lesson-comment', {
       lesson_id: lessonId,
       comment: newComment.value,
+      status: true
     });
 
     newComment.value = '';

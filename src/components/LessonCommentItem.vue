@@ -130,8 +130,9 @@ const sendReply = async () => {
     // Используем АДМИНСКИЙ API-маршрут для создания ответа
     await api.post('/admin/lesson-comment', {
       lesson_id: props.lessonId,
-      parent_id: replyingToId.value, // Указываем ID родительского комментария
-      comment: replyText.value,
+      parent_id: replyingToId.value,
+      reply_id: replyingToId.value,
+      comment: replyText.value
     });
 
     // Обновляем родительский список

@@ -46,7 +46,7 @@ const {
   loading: commentsLoading,
   error: commentsError,
   fetchComments,
-} = useLessonComments();
+} = useLessonComments('partner');
 
 const newComment = ref('');
 const sending = ref(false);
