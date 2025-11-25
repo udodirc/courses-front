@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '../../../api';
 import { useLessonComments } from '../../../composables/useLessonComments';
-import PartnerLessonCommentItem from '../../../components/PartnerLessonCommentItem.vue';
+import LessonCommentItem from '../../../components/LessonCommentItem.vue';
 
 const route = useRoute();
 const lessonId = Number(route.params.id);
@@ -12,12 +12,13 @@ const lesson = ref<any | null>(null);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
-const partnerId = Number(localStorage.getItem('partner_id'));
+const raw = localStorage.getItem('admin_data');
+const adminData = raw ? JSON.parse(raw) : null;
 
 const fetchLesson = async () => {
   loading.value = true;
   try {
-    const { data } = await api.get(`/partner/lessons/${lessonId}`);
+    const { data } = await api.get(`/admin/lessons/${lessonId}`);
     lesson.value = data.data;
 
     await fetchComments(lessonId);
@@ -29,9 +30,6 @@ const fetchLesson = async () => {
   }
 };
 
-// -----------------------------
-// ВИДЕО
-// -----------------------------
 const videoSrc = computed(() => {
   if (!lesson.value) return '';
   if (lesson.value.video_url && lesson.value.video)
@@ -45,8 +43,8 @@ const {
   comments,
   loading: commentsLoading,
   error: commentsError,
-  fetchComments,
-} = useLessonComments('partner');
+  fetchComments, // Эту функцию мы передаем вниз для обновления
+} = useLessonComments('admin');
 
 const newComment = ref('');
 const sending = ref(false);
@@ -59,14 +57,14 @@ const sendComment = async () => {
   sendError.value = null;
 
   try {
-    await api.post('/partner/lesson-comment', {
+    await api.post('/admin/lesson-comment', {
       lesson_id: lessonId,
       comment: newComment.value,
+      status: true
     });
 
     newComment.value = '';
 
-    // обновить список комментариев
     await fetchComments(lessonId);
 
   } catch (e: any) {
@@ -75,6 +73,8 @@ const sendComment = async () => {
     sending.value = false;
   }
 };
+
+// ❌ УДАЛЕНА вся дублирующая логика редактирования/удаления (editingCommentId, deleteComment и т.д.)
 
 onMounted(fetchLesson);
 </script>
@@ -136,15 +136,17 @@ onMounted(fetchLesson);
 
         <div v-else>
           <div v-if="comments[lessonId]?.length" class="space-y-4">
-            <PartnerLessonCommentItem
+
+            <LessonCommentItem
                 v-for="c in comments[lessonId]"
                 :key="c.id"
                 :comment="c"
-                :partner-id="partnerId"
+                :admin-data="adminData"
                 :lesson-id="lessonId"
                 :on-comment-action="fetchComments"
                 class="bg-gray-50 border rounded-lg shadow-sm"
             />
+
           </div>
 
           <div v-else class="text-gray-400 italic">

@@ -53,6 +53,7 @@ export const usePartnerStore = defineStore('partner', () => {
                 headers: { Authorization: `Bearer ${token.value}` },
             });
             user.value = response.data;
+            localStorage.setItem('partner_data', JSON.stringify(user.value));
         } catch (e) {
             console.error('Fetch user error:', e);
             logout();

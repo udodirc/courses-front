@@ -1,6 +1,6 @@
-export interface  Withdrawal {
+export interface Withdrawal {
     id: number;
-    partner_d: number;
+    partner_id: number;
     amount: number;
     status: string;
     description: string;

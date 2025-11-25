@@ -33,6 +33,11 @@ export const useAuthStore = defineStore('auth', {
             try {
                 const response = await api.post('/admin/me');
                 this.user = response.data;
+                if (this.user) {
+                    localStorage.setItem('admin_data', JSON.stringify(this.user));
+                } else {
+                    localStorage.removeItem('admin_data');
+                }
             } catch (error) {
                 const err = error as any;
                 console.error('Fetch user error:', err.response?.data || err.message);
