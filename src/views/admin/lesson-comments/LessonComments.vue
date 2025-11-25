@@ -14,9 +14,13 @@ const listID = 'lesson-comments';
 const schema = ref<FilterSchemaItem[]>([
   { field: 'user', label: 'Имя администратора', type: 'text', col: 'left' },
   { field: 'partner', label: 'Имя партнера', type: 'text', col: 'middle' },
+  { field: 'lesson', label: 'Название урока', type: 'text', col: 'left' },
+  { field: 'reply_status', label: 'Статус', type: 'select', col: 'middle', options: [
+      { label: 'Активный', value: 1 },
+      { label: 'Неактивный', value: 0 },
+    ] },
   { field: 'created_from', label: 'Создано с', type: 'date', col: 'left' },
   { field: 'created_to', label: 'Создано по', type: 'date', col: 'middle' },
-  { field: 'lesson', label: 'Название урока', type: 'text', col: 'left' },
 ]);
 
 // composables
