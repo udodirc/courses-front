@@ -123,9 +123,14 @@ const destroy = async (id: number) => {
 
           <div class="p-4 flex-1 flex flex-col justify-between">
             <div>
-              <h2 class="font-semibold text-lg mb-1 line-clamp-2">
-                {{ course.name }}
-              </h2>
+              <router-link
+                  :to="`/admin/course/${course.id}`"
+                  class="text-blue-600 hover:underline"
+              >
+                <h2 class="font-semibold text-lg mb-1 line-clamp-2">
+                  {{ course.name }}
+                </h2>
+              </router-link>
               <p class="text-gray-600 text-sm mb-2 line-clamp-3">
                 {{ course.short_description }}
               </p>
