@@ -15,11 +15,14 @@ const emit = defineEmits<{
   (e: 'reset'): void;
 }>();
 
+// Раскрытие / скрытие фильтров
+const isOpen = ref(false);
+
 // Локальные фильтры
 const localFilters = ref<FilterItem[]>(
     props.schema.map(f => ({
       field: f.field,
-      value: props.filters.find(fl => fl.field === f.field)?.value ?? null
+      value: props.filters.find(fl => fl.field === f.field)?.value ?? null,
     }))
 );
 
@@ -57,7 +60,7 @@ const columns = computed(() => {
 function applyFilters() {
   localFilters.value = props.schema.map(f => ({
     field: f.field,
-    value: filterValues.value[f.field] === '' ? null : filterValues.value[f.field]
+    value: filterValues.value[f.field] === '' ? null : filterValues.value[f.field],
   }));
   emit('update:filters', [...localFilters.value]);
   emit('apply', [...localFilters.value]);
@@ -75,96 +78,135 @@ function resetFilters() {
 </script>
 
 <template>
-  <div class="bg-white p-4 rounded-2xl shadow" style="margin-bottom: 100px;">
-    <div class="grid grid-cols-2 gap-4 mb-4">
-      <!-- Левая колонка -->
-      <div class="flex flex-col gap-4">
-        <div v-for="f in columns.left" :key="f.field" class="flex flex-col">
-          <label class="text-sm font-medium text-gray-700 mb-1">{{ f.label }}</label>
+  <div>
 
-          <input
-              v-if="f.type === 'text' || f.type === 'email'"
-              v-model="filterValues[f.field]"
-              :type="f.type"
-              class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-          />
+    <!-- Шапка -->
+    <div class="flex items-center justify-end mb-3">
 
-          <select
-              v-else-if="f.type === 'select'"
-              v-model="filterValues[f.field]"
-              class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-          >
-            <option value="">-- выберите --</option>
-            <option
-                v-for="opt in f.options || []"
-                :key="opt.value ?? opt.label"
-                :value="opt.value ?? ''"
-            >
-            {{ opt.label }}
-            </option>
-          </select>
-
-          <input
-              v-else-if="f.type === 'date'"
-              type="date"
-              v-model="filterValues[f.field]"
-              class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-          />
-        </div>
-      </div>
-
-      <!-- Правая колонка -->
-      <div class="flex flex-col gap-4">
-        <div v-for="f in columns.middle" :key="f.field" class="flex flex-col">
-          <label class="text-sm font-medium text-gray-700 mb-1">{{ f.label }}</label>
-
-          <input
-              v-if="f.type === 'text' || f.type === 'email'"
-              v-model="filterValues[f.field]"
-              :type="f.type"
-              class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-          />
-
-          <select
-              v-else-if="f.type === 'select'"
-              v-model="filterValues[f.field]"
-              class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-          >
-            <option value="">-- выберите --</option>
-            <option
-                v-for="opt in f.options || []"
-                :key="opt.value ?? opt.label"
-                :value="opt.value ?? ''"
-            >
-              {{ opt.label }}
-            </option>
-          </select>
-
-          <input
-              v-else-if="f.type === 'date'"
-              type="date"
-              v-model="filterValues[f.field]"
-              class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-          />
-        </div>
-      </div>
-    </div>
-
-    <div class="flex gap-3">
       <button
           type="button"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
-          @click="applyFilters"
+          @click="isOpen = !isOpen"
+          class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-200 transition"
       >
-        Применить
+        <!-- Иконка -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2"
+             class="w-6 h-6">
+          <path d="M3 4h18l-7 9v6l-4 2v-8L3 4z"/>
+        </svg>
+
+        <span class="text-lg font-semibold">Фильтр</span>
       </button>
-      <button
-          type="button"
-          class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg shadow hover:bg-gray-300 transition"
-          @click="resetFilters"
-      >
-        Сбросить
-      </button>
+
     </div>
+
+    <!-- Анимация -->
+    <transition name="fade">
+      <!-- Контейнер фильтров -->
+      <div
+          v-show="isOpen"
+          class="bg-white p-4 rounded-2xl shadow"
+          style="margin-bottom: 100px;"
+      >
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <!-- Левая колонка -->
+          <div class="flex flex-col gap-4">
+            <div v-for="f in columns.left" :key="f.field" class="flex flex-col">
+              <label class="text-sm font-medium text-gray-700 mb-1">{{ f.label }}</label>
+
+              <input
+                  v-if="f.type === 'text' || f.type === 'email'"
+                  v-model="filterValues[f.field]"
+                  :type="f.type"
+                  class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              />
+
+              <select
+                  v-else-if="f.type === 'select'"
+                  v-model="filterValues[f.field]"
+                  class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              >
+                <option value="">-- выберите --</option>
+                <option v-for="opt in f.options || []"
+                        :key="opt.value ?? opt.label"
+                        :value="opt.value ?? ''">
+                  {{ opt.label }}
+                </option>
+              </select>
+
+              <input
+                  v-else-if="f.type === 'date'"
+                  type="date"
+                  v-model="filterValues[f.field]"
+                  class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              />
+            </div>
+          </div>
+
+          <!-- Правая колонка -->
+          <div class="flex flex-col gap-4">
+            <div v-for="f in columns.middle" :key="f.field" class="flex flex-col">
+              <label class="text-sm font-medium text-gray-700 mb-1">{{ f.label }}</label>
+
+              <input
+                  v-if="f.type === 'text' || f.type === 'email'"
+                  v-model="filterValues[f.field]"
+                  :type="f.type"
+                  class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              />
+
+              <select
+                  v-else-if="f.type === 'select'"
+                  v-model="filterValues[f.field]"
+                  class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              >
+                <option value="">-- выберите --</option>
+                <option v-for="opt in f.options || []"
+                        :key="opt.value ?? opt.label"
+                        :value="opt.value ?? ''">
+                  {{ opt.label }}
+                </option>
+              </select>
+
+              <input
+                  v-else-if="f.type === 'date'"
+                  type="date"
+                  v-model="filterValues[f.field]"
+                  class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <button
+              type="button"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+              @click="applyFilters"
+          >
+            Применить
+          </button>
+
+          <button
+              type="button"
+              class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg shadow hover:bg-gray-300 transition"
+              @click="resetFilters"
+          >
+            Сбросить
+          </button>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
