@@ -36,16 +36,25 @@ watch(currentCourseSection, (val) => {
     status: val.status ?? 1,
     course_id: val.course_id ?? null,
   });
-});
+}, { immediate: true }); // Добавляем immediate: true для первичной загрузки
 
 // сохранение формы
 const save = async () => {
   loading.value = true;
   error.value = null;
 
+  // Проверяем наличие course_id перед сохранением
+  if (!formModel.course_id) {
+    setError({ general: ['ID курса не определен. Невозможно перенаправить.'] });
+    loading.value = false;
+    return;
+  }
+
   try {
     await api.put(`/admin/course-section/${courseSectionId}`, { ...formModel });
-    router.push('/admin/course-section');
+
+    router.push(`/admin/course/${formModel.course_id}`);
+
   } catch (e: any) {
     setError(e);
   } finally {
@@ -76,5 +85,6 @@ onMounted(() => {
         :inactiveLabel="'Неактивный'"
         class="mb-4"
     />
+
   </BaseForm>
 </template>

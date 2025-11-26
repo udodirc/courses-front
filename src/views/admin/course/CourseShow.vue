@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import api from '../../../api';
 import { useRoute } from 'vue-router';
-// seoState импорт и логика удалены
+import { useRouter } from 'vue-router';
 
 interface Course {
   id: number;
@@ -27,7 +27,7 @@ interface Course {
 
 interface Lessons {
   id: number;
-  course_section_id: number;
+  course_section_id: number; // Этот ID нам нужен
   course_section_name: string;
   name: string;
   content: string;
@@ -39,12 +39,14 @@ interface Lessons {
 }
 
 interface LessonGroup {
+  section_id: number | null; // 🔥 ДОБАВЛЕНО: ID раздела
   section: string;
   lessons: Lessons[];
   open: boolean; // состояние аккордеона
 }
 
 const route = useRoute();
+const router = useRouter();
 const courseId = Number(route.params.id);
 const course = ref<Course | null>(null);
 const groupedLessons = ref<LessonGroup[]>([]);
@@ -55,7 +57,6 @@ const fetchCourse = async (id: number) => {
   loading.value = true;
   error.value = null;
   try {
-    // Используем id, так как мы берем его из route.params.id
     const response = await api.get(`/admin/course/${id}`);
     course.value = response.data.data;
     const APP_URL = import.meta.env.VITE_APP_URL || '';
@@ -65,7 +66,6 @@ const fetchCourse = async (id: number) => {
       const ogImage = (course.value.og_image != 'Og image')
           ? APP_URL + VITE_PUBLIC_PROJECTS_OG_IMAGE_BASE_PATH + "/" + course.value.id + "/" + course.value.og_image
           : '';
-      // SEO логика удалена
     }
   } catch (err: any) {
     error.value = err.response?.data?.message || 'Ошибка загрузки курса';
@@ -82,12 +82,16 @@ const fetchLessons = async (id: number) => {
 
     const rawLessons = response.data.data as Lessons[];
 
-    // Группировка уроков по разделам и добавляем состояние "open"
     const grouped: LessonGroup[] = rawLessons.reduce((acc, lesson) => {
       const sectionName = lesson.course_section_name || 'Без раздела';
       let group = acc.find(g => g.section === sectionName);
       if (!group) {
-        group = { section: sectionName, lessons: [], open: false };
+        group = {
+          section_id: lesson.course_section_id,
+          section: sectionName,
+          lessons: [],
+          open: false
+        };
         acc.push(group);
       }
       group.lessons.push(lesson);
@@ -102,9 +106,17 @@ const fetchLessons = async (id: number) => {
   }
 };
 
-// 🔥 ФУНКЦИЯ: Переключение аккордеона
 const toggleSection = (group: LessonGroup) => {
   group.open = !group.open;
+};
+
+// 🔥 ИСПРАВЛЕНА ФУНКЦИЯ: Использует group.section_id для навигации
+const editSection = (group: LessonGroup) => {
+  if (group.section_id) {
+    router.push(`/admin/course-section/${group.section_id}/edit`);
+  } else {
+    console.warn("Не удалось найти ID раздела для редактирования.");
+  }
 };
 
 onMounted(async () => {
@@ -131,7 +143,17 @@ onMounted(async () => {
             class="w-full text-left bg-gray-100 px-4 py-2 font-semibold flex justify-between items-center"
         >
           <span>{{ group.section }} ({{ group.lessons.length }})</span>
-          <span>{{ group.open ? '−' : '+' }}</span>
+          <span class="flex items-center space-x-2">
+            <button
+                @click.stop="editSection(group)"
+                class="p-1 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" />
+                </svg>
+            </button>
+            <span>{{ group.open ? '−' : '+' }}</span>
+          </span>
         </button>
 
         <ul v-show="group.open" class="transition max-h-[2000px] duration-300 overflow-hidden">
