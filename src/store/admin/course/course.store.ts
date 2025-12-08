@@ -7,6 +7,11 @@ import { BaseStore } from '../../BaseStore';
 class CourseStore extends BaseStore<CreateCourseDto, Course> {
     public storeId = 'admin-course';
     public api = new CourseApi();
+
+    async toggleStatus(store: any, id: number) {
+        await this.api.toggleStatus(id);
+        await store.fetchList();
+    }
 }
 
 const courseStore = new CourseStore();
@@ -17,14 +22,14 @@ export function useCourseStoreWithGetters() {
     const store = useCourseStore();
     const courseList = computed(() =>
         store.items.map(item => ({
-            ...item,
-            canToggleStatus: true,
+            ...item
         }))
     );
 
     const currentCourse = computed(() => store.item);
     const totalPages = computed(() => store.totalPages);
     const currentPage = computed(() => store.currentPage);
+    const toggleStatus = (id: number) => courseStore.toggleStatus(store, id);
 
     return {
         ...store,
@@ -32,5 +37,6 @@ export function useCourseStoreWithGetters() {
         currentCourse,
         totalPages,
         currentPage,
+        toggleStatus
     };
 }
