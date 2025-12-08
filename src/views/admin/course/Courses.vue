@@ -73,11 +73,14 @@ onMounted(async () => {
 
           <!-- Контент -->
           <div class="p-4 flex-1 flex flex-col justify-between">
-            <div>
-              <h2 class="font-semibold text-lg mb-1 line-clamp-2">{{ course.name }}</h2>
-              <p class="text-gray-600 text-sm mb-2 line-clamp-3">{{ course.short_description }}</p>
-            </div>
-
+            <router-link
+                :to="`/admin/course/${course.id}`"
+            >
+              <div>
+                <h2 class="font-semibold text-lg mb-1 line-clamp-2">{{ course.name }}</h2>
+                <p class="text-gray-600 text-sm mb-2 line-clamp-3">{{ course.short_description }}</p>
+              </div>
+            </router-link>
             <!-- Цена и кнопки действий -->
             <div class="mt-2 flex items-center justify-between">
               <span class="font-bold text-indigo-600 text-lg">${{ course.price }}</span>
