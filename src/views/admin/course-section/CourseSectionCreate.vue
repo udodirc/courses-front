@@ -38,7 +38,6 @@ async function save() {
       course_id: formModel.value.course_id,
       name: formModel.value.name,
     });
-    router.push('/admin/course-section');
     router.push(`/admin/course/${courseId}`);
   } catch (e) {
     console.error('Ошибка при сохранении проектов:', e);

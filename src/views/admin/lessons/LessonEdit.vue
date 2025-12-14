@@ -14,6 +14,7 @@ import BaseTextAreaWithEditor from "../../../components/ui/BaseTextAreaWithEdito
 const route = useRoute();
 const router = useRouter();
 const lessonId = Number(route.params.id);
+const courseId = Number(route.query.course_id);
 
 const { currentLesson } = useLessonStoreWithGetters();
 const { error, setError } = useErrorHandler();
@@ -139,7 +140,7 @@ const save = async () => {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
 
-    router.push('/admin/lessons');
+    router.push(`/admin/course/${courseId}`);
   } catch (e: any) {
     setError(e);
   } finally {

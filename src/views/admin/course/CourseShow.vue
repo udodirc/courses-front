@@ -126,7 +126,10 @@ const toggleSectionStatus = async (group: LessonGroup) => {
 /* -------------------- LESSONS -------------------- */
 
 const editLesson = (lesson: Lesson) => {
-  router.push(`/admin/lessons/${lesson.id}/edit`);
+  router.push({
+    path:`/admin/lessons/${lesson.id}/edit`,
+    query: { course_id: courseId },
+  });
 };
 
 const deleteLesson = async (lesson: Lesson) => {
@@ -159,6 +162,13 @@ const toggleLessonStatus = async (lesson: Lesson, group: LessonGroup) => {
   }
 };
 
+const createLesson = (group: LessonGroup) => {
+  router.push({
+    path: '/admin/lessons/create',
+    query: { course_id: courseId },
+  });
+};
+
 /* -------------------- LIFECYCLE -------------------- */
 
 onMounted(async () => {
@@ -189,7 +199,7 @@ onMounted(async () => {
           @click="createSection"
           class="mb-6 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
       >
-        ➕ Создать раздел
+        Создать раздел
       </button>
 
       <div
@@ -216,6 +226,15 @@ onMounted(async () => {
         </button>
 
         <ul v-show="group.open">
+          <!-- Кнопка добавить урок -->
+          <li class="px-4 py-3 border-b flex justify-end">
+            <button
+                @click.stop="createLesson(group)"
+                class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition"
+            >
+              Добавить урок
+            </button>
+          </li>
           <li
               v-if="!group.lessons.length"
               class="px-4 py-3 text-gray-400 italic border-t"
@@ -232,7 +251,7 @@ onMounted(async () => {
 
             <div class="flex gap-3 items-center">
               <button @click.stop="toggleLessonStatus(lesson, group)">
-                {{ lesson.status ? 'Отключить' : 'Включить' }}
+                {{ lesson.status ? '✅' : '❌' }}
               </button>
               <button @click.stop="editLesson(lesson)">✏️</button>
               <button @click.stop="deleteLesson(lesson)">🗑</button>
