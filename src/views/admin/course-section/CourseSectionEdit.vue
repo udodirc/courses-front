@@ -45,7 +45,7 @@ const save = async () => {
 
   try {
     await api.put(`/admin/course-section/${courseSectionId}`, { ...formModel });
-    router.push('/admin/course-section');
+    router.push(`/admin/course/${formModel.course_id}`);
   } catch (e: any) {
     setError(e);
   } finally {

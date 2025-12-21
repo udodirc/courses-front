@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
 import { useEntitySave } from '../../../composables/useEntitySave';
 import { useFetchList } from '../../../composables/useFetchList.ts';
 import BaseForm from '../../../components/ui/BaseForm.vue';
@@ -12,6 +12,8 @@ import BaseToggle from '../../../components/ui/BaseToggle.vue';
 import BaseFileUpload from '../../../components/ui/BaseFileUpload.vue';
 
 const router = useRouter();
+const route = useRoute();
+const courseId = Number(route.query.course_id);
 
 interface FormModel {
   course_id: number | null;
@@ -99,7 +101,7 @@ async function save() {
     }
 
     await saveEntity('/admin/lessons', payload);
-    router.push('/admin/lessons');
+    router.push(`/admin/course/${courseId}`);
   } catch (e) {
     console.error('Ошибка при сохранении урока:', e);
   }

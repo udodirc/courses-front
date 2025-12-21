@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
 import { useEntitySave } from '../../../composables/useEntitySave';
 import BaseForm from '../../../components/ui/BaseForm.vue';
 import BaseInput from "../../../components/ui/BaseInput.vue";
@@ -9,6 +9,8 @@ import {useFetchList} from "../../../composables/useFetchList.ts";
 import BaseSelect from "../../../components/ui/BaseSelect.vue";
 
 const router = useRouter();
+const route = useRoute();
+const courseId = Number(route.query.course_id);
 
 // Тип формы
 interface FormModel {
@@ -36,7 +38,7 @@ async function save() {
       course_id: formModel.value.course_id,
       name: formModel.value.name,
     });
-    router.push('/admin/course-section');
+    router.push(`/admin/course/${courseId}`);
   } catch (e) {
     console.error('Ошибка при сохранении проектов:', e);
   }
@@ -44,11 +46,11 @@ async function save() {
 </script>
 
 <template>
-  <BaseForm label="Создание контента" :loading="loading" :onSubmit="save">
+  <BaseForm label="Создание раздела" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
     <BaseSelect
         v-model="formModel.course_id"
-        label="Родительское меню"
+        label="Курс"
         :options="courses.map(course => ({ value: course.id, label: course.name }))"
     />
     <BaseInput v-model="formModel.name" label="Имя"/>

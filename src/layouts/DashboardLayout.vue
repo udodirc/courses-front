@@ -81,8 +81,8 @@ const allMenu: MenuItem[] = [
     superadmin: true,
     children: [
       { name: "Курсы", path: "/admin/courses" },
-      { name: "Разделы курсов", path: "/admin/course-section" },
-      { name: "Уроки", path: "/admin/lessons" },
+      // { name: "Разделы курсов", path: "/admin/course-section" },
+      // { name: "Уроки", path: "/admin/lessons" },
       { name: "Коментарии к урокам", path: "/admin/lessons-comments" },
     ],
   },

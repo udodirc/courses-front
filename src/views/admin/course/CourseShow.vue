@@ -1,108 +1,254 @@
 <script setup lang="ts">
-import {onMounted, ref} from 'vue';
-import { useRoute } from 'vue-router';
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useCourseStoreWithGetters } from '../../../store/admin/course/course.store.ts';
 import api from "../../../api";
 
-interface Lessons {
+/* -------------------- TYPES -------------------- */
+
+interface Lesson {
   id: number;
   course_section_id: number;
-  course_section_name: string;
   name: string;
-  content: string;
   duration: number;
   formatted_duration: string;
-  free_pay: boolean;
   status: boolean;
-  createdAt: string;
+}
+
+interface CourseSection {
+  id: number;
+  name: string;
+  status: boolean;
 }
 
 interface LessonGroup {
+  section_id: number;
   section: string;
-  lessons: Lessons[];
+  lessons: Lesson[];
   open: boolean;
+  status: boolean;
 }
 
+/* -------------------- SETUP -------------------- */
+
 const route = useRoute();
+const router = useRouter();
 const courseStore = useCourseStoreWithGetters();
+
 const courseId = Number(route.params.id);
 const course = courseStore.currentCourse;
 const loading = courseStore.loading;
 const error = courseStore.error;
+
 const groupedLessons = ref<LessonGroup[]>([]);
 
-const fetchLessons = async (id: number) => {
+/* -------------------- API -------------------- */
+
+const fetchData = async (id: number) => {
   courseStore.loading = true;
 
   try {
-    const response = await api.get(`/admin/lessons/course/${id}`);
-    const rawLessons = response.data.data as Lessons[];
+    const [sectionsRes, lessonsRes] = await Promise.all([
+      api.get(`/admin/course-section?course_id=${id}`),
+      api.get(`/admin/lessons/course/${id}`)
+    ]);
 
-    const grouped: LessonGroup[] = rawLessons.reduce((acc: LessonGroup[], lesson) => {
-      const sectionName = lesson.course_section_name || 'Без раздела';
+    const sections = sectionsRes.data.data as CourseSection[];
+    const lessons = lessonsRes.data.data as Lesson[];
 
-      let group = acc.find(g => g.section === sectionName);
-      if (!group) {
-        group = { section: sectionName, lessons: [], open: false };
-        acc.push(group);
-      }
+    groupedLessons.value = sections.map(section => ({
+      section_id: section.id,
+      section: section.name,
+      lessons: lessons.filter(l => l.course_section_id === section.id),
+      open: false,
+      status: section.status
+    }));
 
-      group.lessons.push(lesson);
-      return acc;
-    }, []);
-
-    groupedLessons.value = grouped;
   } catch (err: any) {
-    courseStore.error = err.response?.data?.message || 'Ошибка загрузки уроков';
+    courseStore.error =
+        err.response?.data?.message || 'Ошибка загрузки данных';
   } finally {
     courseStore.loading = false;
   }
 };
 
+/* -------------------- SECTIONS -------------------- */
+
 const toggleSection = (group: LessonGroup) => {
   group.open = !group.open;
 };
 
+const createSection = () => {
+  router.push({
+    path: '/admin/course-section/create',
+    query: { course_id: courseId },
+  });
+};
+
+const editSection = (group: LessonGroup) => {
+  router.push(`/admin/course-section/${group.section_id}/edit`);
+};
+
+const deleteSection = async (group: LessonGroup) => {
+  if (!confirm(`Удалить раздел "${group.section}"?`)) return;
+
+  try {
+    await api.delete(`/admin/course-section/${group.section_id}`);
+    groupedLessons.value = groupedLessons.value.filter(
+        g => g.section_id !== group.section_id
+    );
+  } catch (e) {
+    console.error('Ошибка при удалении раздела:', e);
+  }
+};
+
+const toggleSectionStatus = async (group: LessonGroup) => {
+  try {
+    await api.post(`/admin/course-section/status/${group.section_id}`);
+    group.status = !group.status;
+  } catch (e) {
+    console.error('Ошибка при смене статуса раздела:', e);
+  }
+};
+
+/* -------------------- LESSONS -------------------- */
+
+const createLesson = (group: LessonGroup) => {
+  router.push({
+    path: '/admin/lessons/create',
+    query: { course_id: courseId, section_id: group.section_id },
+  });
+};
+
+const editLesson = (lesson: Lesson) => {
+  router.push({
+    path: `/admin/lessons/${lesson.id}/edit`,
+    query: { course_id: courseId },
+  });
+};
+
+const deleteLesson = async (lesson: Lesson) => {
+  if (!confirm(`Удалить урок "${lesson.name}"?`)) return;
+
+  try {
+    await api.delete(`/admin/lessons/${lesson.id}`);
+
+    groupedLessons.value.forEach(group => {
+      group.lessons = group.lessons.filter(l => l.id !== lesson.id);
+    });
+  } catch (e) {
+    console.error('Ошибка при удалении урока:', e);
+  }
+};
+
+const toggleLessonStatus = async (lesson: Lesson) => {
+  try {
+    await api.post(`/admin/lessons/status/${lesson.id}`);
+    lesson.status = !lesson.status;
+  } catch (e) {
+    console.error('Ошибка при смене статуса урока:', e);
+  }
+};
+
+/* -------------------- LIFECYCLE -------------------- */
+
 onMounted(async () => {
   if (!isNaN(courseId)) {
     await courseStore.fetchItem(courseId);
-    await fetchLessons(courseId);
-  } else {
-    courseStore.error = 'Некорректный ID курса';
+    await fetchData(courseId);
   }
 });
 </script>
 
 <template>
   <main class="max-w-4xl mx-auto py-12 px-6">
-    <div v-if="loading" class="text-gray-500 text-center">Загрузка курса...</div>
-    <div v-else-if="error" class="text-red-500 text-center">{{ error }}</div>
+    <div v-if="loading" class="text-center text-gray-500">
+      Загрузка курса...
+    </div>
+
+    <div v-else-if="error" class="text-center text-red-500">
+      {{ error }}
+    </div>
 
     <div v-else-if="course">
       <h1 class="text-2xl font-bold mb-4">{{ course.name }}</h1>
-      <div class="mb-6 prose" v-html="course.short_description"></div>
-      <div class="mb-6 prose" v-html="course.description"></div>
 
-      <!-- Аккордеон уроков -->
-      <div v-for="group in groupedLessons" :key="group.section" class="mb-4 border rounded-lg overflow-hidden">
+      <div class="mb-6 prose" v-html="course.short_description" />
+      <div class="mb-6 prose" v-html="course.description" />
+
+      <button
+          @click="createSection"
+          class="mb-6 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+      >
+        Создать раздел
+      </button>
+
+      <div
+          v-for="group in groupedLessons"
+          :key="group.section_id"
+          class="mb-4 border rounded overflow-hidden"
+      >
         <button
             @click="toggleSection(group)"
-            class="w-full text-left bg-gray-100 px-4 py-2 font-semibold flex justify-between items-center"
+            class="w-full px-4 py-2 bg-gray-100 flex justify-between items-center font-semibold"
         >
           <span>{{ group.section }}</span>
-          <span>{{ group.open ? '-' : '+' }}</span>
+
+          <div class="flex gap-2 items-center">
+            <button @click.stop="toggleSectionStatus(group)">
+              {{ group.status ? '✅' : '❌' }}
+            </button>
+
+            <button @click.stop="editSection(group)">✏️</button>
+            <button @click.stop="deleteSection(group)">🗑</button>
+
+            <span>{{ group.open ? '-' : '+' }}</span>
+          </div>
         </button>
-        <ul v-show="group.open" class="transition max-h-[2000px] duration-300 overflow-hidden">
+
+        <ul v-show="group.open">
+          <li class="px-4 py-3 border-b flex justify-end">
+            <button
+                @click.stop="createLesson(group)"
+                class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+            >
+              Добавить урок
+            </button>
+          </li>
+
+          <li
+              v-if="!group.lessons.length"
+              class="px-4 py-3 text-gray-400 italic border-t"
+          >
+            Уроков пока нет
+          </li>
+
           <li
               v-for="lesson in group.lessons"
               :key="lesson.id"
-              class="flex justify-between items-center px-4 py-3 border-t hover:bg-gray-50 transition"
+              class="px-4 py-3 border-t flex justify-between"
           >
             <span>{{ lesson.name }}</span>
-            <span class="text-gray-500 text-sm">{{ lesson.formatted_duration }}</span>
+
+            <div class="flex gap-3 items-center">
+              <button @click.stop="toggleLessonStatus(lesson)">
+                {{ lesson.status ? '✅' : '❌' }}
+              </button>
+              <button @click.stop="editLesson(lesson)">✏️</button>
+              <button @click.stop="deleteLesson(lesson)">🗑</button>
+              <span class="text-gray-500 text-sm">
+                {{ lesson.formatted_duration }}
+              </span>
+            </div>
           </li>
         </ul>
       </div>
     </div>
   </main>
 </template>
+
+<style scoped>
+ul {
+  transition: max-height 0.3s ease-in-out;
+}
+</style>
