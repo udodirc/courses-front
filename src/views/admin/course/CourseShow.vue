@@ -56,19 +56,13 @@ const fetchData = async (id: number) => {
     const sections = sectionsRes.data.data as CourseSection[];
     const lessons = lessonsRes.data.data as Lesson[];
 
-    groupedLessons.value = sections.map(section => {
-      const sectionLessons = lessons.filter(
-          l => l.course_section_id === section.id
-      );
-
-      return {
-        section_id: section.id,
-        section: section.name,
-        lessons: sectionLessons,
-        open: false,
-        status: section.status
-      };
-    });
+    groupedLessons.value = sections.map(section => ({
+      section_id: section.id,
+      section: section.name,
+      lessons: lessons.filter(l => l.course_section_id === section.id),
+      open: false,
+      status: section.status
+    }));
 
   } catch (err: any) {
     courseStore.error =
@@ -109,15 +103,9 @@ const deleteSection = async (group: LessonGroup) => {
 };
 
 const toggleSectionStatus = async (group: LessonGroup) => {
-  if (!group.section_id) return;
-
   try {
     await api.post(`/admin/course-section/status/${group.section_id}`);
-
     group.status = !group.status;
-
-    // Синхронизируем статусы всех уроков внутри раздела
-    group.lessons.forEach(l => (l.status = group.status));
   } catch (e) {
     console.error('Ошибка при смене статуса раздела:', e);
   }
@@ -125,9 +113,16 @@ const toggleSectionStatus = async (group: LessonGroup) => {
 
 /* -------------------- LESSONS -------------------- */
 
+const createLesson = (group: LessonGroup) => {
+  router.push({
+    path: '/admin/lessons/create',
+    query: { course_id: courseId, section_id: group.section_id },
+  });
+};
+
 const editLesson = (lesson: Lesson) => {
   router.push({
-    path:`/admin/lessons/${lesson.id}/edit`,
+    path: `/admin/lessons/${lesson.id}/edit`,
     query: { course_id: courseId },
   });
 };
@@ -140,33 +135,19 @@ const deleteLesson = async (lesson: Lesson) => {
 
     groupedLessons.value.forEach(group => {
       group.lessons = group.lessons.filter(l => l.id !== lesson.id);
-      group.status = group.lessons.some(l => l.status);
     });
   } catch (e) {
     console.error('Ошибка при удалении урока:', e);
   }
 };
 
-const toggleLessonStatus = async (lesson: Lesson, group: LessonGroup) => {
-  if (!lesson.id) return;
-
+const toggleLessonStatus = async (lesson: Lesson) => {
   try {
     await api.post(`/admin/lessons/status/${lesson.id}`);
-
     lesson.status = !lesson.status;
-
-    // Обновляем статус раздела
-    group.status = group.lessons.some(l => l.status);
   } catch (e) {
     console.error('Ошибка при смене статуса урока:', e);
   }
-};
-
-const createLesson = (group: LessonGroup) => {
-  router.push({
-    path: '/admin/lessons/create',
-    query: { course_id: courseId },
-  });
 };
 
 /* -------------------- LIFECYCLE -------------------- */
@@ -226,15 +207,15 @@ onMounted(async () => {
         </button>
 
         <ul v-show="group.open">
-          <!-- Кнопка добавить урок -->
           <li class="px-4 py-3 border-b flex justify-end">
             <button
                 @click.stop="createLesson(group)"
-                class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition"
+                class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
             >
               Добавить урок
             </button>
           </li>
+
           <li
               v-if="!group.lessons.length"
               class="px-4 py-3 text-gray-400 italic border-t"
@@ -250,7 +231,7 @@ onMounted(async () => {
             <span>{{ lesson.name }}</span>
 
             <div class="flex gap-3 items-center">
-              <button @click.stop="toggleLessonStatus(lesson, group)">
+              <button @click.stop="toggleLessonStatus(lesson)">
                 {{ lesson.status ? '✅' : '❌' }}
               </button>
               <button @click.stop="editLesson(lesson)">✏️</button>
