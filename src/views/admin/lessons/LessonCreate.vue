@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch } from 'vue';
 import {useRoute, useRouter} from 'vue-router';
 import { useEntitySave } from '../../../composables/useEntitySave';
 import { useFetchList } from '../../../composables/useFetchList.ts';
@@ -10,11 +10,14 @@ import BaseSelect from '../../../components/ui/BaseSelect.vue';
 import BaseTextAreaWithEditor from '../../../components/ui/BaseTextAreaWithEditor.vue';
 import BaseToggle from '../../../components/ui/BaseToggle.vue';
 import BaseFileUpload from '../../../components/ui/BaseFileUpload.vue';
+import { useCourseStoreWithGetters } from '../../../store/admin/course/course.store.ts';
 
 const router = useRouter();
 const route = useRoute();
 const courseId = Number(route.query.course_id);
 
+const courseStore = useCourseStoreWithGetters();
+//console.log(courseStore.currentCourseName.value);
 interface FormModel {
   course_id: number | null;
   course_section_id: number | null;
@@ -35,12 +38,9 @@ const formModel = ref<FormModel>({
   video: null,
 });
 
-const { items: courses, fetchItems: fetchCourses } = useFetchList<{ id: number; name: string }>('/admin/course');
 const { items: sections, fetchItems: fetchSections } = useFetchList<{ id: number; name: string }>('/admin/course_section');
 
 const { saveEntity, loading, error } = useEntitySave<FormModel>();
-
-onMounted(() => fetchCourses());
 
 watch(
     () => formModel.value.course_id,
@@ -89,7 +89,7 @@ const removeVideo = () => {
 async function save() {
   try {
     const payload = new FormData();
-    payload.append('course_id', String(formModel.value.course_id));
+    payload.append('course_id', String(courseStore.currentCourseName.value));
     payload.append('course_section_id', String(formModel.value.course_section_id));
     payload.append('name', formModel.value.name);
     payload.append('content', formModel.value.content);
@@ -112,10 +112,10 @@ async function save() {
   <BaseForm label="Создание урока" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
 
-    <BaseSelect
-        v-model="formModel.course_id"
+    <BaseInput
+        :model-value="courseStore.currentCourseName.value"
         label="Курс"
-        :options="courses.map(c => ({ value: c.id, label: c.name }))"
+        readonly
     />
 
     <BaseSelect
