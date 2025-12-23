@@ -63,12 +63,14 @@ async function save() {
   >
     <FormErrors :error="error || courseStore.error" />
 
-    <!-- Курс (только отображение) -->
-    <BaseInput
-        :model-value="courseStore.currentCourseName.value"
-        label="Курс"
-        readonly
-    />
+    <div class="mb-4">
+      <label class="block text-sm mb-1">
+        Курс
+      </label>
+      <div class="text-base font-medium">
+        {{ courseStore.currentCourseName.value }}
+      </div>
+    </div>
 
     <!-- Имя раздела -->
     <BaseInput

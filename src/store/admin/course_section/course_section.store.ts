@@ -23,6 +23,7 @@ export function useCourseSectionStoreWithGetters() {
     );
 
     const currentCourseSection = computed(() => store.item);
+    const currentCourseSectionName = computed(() => store.item?.name ?? '');
     const totalPages = computed(() => store.totalPages);
     const currentPage = computed(() => store.currentPage);
 
@@ -30,6 +31,7 @@ export function useCourseSectionStoreWithGetters() {
         ...store,
         courseSectionList,
         currentCourseSection,
+        currentCourseSectionName,
         totalPages,
         currentPage,
     };

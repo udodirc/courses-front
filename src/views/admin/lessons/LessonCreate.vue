@@ -1,23 +1,25 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import {useRoute, useRouter} from 'vue-router';
 import { useEntitySave } from '../../../composables/useEntitySave';
 import { useFetchList } from '../../../composables/useFetchList.ts';
 import BaseForm from '../../../components/ui/BaseForm.vue';
 import BaseInput from '../../../components/ui/BaseInput.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
-import BaseSelect from '../../../components/ui/BaseSelect.vue';
 import BaseTextAreaWithEditor from '../../../components/ui/BaseTextAreaWithEditor.vue';
 import BaseToggle from '../../../components/ui/BaseToggle.vue';
 import BaseFileUpload from '../../../components/ui/BaseFileUpload.vue';
 import { useCourseStoreWithGetters } from '../../../store/admin/course/course.store.ts';
+import { useCourseSectionStoreWithGetters } from '../../../store/admin/course_section/course_section.store.ts';
 
 const router = useRouter();
 const route = useRoute();
 const courseId = Number(route.query.course_id);
+const courseSectionId = Number(route.query.section_id);
 
 const courseStore = useCourseStoreWithGetters();
-//console.log(courseStore.currentCourseName.value);
+const currentCourseSection = useCourseSectionStoreWithGetters();
+
 interface FormModel {
   course_id: number | null;
   course_section_id: number | null;
@@ -86,11 +88,21 @@ const removeVideo = () => {
   if (videoFileInputRef.value) videoFileInputRef.value.value = '';
 };
 
+// ===== Загрузка курса =====
+onMounted(async () => {
+  if ((!courseId) || (!courseSectionId)) return;
+
+  // загрузка одного курса
+  await courseStore.fetchItem(courseId);
+
+  await currentCourseSection.fetchItem(courseSectionId);
+});
+
 async function save() {
   try {
     const payload = new FormData();
-    payload.append('course_id', String(courseStore.currentCourseName.value));
-    payload.append('course_section_id', String(formModel.value.course_section_id));
+    payload.append('course_id', String(courseId));
+    payload.append('course_section_id', String(courseSectionId));
     payload.append('name', formModel.value.name);
     payload.append('content', formModel.value.content);
     payload.append('duration', String(formModel.value.duration));
@@ -112,18 +124,23 @@ async function save() {
   <BaseForm label="Создание урока" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
 
-    <BaseInput
-        :model-value="courseStore.currentCourseName.value"
-        label="Курс"
-        readonly
-    />
+    <div class="mb-4">
+      <label class="block text-sm mb-1">
+        Курс
+      </label>
+      <div class="text-base font-medium">
+        {{ courseStore.currentCourseName.value }}
+      </div>
+    </div>
 
-    <BaseSelect
-        v-model="formModel.course_section_id"
-        label="Раздел курса"
-        :options="sections.map(s => ({ value: s.id, label: s.name }))"
-        :disabled="!formModel.course_id"
-    />
+    <div class="mb-4">
+      <label class="block text-sm mb-1">
+        Раздел курса
+      </label>
+      <div class="text-base font-medium">
+        {{ currentCourseSection.currentCourseSectionName.value }}
+      </div>
+    </div>
 
     <BaseInput v-model="formModel.name" label="Имя" required class="mb-4" />
     <BaseTextAreaWithEditor v-model="formModel.content" label="Контент" required class="w-full mb-4" />

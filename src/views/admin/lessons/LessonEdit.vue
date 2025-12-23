@@ -156,6 +156,7 @@ onMounted(() => {
     error.value = { general: ['Некорректный ID урока'] };
   }
 });
+console.log(formModel.video_preview);
 </script>
 
 <template>
@@ -207,8 +208,8 @@ onMounted(() => {
       </label>
 
       <!-- Превью видео -->
-      <div v-if="formModel.video_preview" class="relative group mt-3">
-        <video
+      <div v-if="Boolean(formModel.video)" class="relative group mt-3">
+      <video
             :src="formModel.video_preview"
             controls
             class="w-full max-h-64 rounded-lg border"
