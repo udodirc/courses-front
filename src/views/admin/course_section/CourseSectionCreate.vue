@@ -1,36 +1,45 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import {useRoute, useRouter} from 'vue-router';
+import { ref, onMounted, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
 import { useEntitySave } from '../../../composables/useEntitySave';
+import { useCourseStoreWithGetters } from '../../../store/admin/course/course.store.ts';
+
 import BaseForm from '../../../components/ui/BaseForm.vue';
-import BaseInput from "../../../components/ui/BaseInput.vue";
+import BaseInput from '../../../components/ui/BaseInput.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
-import {useFetchList} from "../../../composables/useFetchList.ts";
-import BaseSelect from "../../../components/ui/BaseSelect.vue";
 
 const router = useRouter();
 const route = useRoute();
+
+// ===== id курса из query =====
 const courseId = Number(route.query.course_id);
 
-// Тип формы
+// ===== Типы =====
 interface FormModel {
   course_id: number;
   name: string;
 }
 
-const { items: courses, fetchItems: fetchCourses } = useFetchList<{ id: number; name: string }>('/admin/course');
+// ===== Store курса =====
+const courseStore = useCourseStoreWithGetters();
 
-// Инициализация формы
-const formModel = ref<FormModel>(<FormModel>{
-  course_id: null as number | null,
+// ===== Форма =====
+const formModel = ref<FormModel>({
+  course_id: courseId,
   name: '',
 });
 
-const { saveEntity, loading, error } = useEntitySave<FormModel>();
+// ===== Загрузка курса =====
+onMounted(async () => {
+  if (!courseId) return;
 
-onMounted(() => {
-  fetchCourses();
+  // загрузка одного курса
+  await courseStore.fetchItem(courseId);
 });
+
+// ===== Сохранение =====
+const { saveEntity, loading, error } = useEntitySave<FormModel>();
 
 async function save() {
   try {
@@ -38,21 +47,33 @@ async function save() {
       course_id: formModel.value.course_id,
       name: formModel.value.name,
     });
+
     router.push(`/admin/course/${courseId}`);
   } catch (e) {
-    console.error('Ошибка при сохранении проектов:', e);
+    console.error('Ошибка при сохранении раздела', e);
   }
 }
 </script>
 
 <template>
-  <BaseForm label="Создание раздела" :loading="loading" :onSubmit="save">
-    <FormErrors :error="error" />
-    <BaseSelect
-        v-model="formModel.course_id"
+  <BaseForm
+      label="Создание раздела"
+      :loading="loading || courseStore.loading"
+      :onSubmit="save"
+  >
+    <FormErrors :error="error || courseStore.error" />
+
+    <!-- Курс (только отображение) -->
+    <BaseInput
+        :model-value="courseStore.currentCourseName.value"
         label="Курс"
-        :options="courses.map(course => ({ value: course.id, label: course.name }))"
+        readonly
     />
-    <BaseInput v-model="formModel.name" label="Имя"/>
+
+    <!-- Имя раздела -->
+    <BaseInput
+        v-model="formModel.name"
+        label="Имя"
+    />
   </BaseForm>
 </template>

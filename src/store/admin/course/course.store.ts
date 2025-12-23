@@ -27,6 +27,7 @@ export function useCourseStoreWithGetters() {
     );
 
     const currentCourse = computed(() => store.item);
+    const currentCourseName = computed(() => store.item?.name ?? '');
     const totalPages = computed(() => store.totalPages);
     const currentPage = computed(() => store.currentPage);
     const toggleStatus = (id: number) => courseStore.toggleStatus(store, id);
@@ -35,6 +36,7 @@ export function useCourseStoreWithGetters() {
         ...store,
         courseList,
         currentCourse,
+        currentCourseName,
         totalPages,
         currentPage,
         toggleStatus
