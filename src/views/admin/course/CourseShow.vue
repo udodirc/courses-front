@@ -80,7 +80,7 @@ const toggleSection = (group: LessonGroup) => {
 
 const createSection = () => {
   router.push({
-    path: '/admin/course-section/create',
+    path: '/admin/course_section/create',
     query: { course_id: courseId },
   });
 };

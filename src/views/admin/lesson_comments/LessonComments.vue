@@ -8,7 +8,7 @@ import { usePagination } from '../../../composables/usePagination.ts';
 import type { FilterSchemaItem } from '../../../types/Filters.ts';
 
 const lessonCommentsStore = useLessonCommentsStoreWithGetters();
-const listID = 'lesson-comments';
+const listID = 'lesson_comments';
 
 // схема фильтров
 const schema = ref<FilterSchemaItem[]>([

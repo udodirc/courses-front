@@ -5,7 +5,7 @@ import type { CreateCourseSectionDto } from '../../../dto/course-section.dto.ts'
 import { BaseStore } from '../../BaseStore';
 
 class CourseSectionStore extends BaseStore<CreateCourseSectionDto, CourseSection> {
-    public storeId = 'admin-course-section';
+    public storeId = 'admin-course_section';
     public api = new CourseSectionApi();
 }
 

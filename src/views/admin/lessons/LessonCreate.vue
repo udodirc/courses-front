@@ -36,7 +36,7 @@ const formModel = ref<FormModel>({
 });
 
 const { items: courses, fetchItems: fetchCourses } = useFetchList<{ id: number; name: string }>('/admin/course');
-const { items: sections, fetchItems: fetchSections } = useFetchList<{ id: number; name: string }>('/admin/course-section');
+const { items: sections, fetchItems: fetchSections } = useFetchList<{ id: number; name: string }>('/admin/course_section');
 
 const { saveEntity, loading, error } = useEntitySave<FormModel>();
 
