@@ -3,6 +3,7 @@ export interface  Lesson {
     course_section_id: number;
     name: string;
     content: string;
+    video_link: string;
     duration: number;
     status: boolean;
     free_pay: boolean;
