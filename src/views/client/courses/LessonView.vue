@@ -13,6 +13,7 @@ const loading = ref(true);
 const error = ref<string | null>(null);
 
 const partnerId = Number(localStorage.getItem('partner_id'));
+const token = localStorage.getItem('partner_token'); // JWT токен для Authorization
 
 const fetchLesson = async () => {
   loading.value = true;
@@ -30,17 +31,36 @@ const fetchLesson = async () => {
 };
 
 // -----------------------------
-// ВИДЕО
+// ВИДЕО через Blob
 // -----------------------------
-const videoSrc = computed(() => {
-  if (!lesson.value) return '';
-  if (lesson.value.video_url && lesson.value.video)
-    return `${lesson.value.video_url}/${lesson.value.video}`;
-  if (lesson.value.video_preview)
-    return lesson.value.video_preview;
-  return '';
-});
+const videoUrl = ref<string | null>(null);
 
+const fetchVideo = async () => {
+  if (!lesson.value || !token) return;
+
+  try {
+    const response = await fetch(`http://courses.local:8086/api/partner/lessons/${lessonId}/video`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.error('Ошибка загрузки видео:', response.status, response.statusText);
+      return;
+    }
+
+    const blob = await response.blob();
+    videoUrl.value = URL.createObjectURL(blob);
+
+  } catch (err) {
+    console.error('Ошибка при fetch видео:', err);
+  }
+};
+
+// -----------------------------
+// Комментарии
+// -----------------------------
 const {
   comments,
   loading: commentsLoading,
@@ -65,8 +85,6 @@ const sendComment = async () => {
     });
 
     newComment.value = '';
-
-    // обновить список комментариев
     await fetchComments(lessonId);
 
   } catch (e: any) {
@@ -76,7 +94,10 @@ const sendComment = async () => {
   }
 };
 
-onMounted(fetchLesson);
+onMounted(async () => {
+  await fetchLesson();
+  await fetchVideo();
+});
 </script>
 
 <template>
@@ -90,24 +111,23 @@ onMounted(fetchLesson);
     </div>
 
     <div v-else-if="lesson" class="max-w-4xl mx-auto space-y-6">
+
       <div class="text-sm text-gray-500">
         Курс: <span class="font-semibold text-gray-800">{{ lesson.course_name }}</span>
       </div>
 
-      <h1 class="text-3xl font-bold text-gray-900">
-        {{ lesson.name }}
-      </h1>
+      <h1 class="text-3xl font-bold text-gray-900">{{ lesson.name }}</h1>
 
-      <div v-if="videoSrc" class="mt-4">
-        <video
-            :src="videoSrc"
-            controls
-            preload="metadata"
-            class="w-full max-h-[500px] rounded-lg border shadow-sm bg-black"
-        >
-          Ваш браузер не поддерживает видео.
-        </video>
-      </div>
+      <!-- ВИДЕО -->
+      <video
+          v-if="videoUrl"
+          :src="videoUrl"
+          controls
+          preload="metadata"
+          class="w-full max-h-[500px] rounded-lg border shadow-sm bg-black"
+      >
+        Ваш браузер не поддерживает видео
+      </video>
 
       <div v-else class="bg-gray-100 text-gray-500 text-center py-8 rounded-lg">
         🎥 Видео недоступно
@@ -117,13 +137,10 @@ onMounted(fetchLesson);
         Длительность: {{ lesson.formatted_duration }}
       </div>
 
-      <div
-          class="prose prose-gray max-w-none border-t pt-6"
-          v-html="lesson.content"
-      ></div>
+      <div class="prose prose-gray max-w-none border-t pt-6" v-html="lesson.content"></div>
 
+      <!-- Комментарии -->
       <div class="mt-10 border-t pt-6">
-
         <h2 class="text-2xl font-semibold mb-4">Комментарии</h2>
 
         <div v-if="commentsError[lessonId]" class="text-red-500">
@@ -170,7 +187,6 @@ onMounted(fetchLesson);
             {{ sending ? 'Отправка...' : 'Отправить' }}
           </button>
         </div>
-
       </div>
     </div>
 

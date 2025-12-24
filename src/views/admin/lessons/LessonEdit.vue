@@ -20,11 +20,12 @@ const { currentLesson } = useLessonStoreWithGetters();
 const { error, setError } = useErrorHandler();
 const loading = ref(false);
 
-const videoFileInputRef = ref<HTMLInputElement | null>(null);
+// const videoFileInputRef = ref<HTMLInputElement | null>(null);
 
 const formModel = reactive({
   name: '',
   content: '',
+  video_link: '',
   duration: 0, // в секундах
   status: 1,
   free_pay: true,
@@ -43,6 +44,7 @@ watch(currentLesson, (val) => {
   Object.assign(formModel, {
     name: val.name,
     content: val.content,
+    video_link: val.video_link,
     duration: val.duration ?? 0,
     status: val.status ?? 1,
     free_pay: val.free_pay ?? 1,
@@ -71,47 +73,47 @@ const formattedDuration = computed({
 });
 
 // --- Загрузка нового видео ---
-const handleVideoFileChange = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  if (!target.files || !target.files[0]) return;
-
-  const file = target.files[0];
-
-  // 🔍 Проверка формата
-  if (!file.type.startsWith('video/')) {
-    alert('Пожалуйста, выберите видеофайл.');
-    if (videoFileInputRef.value) videoFileInputRef.value.value = '';
-    return;
-  }
-
-  if (formModel.video_preview.startsWith('blob:')) {
-    URL.revokeObjectURL(formModel.video_preview);
-  }
-
-  formModel.video = file;
-  formModel.video_preview = URL.createObjectURL(file);
-};
-
-// --- Удаление видео ---
-const removeVideo = async () => {
-  try {
-    if (typeof formModel.video === 'string' && formModel.video !== '') {
-      await api.delete(`/admin/files/${formModel.video_dir}/${lessonId}` , {
-        data: { dir: formModel.video_all_dir, filename: formModel.video }
-      });
-    }
-
-    if (formModel.video_preview.startsWith('blob:'))
-      URL.revokeObjectURL(formModel.video_preview);
-
-    formModel.video = null;
-    formModel.video_preview = '';
-
-    if (videoFileInputRef.value) videoFileInputRef.value.value = '';
-  } catch (e) {
-    console.error('Ошибка при удалении видео', e);
-  }
-};
+// const handleVideoFileChange = (event: Event) => {
+//   const target = event.target as HTMLInputElement;
+//   if (!target.files || !target.files[0]) return;
+//
+//   const file = target.files[0];
+//
+//   // 🔍 Проверка формата
+//   if (!file.type.startsWith('video/')) {
+//     alert('Пожалуйста, выберите видеофайл.');
+//     if (videoFileInputRef.value) videoFileInputRef.value.value = '';
+//     return;
+//   }
+//
+//   if (formModel.video_preview.startsWith('blob:')) {
+//     URL.revokeObjectURL(formModel.video_preview);
+//   }
+//
+//   formModel.video = file;
+//   formModel.video_preview = URL.createObjectURL(file);
+// };
+//
+// // --- Удаление видео ---
+// const removeVideo = async () => {
+//   try {
+//     if (typeof formModel.video === 'string' && formModel.video !== '') {
+//       await api.delete(`/admin/files/${formModel.video_dir}/${lessonId}` , {
+//         data: { dir: formModel.video_all_dir, filename: formModel.video }
+//       });
+//     }
+//
+//     if (formModel.video_preview.startsWith('blob:'))
+//       URL.revokeObjectURL(formModel.video_preview);
+//
+//     formModel.video = null;
+//     formModel.video_preview = '';
+//
+//     if (videoFileInputRef.value) videoFileInputRef.value.value = '';
+//   } catch (e) {
+//     console.error('Ошибка при удалении видео', e);
+//   }
+// };
 
 // --- Сохранение формы ---
 const save = async () => {
@@ -122,6 +124,7 @@ const save = async () => {
     const payload = new FormData();
     payload.append('name', formModel.name);
     payload.append('content', formModel.content);
+    payload.append('video_link', formModel.video_link);
     payload.append('duration', String(formModel.duration));
     payload.append('status', String(formModel.status));
     payload.append('free_pay', formModel.free_pay ? '1' : '0');
@@ -130,11 +133,11 @@ const save = async () => {
       payload.append('course_section_id', String(formModel.course_section_id));
     }
 
-    if (formModel.video instanceof File) {
-      payload.append('video', formModel.video);
-    } else if (formModel.video === null) {
-      payload.append('video', '');
-    }
+    // if (formModel.video instanceof File) {
+    //   payload.append('video', formModel.video);
+    // } else if (formModel.video === null) {
+    //   payload.append('video', '');
+    // }
 
     await api.post(`/admin/lessons/${lessonId}`, payload, {
       headers: { 'Content-Type': 'multipart/form-data' },
@@ -156,6 +159,7 @@ onMounted(() => {
     error.value = { general: ['Некорректный ID урока'] };
   }
 });
+console.log(formModel.video_preview);
 </script>
 
 <template>
@@ -164,6 +168,7 @@ onMounted(() => {
 
     <BaseInput v-model="formModel.name" label="Имя" required class="mb-4" />
     <BaseTextAreaWithEditor v-model="formModel.content" label="Контент" required class="w-full mb-4" />
+    <BaseInput v-model="formModel.video_link" label="Ссылка на видео" required class="mb-4" />
 
     <BaseInput
         v-model="formattedDuration"
@@ -190,38 +195,38 @@ onMounted(() => {
     />
 
     <!-- Видео урок -->
-    <div class="mb-4">
-      <label class="block text-sm text-gray-600 mb-1">Видео урок</label>
+<!--    <div class="mb-4">-->
+<!--      <label class="block text-sm text-gray-600 mb-1">Видео урок</label>-->
 
-      <label
-          class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg shadow cursor-pointer hover:bg-green-700 transition"
-      >
-        <span>Выбрать видео</span>
-        <input
-            ref="videoFileInputRef"
-            type="file"
-            accept="video/*"
-            class="hidden"
-            @change="handleVideoFileChange"
-        />
-      </label>
+<!--      <label-->
+<!--          class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg shadow cursor-pointer hover:bg-green-700 transition"-->
+<!--      >-->
+<!--        <span>Выбрать видео</span>-->
+<!--        <input-->
+<!--            ref="videoFileInputRef"-->
+<!--            type="file"-->
+<!--            accept="video/*"-->
+<!--            class="hidden"-->
+<!--            @change="handleVideoFileChange"-->
+<!--        />-->
+<!--      </label>-->
 
-      <!-- Превью видео -->
-      <div v-if="formModel.video_preview" class="relative group mt-3">
-        <video
-            :src="formModel.video_preview"
-            controls
-            class="w-full max-h-64 rounded-lg border"
-        ></video>
+<!--      &lt;!&ndash; Превью видео &ndash;&gt;-->
+<!--      <div v-if="Boolean(formModel.video)" class="relative group mt-3">-->
+<!--      <video-->
+<!--            :src="formModel.video_preview"-->
+<!--            controls-->
+<!--            class="w-full max-h-64 rounded-lg border"-->
+<!--        ></video>-->
 
-        <button
-            type="button"
-            class="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
-            @click="removeVideo"
-        >
-          ✕ Удалить
-        </button>
-      </div>
-    </div>
+<!--        <button-->
+<!--            type="button"-->
+<!--            class="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"-->
+<!--            @click="removeVideo"-->
+<!--        >-->
+<!--          ✕ Удалить-->
+<!--        </button>-->
+<!--      </div>-->
+<!--    </div>-->
   </BaseForm>
 </template>

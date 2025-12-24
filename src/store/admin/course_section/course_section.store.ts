@@ -5,7 +5,7 @@ import type { CreateCourseSectionDto } from '../../../dto/course-section.dto.ts'
 import { BaseStore } from '../../BaseStore';
 
 class CourseSectionStore extends BaseStore<CreateCourseSectionDto, CourseSection> {
-    public storeId = 'admin-course-section';
+    public storeId = 'admin-course_section';
     public api = new CourseSectionApi();
 }
 
@@ -23,6 +23,7 @@ export function useCourseSectionStoreWithGetters() {
     );
 
     const currentCourseSection = computed(() => store.item);
+    const currentCourseSectionName = computed(() => store.item?.name ?? '');
     const totalPages = computed(() => store.totalPages);
     const currentPage = computed(() => store.currentPage);
 
@@ -30,6 +31,7 @@ export function useCourseSectionStoreWithGetters() {
         ...store,
         courseSectionList,
         currentCourseSection,
+        currentCourseSectionName,
         totalPages,
         currentPage,
     };
