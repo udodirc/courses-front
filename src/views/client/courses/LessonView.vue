@@ -34,12 +34,12 @@ const fetchLesson = async () => {
 // ВИДЕО через Blob
 // -----------------------------
 const videoUrl = ref<string | null>(null);
-
+const APP_URL = import.meta.env.VITE_APP_URL || '';
 const fetchVideo = async () => {
   if (!lesson.value || !token) return;
 
   try {
-    const response = await fetch(`http://courses.local:8086/api/partner/lessons/${lessonId}/video`, {
+    const response = await fetch(`${APP_URL}/partner/lessons/${lessonId}/video`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
