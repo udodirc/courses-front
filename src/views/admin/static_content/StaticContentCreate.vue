@@ -26,7 +26,7 @@ async function save() {
       content: formModel.value.content,
     };
 
-    await saveEntity('/admin/static_content', payload);
+    await saveEntity('/admin/static-content', payload);
     router.push('/admin/static-content');
   } catch (e) {
     console.error('Ошибка при сохранении контента:', e);

@@ -39,7 +39,7 @@ async function save() {
   error.value = null;
 
   try {
-    await api.put(`/admin/static_content/${contentId}`, {
+    await api.put(`/admin/static-content/${contentId}`, {
       name: formModel.value.name,
       content: formModel.value.content,
       status: formModel.value.status,

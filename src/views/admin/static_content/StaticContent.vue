@@ -51,7 +51,7 @@ const columns: { label: string; field: keyof StaticContent | string }[] = [
       />
 
       <router-link
-          to="/admin/static_content/create"
+          to="/admin/static-content/create"
           class="inline-block mb-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded"
       >
         Создать
