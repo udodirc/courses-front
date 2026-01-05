@@ -20,6 +20,8 @@
 
       <!-- Вход -->
       <form v-if="activeTab==='login'" @submit.prevent="login">
+        <FormErrors :error="errorMessage" />
+
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Логин или Email</label>
           <input
@@ -40,8 +42,6 @@
           />
         </div>
 
-        <p v-if="errorMessage" class="text-red-500 text-sm mb-3">{{ errorMessage }}</p>
-
         <button
             type="submit"
             class="w-full bg-black text-white py-2 rounded-lg font-semibold hover:bg-gray-800 transition-colors duration-200"
@@ -53,10 +53,12 @@
 
       <!-- Регистрация -->
       <form v-else-if="activeTab==='register'" @submit.prevent="register">
+        <FormErrors :error="errorMessage" />
+
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Спонсор</label>
           <input
-              type="input"
+              type="text"
               v-model="form.registerSponsor"
               required
               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
@@ -66,7 +68,7 @@
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Логин</label>
           <input
-              type="input"
+              type="text"
               v-model="form.registerLogin"
               required
               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
@@ -93,8 +95,6 @@
           />
         </div>
 
-        <p v-if="errorMessage" class="text-red-500 text-sm mb-3">{{ errorMessage }}</p>
-
         <button
             type="submit"
             class="w-full bg-black text-white py-2 rounded-lg font-semibold hover:bg-gray-800 transition-colors duration-200"
@@ -106,6 +106,8 @@
 
       <!-- Восстановление пароля -->
       <form v-else @submit.prevent="forgotPassword">
+        <FormErrors :error="errorMessage" />
+
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
           <input
@@ -115,8 +117,6 @@
               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </div>
-
-        <p v-if="errorMessage" class="text-red-500 text-sm mb-3">{{ errorMessage }}</p>
 
         <button
             type="submit"
@@ -134,6 +134,7 @@
 import { ref, computed } from "vue";
 import { usePartnerStore } from "../store/client/partner/partner.store.ts";
 import { useRouter } from "vue-router";
+import FormErrors from '../components/ui/FormErrors.vue';
 
 const emit = defineEmits(["close"]);
 const partnerStore = usePartnerStore();
@@ -141,7 +142,7 @@ const router = useRouter();
 
 const activeTab = ref<'login'|'register'|'forgot'>('login');
 const loading = ref(false);
-const errorMessage = ref("");
+const errorMessage = ref<string | Record<string,string[]> | null>("");
 
 const form = ref({
   login: "",
@@ -161,38 +162,94 @@ const activeTabTitle = computed(() => {
   }
 });
 
-const tabClass = (tab: string) => activeTab.value === tab ? 'font-semibold border-b-2 border-black' : 'text-gray-500';
+const tabClass = (tab: string) =>
+    activeTab.value === tab ? 'font-semibold border-b-2 border-black' : 'text-gray-500';
 
+// Универсальная обработка ошибок
+const handleError = (e: any) => {
+  const data = e.response?.data;
+  if (data?.errors) {
+    errorMessage.value = data.errors;
+  } else if (data?.error) { // Добавили проверку поля error
+    errorMessage.value = data.error;
+  } else if (data?.message) {
+    errorMessage.value = data.message;
+  } else {
+    errorMessage.value = e.message || "Произошла ошибка";
+  }
+};
+
+// === AUTH ===
 const login = async () => {
-  loading.value = true; errorMessage.value = "";
+  loading.value = true;
+  errorMessage.value = "";
+
   try {
+    // 1. Пытаемся авторизоваться
     await partnerStore.login(form.value.login, form.value.password);
-    emit("close");
-    router.push('/partner/profile');
-  } catch (error: any) {
-    errorMessage.value = error.response?.data?.error || "Ошибка входа";
-  } finally { loading.value = false; }
+
+    // 2. Пытаемся получить данные пользователя
+    try {
+      await partnerStore.fetchUser();
+
+      // ЕСЛИ ВСЕ ОК: переходим в профиль и закрываем окно
+      router.push('/partner/profile');
+      emit("close");
+
+    } catch (fetchError: any) {
+      // ЕСЛИ ОШИБКА (например, почта не подтверждена):
+      // Мы ОСТАЕМСЯ в модальном окне и показываем текст
+      const errorData = fetchError.response?.data;
+
+      if (errorData?.error === "Email not verified") {
+        errorMessage.value = "Почта не подтверждена. Проверьте свой почтовый ящик.";
+      } else if (fetchError.response?.status === 403) {
+        errorMessage.value = errorData?.message || "Доступ запрещен.";
+      } else {
+        handleError(fetchError);
+      }
+
+      // ВАЖНО: Если мы здесь, мы НЕ вызываем emit("close")
+    }
+
+  } catch (loginError: any) {
+    // Ошибка самого входа (неверный пароль и т.д.)
+    handleError(loginError);
+  } finally {
+    loading.value = false;
+  }
 };
 
 const register = async () => {
-  loading.value = true; errorMessage.value = "";
+  loading.value = true;
+  errorMessage.value = "";
   try {
-    await partnerStore.register(form.value.registerSponsor, form.value.registerLogin, form.value.registerEmail, form.value.registerPassword);
+    await partnerStore.register(
+        form.value.registerSponsor,
+        form.value.registerLogin,
+        form.value.registerEmail,
+        form.value.registerPassword
+    );
     emit("close");
     router.push('/partner/profile');
-  } catch (error: any) {
-    errorMessage.value = error.response?.data?.error || "Ошибка регистрации";
-  } finally { loading.value = false; }
+  } catch (e) {
+    handleError(e);
+  } finally {
+    loading.value = false;
+  }
 };
 
 const forgotPassword = async () => {
-  loading.value = true; errorMessage.value = "";
+  loading.value = true;
+  errorMessage.value = "";
   try {
     await partnerStore.resetPassword(form.value.forgotEmail);
     errorMessage.value = "Проверьте почту для восстановления пароля";
-  } catch (error: any) {
-    errorMessage.value = error.response?.data?.error || "Ошибка отправки письма";
-  } finally { loading.value = false; }
+  } catch (e) {
+    handleError(e);
+  } finally {
+    loading.value = false;
+  }
 };
 </script>
 

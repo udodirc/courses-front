@@ -63,9 +63,18 @@ export const usePartnerStore = defineStore('partner', () => {
             });
             user.value = response.data;
             localStorage.setItem('partner_data', JSON.stringify(user.value));
-        } catch (e) {
+        } catch (e: any) {
             console.error('Fetch user error:', e);
+
+            // Если это ошибка верификации, НЕ делаем logout,
+            // просто пробрасываем ошибку в компонент
+            if (e.response?.data?.error === "Email not verified" || e.response?.status === 403) {
+                throw e;
+            }
+
+            // Для критических ошибок (токен протух совсем) — выходим
             logout();
+            throw e; // Обязательно пробрасываем, чтобы компонент зашел в свой блок catch
         }
     }
 
