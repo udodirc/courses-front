@@ -34,6 +34,15 @@ export const usePartnerStore = defineStore('partner', () => {
         }
     }
 
+    async function resetPassword(email: string) {
+        try {
+            await api.post('/password/email', { email });
+        } catch (e: any) {
+            console.error('Forgot password error:', e.response?.data || e.message);
+            throw e;
+        }
+    }
+
     async function register(sponsor: string, login: string, email: string, password: string) {
         try {
             const response = await api.post('/register', { sponsor, login, email, password });
@@ -121,6 +130,7 @@ export const usePartnerStore = defineStore('partner', () => {
         register,
         fetchUser,
         logout,
+        resetPassword,
 
         // list
         items,

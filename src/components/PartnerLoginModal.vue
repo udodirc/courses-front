@@ -188,7 +188,7 @@ const register = async () => {
 const forgotPassword = async () => {
   loading.value = true; errorMessage.value = "";
   try {
-    await partnerStore.forgotPassword(form.value.forgotEmail);
+    await partnerStore.resetPassword(form.value.forgotEmail);
     errorMessage.value = "Проверьте почту для восстановления пароля";
   } catch (error: any) {
     errorMessage.value = error.response?.data?.error || "Ошибка отправки письма";
