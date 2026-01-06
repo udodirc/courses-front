@@ -42,6 +42,16 @@
           />
         </div>
 
+        <!-- Кнопка повторной отправки ссылки подтверждения -->
+        <button
+            v-if="errorMessage === 'Email not verified'"
+            @click="resendVerification"
+            class="w-full mb-3 bg-yellow-500 text-white py-2 rounded-lg font-semibold hover:bg-yellow-600 transition-colors duration-200"
+            :disabled="loading"
+        >
+          {{ loading ? "Отправка..." : "Отправить повторно ссылку подтверждения" }}
+        </button>
+
         <button
             type="submit"
             class="w-full bg-black text-white py-2 rounded-lg font-semibold hover:bg-gray-800 transition-colors duration-200"
@@ -233,6 +243,20 @@ const register = async () => {
     emit("close");
     router.push('/partner/profile');
   } catch (e) {
+    handleError(e);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const resendVerification = async () => {
+  loading.value = true;
+  errorMessage.value = "";
+  try {
+    // Берём email из формы регистрации
+    await partnerStore.resendVerification(form.value.login);
+    errorMessage.value = "Новая ссылка для подтверждения отправлена на вашу почту";
+  } catch (e: any) {
     handleError(e);
   } finally {
     loading.value = false;
