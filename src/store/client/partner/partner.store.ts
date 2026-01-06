@@ -46,6 +46,28 @@ export const usePartnerStore = defineStore('partner', () => {
         }
     }
 
+    async function resetPassword(email: string) {
+        try {
+            await api.post('/password/email', { email });
+        } catch (e: any) {
+            console.error('Forgot password error:', e.response?.data || e.message);
+            throw e;
+        }
+    }
+
+    // === повторная отправка email для подтверждения ===
+    async function resendVerification(login: string) {
+        try {
+            loading.value = true;
+            await api.post('/partner/email/resend', { login });
+        } catch (e: any) {
+            console.error('Resend verification error:', e.response?.data || e.message);
+            throw e;
+        } finally {
+            loading.value = false;
+        }
+    }
+
     async function fetchUser() {
         if (!token.value) return;
         try {
@@ -54,9 +76,13 @@ export const usePartnerStore = defineStore('partner', () => {
             });
             user.value = response.data;
             localStorage.setItem('partner_data', JSON.stringify(user.value));
-        } catch (e) {
+        } catch (e: any) {
             console.error('Fetch user error:', e);
+            if (e.response?.data?.error === "Email not verified" || e.response?.status === 403) {
+                throw e;
+            }
             logout();
+            throw e;
         }
     }
 
@@ -121,6 +147,8 @@ export const usePartnerStore = defineStore('partner', () => {
         register,
         fetchUser,
         logout,
+        resetPassword,
+        resendVerification,
 
         // list
         items,
