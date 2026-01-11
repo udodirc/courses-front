@@ -98,6 +98,10 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'order', name: 'AdminOrder', component: () => import('../views/admin/order/Order.vue') },
             { path: '/admin/orders/:id', name: 'AdminOrderShow', component: () => import('../views/admin/order/OrderShow.vue') },
             { path: 'withdrawals', name: 'AdminWithdrawal', component: () => import('../views/admin/withdrawal/Withdrawals.vue') },
+            { path: 'faq', name: 'AdminFaq', component: () => import('../views/admin/faq/Faq.vue') },
+            { path: '/admin/faq/create', name: 'AdminFaqCreate', component: () => import('../views/admin/faq/FaqCreate.vue') },
+            { path: 'faq/:id/edit', name: 'AdminFaqEdit', component: () => import('../views/admin/faq/FaqEdit.vue') },
+            { path: '/admin/faq/:id', name: 'AdminFaqShow', component: () => import('../views/admin/faq/FaqShow.vue') },
         ],
     },
 
@@ -119,6 +123,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'orders', name: 'ClientOrders', component: () => import('../views/client/order/Order.vue') },
             { path: 'withdrawals', name: 'ClientWithdrawal', component: () => import('../views/client/withdrawal/Withdrawal.vue') },
             { path: 'withdrawal/create', name: 'ClientWithdrawalCreate', component: () => import('../views/client/withdrawal/CreateWithdrawal.vue') },
+            { path: 'faq', name: 'ClientFaq', component: () => import('../views/client/faq/Faq.vue') },
         ],
     },
     {
@@ -129,9 +134,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'courses', name: 'FrontendCourses', component: () => import('../views/front/courses/Course.vue') },
             { path: 'courses/:slug', name: 'FrontendCourseView', component: () => import('../views/front/courses/CourseView.vue') },
             { path: ':slug', name: 'FrontendPage', component: () => import('../views/front/Page.vue'), props: true },
-            { path: '/ref/:login', name: 'ReferralLink', component: () => import('../views/front/ReferralRedirect.vue'),
-            }
-
+            { path: '/ref/:login', name: 'ReferralLink', component: () => import('../views/front/ReferralRedirect.vue'), }
         ],
     },
 

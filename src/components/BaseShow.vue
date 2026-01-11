@@ -53,6 +53,8 @@ const customLabels: Record<string, string> = {
   amount: 'Сумма',
   currency: 'Валюта',
   payment_method: 'Система платежа',
+  question: 'Вопрос',
+  answer: 'Ответ',
 };
 
 // visibleFields с фильтром exclude
