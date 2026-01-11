@@ -27,7 +27,7 @@ const fetchCourses = async (page = 1) => {
   error.value = null;
 
   try {
-    const response = await api.get(`/courses?page=${page}`);
+    const response = await api.get(`/partner/courses?page=${page}`);
     courses.value = response.data.data;
 
     currentPage.value = response.data.meta.current_page;
