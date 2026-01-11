@@ -98,6 +98,10 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'order', name: 'AdminOrder', component: () => import('../views/admin/order/Order.vue') },
             { path: '/admin/orders/:id', name: 'AdminOrderShow', component: () => import('../views/admin/order/OrderShow.vue') },
             { path: 'withdrawals', name: 'AdminWithdrawal', component: () => import('../views/admin/withdrawal/Withdrawals.vue') },
+            { path: 'faq', name: 'AdminFaq', component: () => import('../views/admin/faq/Faq.vue') },
+            { path: '/admin/faq/create', name: 'AdminFaqCreate', component: () => import('../views/admin/faq/FaqCreate.vue') },
+            { path: 'faq/:id/edit', name: 'AdminFaqEdit', component: () => import('../views/admin/faq/FaqEdit.vue') },
+            { path: '/admin/faq/:id', name: 'AdminFaqShow', component: () => import('../views/admin/faq/FaqShow.vue') },
         ],
     },
 
