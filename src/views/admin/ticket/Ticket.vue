@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useTicketWithGetters } from '../../../store/admin/ticket/ticket.store.ts';
-import ItemList from '../../../components/ItemList.vue';
 import Filters from '../../../components/Filters.vue';
 import { useFilterList } from '../../../composables/useFilterList';
 import { usePagination } from '../../../composables/usePagination';
 import type { FilterSchemaItem } from '../../../types/Filters.ts';
-import type { Ticket } from '../../../types/Ticket.ts';
 
 const ticketStore = useTicketWithGetters();
 
@@ -30,13 +28,6 @@ const { onNext, onPrev, goToPage } = usePagination(ticketStore, filters, toFilte
 onMounted(() => {
   applyFilters();
 });
-
-// колонки для таблицы
-const columns: { label: string; field: keyof Ticket | string }[] = [
-  { label: 'ID', field: 'id' },
-  { label: 'Автор', field: 'author' },
-  { label: 'Вопрос', field: 'text' },
-];
 </script>
 
 <template>
@@ -52,25 +43,63 @@ const columns: { label: string; field: keyof Ticket | string }[] = [
           @reset="resetFilters"
       />
 
-      <router-link
-          to="/admin/static-content/create"
-          class="inline-block mb-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded"
-      >
-        Создать
-      </router-link>
+      <!-- Список тикетов в стиле новостей -->
+      <div class="space-y-4 mb-6">
+        <div
+            v-for="ticket in ticketStore.ticketList.value"
+            :key="ticket.id"
+            class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+        >
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex items-center space-x-3">
+              <span class="text-sm font-bold text-gray-500">#{{ ticket.id }}</span>
+              <span
+                  :class="[
+            'px-2 py-1 text-xs rounded-full',
+            ticket.status == true ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+          ]"
+              >
+          {{ ticket.status == true ? 'Ожидает ответа' : 'Отвечен' }}
+        </span>
+            </div>
+            <span class="text-xs text-gray-400">{{ ticket.createdAt }}</span>
+          </div>
 
-     <ItemList
-          :key="ticketStore.currentPage.value"
-          :items="ticketStore.ticketList.value"
-          :columns="columns"
-          :basePath="'/admin/tickets'"
-          :deleteItem="ticketStore.deleteItem"
-          :currentPage="ticketStore.currentPage.value"
-          :totalPages="ticketStore.totalPages.value"
+          <!-- Текст вопроса (тот самый первый текст из БД) -->
+          <h2 class="text-xl font-semibold text-gray-800 mb-2">
+            {{ ticket.text || 'Без названия' }}
+          </h2>
+
+          <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
+            <div class="text-sm text-gray-600">
+              Автор: <span class="font-medium">{{ ticket.author }}</span>
+            </div>
+
+            <div class="flex space-x-2">
+              <router-link
+                  :to="`/admin/ticket/${ticket.id}`"
+                  class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+              >
+                Открыть чат →
+              </router-link>
+              <button
+                  @click="ticketStore.deleteItem(ticket.id)"
+                  class="text-red-500 hover:text-red-700 text-sm"
+              >
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Пагинация (вынесена отдельно, так как ItemList больше нет) -->
+      <BasePagination
+          :current-page="ticketStore.currentPage.value"
+          :total-pages="ticketStore.totalPages.value"
           @next="onNext"
           @prev="onPrev"
           @go="goToPage"
-          @refresh="applyFilters"
       />
     </main>
   </div>
