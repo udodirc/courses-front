@@ -126,6 +126,8 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'withdrawals', name: 'ClientWithdrawal', component: () => import('../views/client/withdrawal/Withdrawal.vue') },
             { path: 'withdrawal/create', name: 'ClientWithdrawalCreate', component: () => import('../views/client/withdrawal/CreateWithdrawal.vue') },
             { path: 'faq', name: 'ClientFaq', component: () => import('../views/client/faq/Faq.vue') },
+            { path: 'tickets', name: 'ClientTicket', component: () => import('../views/client/ticket/Ticket.vue') },
+            { path: 'ticket/:id', name: 'ClientTickets', component: () => import('../views/client/ticket/Tickets.vue') },
         ],
     },
     {
