@@ -86,6 +86,7 @@ const allMenu: MenuItem[] = [
       { name: "Коментарии к урокам", path: "/admin/lessons-comments" },
     ],
   },
+  { name: "Запросы", path: "/admin/tickets", icon: "fas fa-clone" },
   { name: "Меню", path: "/admin/menus", icon: "fas fa-bars" },
   { name: "Контент", path: "/admin/content", icon: "fas fa-file-alt" },
   { name: "Статичный контент", path: "/admin/static-content", icon: "fas fa-clone" },

@@ -102,6 +102,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: '/admin/faq/create', name: 'AdminFaqCreate', component: () => import('../views/admin/faq/FaqCreate.vue') },
             { path: 'faq/:id/edit', name: 'AdminFaqEdit', component: () => import('../views/admin/faq/FaqEdit.vue') },
             { path: '/admin/faq/:id', name: 'AdminFaqShow', component: () => import('../views/admin/faq/FaqShow.vue') },
+            { path: 'tickets', name: 'AdminTicket', component: () => import('../views/admin/ticket/Ticket.vue') },
         ],
     },
 
