@@ -13,7 +13,7 @@ const ticketStore = useTicketWithGetters();
 // 1. Схема фильтров
 const schema = ref<FilterSchemaItem[]>([
   { field: 'text', label: 'Вопрос', type: 'text', col: 'left' },
-  { field: 'status', label: 'Статус', type: 'select', col: 'middle', options: [
+  { field: 'ticket_status', label: 'Статус', type: 'select', col: 'middle', options: [
       { label: 'Есть ответ', value: 2 },
       { label: 'Нет ответа', value: 1 },
       { label: 'Архив', value: 0 },
