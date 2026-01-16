@@ -115,7 +115,7 @@ const formatDate = (dateString: string) => {
 
 <template>
   <div class="p-6">
-    <h1 class="text-3xl text-black pb-6 font-semibold">История переписки #{{ ticketId }}</h1>
+    <h1 class="text-3xl text-black pb-6 font-semibold">Запрос #{{ ticketId }}</h1>
 
     <div v-if="loading" class="text-center py-10 text-gray-500">
       <div class="animate-pulse">Загрузка данных...</div>
