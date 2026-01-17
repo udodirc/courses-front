@@ -102,6 +102,8 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: '/admin/faq/create', name: 'AdminFaqCreate', component: () => import('../views/admin/faq/FaqCreate.vue') },
             { path: 'faq/:id/edit', name: 'AdminFaqEdit', component: () => import('../views/admin/faq/FaqEdit.vue') },
             { path: '/admin/faq/:id', name: 'AdminFaqShow', component: () => import('../views/admin/faq/FaqShow.vue') },
+            { path: 'tickets', name: 'AdminTicket', component: () => import('../views/admin/ticket/Ticket.vue') },
+            { path: '/admin/ticket/:id', name: 'AdminTickets', component: () => import('../views/admin/ticket/Tickets.vue') },
         ],
     },
 
@@ -124,6 +126,8 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'withdrawals', name: 'ClientWithdrawal', component: () => import('../views/client/withdrawal/Withdrawal.vue') },
             { path: 'withdrawal/create', name: 'ClientWithdrawalCreate', component: () => import('../views/client/withdrawal/CreateWithdrawal.vue') },
             { path: 'faq', name: 'ClientFaq', component: () => import('../views/client/faq/Faq.vue') },
+            { path: 'tickets', name: 'ClientTicket', component: () => import('../views/client/ticket/Ticket.vue') },
+            { path: 'ticket/:id', name: 'ClientTickets', component: () => import('../views/client/ticket/Tickets.vue') },
         ],
     },
     {

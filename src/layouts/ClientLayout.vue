@@ -59,6 +59,7 @@ const allMenu: MenuItem[] = [
     ],
   },
   { name: "F.A.Q", path: "/partner/faq", icon: "fas fa-tachometer-alt" },
+  { name: "Запросы", path: "/partner/tickets", icon: "fas fa-tachometer-alt" },
 ];
 
 // Фильтруем меню (оставлено как есть, без фильтрации по ролям)
