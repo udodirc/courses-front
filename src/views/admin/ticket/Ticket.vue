@@ -44,18 +44,23 @@ const handleDelete = async (id: number) => {
 };
 
 // Метод перевода в архив
-const handleArchive = async (id: number) => {
-  if (!confirm('Вы уверены, что хотите перенести этот запрос в архив?')) return;
+const handleArchive = async (id: number, currentStatus: number) => {
+  const isArchived = currentStatus === 0;
+  const message = isArchived
+      ? 'Вы уверены, что хотите восстановить этот запрос из архива?'
+      : 'Вы уверены, что хотите перенести этот запрос в архив?';
+
+  if (!confirm(message)) return;
 
   try {
-    // Отправляем запрос на архивацию
+    // Вызываем тот же эндпоинт (бэкенд сам переключит статус благодаря вашей проверке в PHP)
     await api.post(`/admin/tickets/archive/${id}`);
 
-    // После успешного запроса обновляем список
+    // Обновляем список, чтобы увидеть изменения
     applyFilters();
   } catch (error: any) {
-    console.error('Ошибка при архивации:', error);
-    alert(error.response?.data?.message || 'Произошла ошибка при переносе в архив');
+    console.error('Ошибка при смене статуса:', error);
+    alert(error.response?.data?.message || 'Произошла ошибка');
   }
 };
 
@@ -139,11 +144,11 @@ onMounted(() => {
                 </router-link>
 
                 <button
-                    v-if="ticket.status !== 0"
-                    @click="handleArchive(ticket.id)"
-                    class="text-gray-500 hover:text-gray-700 text-sm font-medium transition-colors"
+                    @click="handleArchive(ticket.id, ticket.status)"
+                    class="text-sm font-medium transition-colors"
+                    :class="ticket.status == 0 ? 'text-green-600 hover:text-green-800' : 'text-gray-500 hover:text-gray-700'"
                 >
-                  В архив
+                  {{ ticket.status == 0 ? 'Вернуть из архива' : 'В архив' }}
                 </button>
 
                 <button
