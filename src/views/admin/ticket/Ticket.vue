@@ -43,6 +43,22 @@ const handleDelete = async (id: number) => {
   }
 };
 
+// Метод перевода в архив
+const handleArchive = async (id: number) => {
+  if (!confirm('Вы уверены, что хотите перенести этот запрос в архив?')) return;
+
+  try {
+    // Отправляем запрос на архивацию
+    await api.post(`/admin/tickets/archive/${id}`);
+
+    // После успешного запроса обновляем список
+    applyFilters();
+  } catch (error: any) {
+    console.error('Ошибка при архивации:', error);
+    alert(error.response?.data?.message || 'Произошла ошибка при переносе в архив');
+  }
+};
+
 // 4. Форматирование даты
 const formatDate = (dateString: string) => {
   if (!dateString) return '';
@@ -121,6 +137,14 @@ onMounted(() => {
                   Открыть чат
                   <span class="ml-1">→</span>
                 </router-link>
+
+                <button
+                    v-if="ticket.status !== 0"
+                    @click="handleArchive(ticket.id)"
+                    class="text-gray-500 hover:text-gray-700 text-sm font-medium transition-colors"
+                >
+                  В архив
+                </button>
 
                 <button
                     @click="handleDelete(ticket.id)"

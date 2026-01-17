@@ -3,6 +3,6 @@ export interface  Ticket {
     partner_id: number;
     author: string;
     text: string;
-    status: boolean;
+    status: number;
     createdAt: string;
 }
