@@ -90,6 +90,14 @@ const allMenu: MenuItem[] = [
   { name: "Меню", path: "/admin/menus", icon: "fas fa-bars" },
   { name: "Контент", path: "/admin/content", icon: "fas fa-file-alt" },
   { name: "Статичный контент", path: "/admin/static-content", icon: "fas fa-clone" },
+  {
+    name: "Telegram",
+    icon: "fa fa-book",
+    superadmin: true,
+    children: [
+      { name: "Отправка сообщения", path: "/admin/telegram-bot" }
+    ],
+  },
   { name: "F.A.Q", path: "/admin/faq", icon: "fas fa-clone" },
   { name: "Настройки", path: "/admin/settings", icon: "fas fa-cogs" },
 ];
