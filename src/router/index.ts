@@ -18,9 +18,9 @@ interface AppRouteMeta {
 // Все маршруты
 const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
     {
-        path: '/email/verify-redirect',
-        name: 'verify-email-redirect',
-        component: () => import('../views/front/auth/VerifyEmailView.vue'),
+        path: '/email-status',
+        name: 'email-status',
+        component: () => import('../views/front/auth/EmailStatus.vue'),
     },
 
     {

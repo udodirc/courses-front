@@ -44,7 +44,7 @@
 
         <!-- Кнопка повторной отправки ссылки подтверждения -->
         <button
-            v-if="errorMessage === 'Email not verified'"
+            v-if="errorMessage === 'Email not verified' || errorMessage === 'Unauthorized'"
             @click="resendVerification"
             class="w-full mb-3 bg-yellow-500 text-white py-2 rounded-lg font-semibold hover:bg-yellow-600 transition-colors duration-200"
             :disabled="loading"
