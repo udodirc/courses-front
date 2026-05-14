@@ -10,22 +10,26 @@ const status = computed(() => route.query.status);
 const title = computed(() => {
   switch (status.value) {
     case 'verified':
-      return 'Email verified';
+      return 'Почта подтверждена';
+
     case 'already-verified':
-      return 'Already verified';
+      return 'Почта уже подтверждена';
+
     default:
-      return 'Verification failed';
+      return 'Ошибка';
   }
 });
 
 const message = computed(() => {
   switch (status.value) {
     case 'verified':
-      return 'Your email has been successfully verified.';
+      return 'Ваш email успешно подтвержден. Теперь вы можете войти в аккаунт.';
+
     case 'already-verified':
-      return 'Your email was already verified.';
+      return 'Этот email уже был подтвержден ранее.';
+
     default:
-      return 'The verification link is invalid or expired.';
+      return 'Ссылка подтверждения недействительна или срок её действия истек.';
   }
 });
 
@@ -49,7 +53,7 @@ const closeModal = () => {
           class="px-4 py-2 bg-black text-white rounded-lg"
           @click="closeModal"
       >
-        Continue
+        Продолжить
       </button>
     </div>
   </div>
