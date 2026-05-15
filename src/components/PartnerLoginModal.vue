@@ -44,7 +44,7 @@
 
         <!-- Кнопка повторной отправки ссылки подтверждения -->
         <button
-            v-if="errorMessage === 'Email not verified' || errorMessage === 'Unauthorized'"
+            v-if="verification === false"
             @click="resendVerification"
             class="w-full mb-3 bg-yellow-500 text-white py-2 rounded-lg font-semibold hover:bg-yellow-600 transition-colors duration-200"
             :disabled="loading"
@@ -153,6 +153,7 @@ const router = useRouter();
 const activeTab = ref<'login'|'register'|'forgot'>('login');
 const loading = ref(false);
 const errorMessage = ref<string | Record<string,string[]> | null>("");
+const verification = ref<boolean | null>(null);
 
 const form = ref({
   login: "",
@@ -178,6 +179,7 @@ const tabClass = (tab: string) =>
 // Универсальная обработка ошибок
 const handleError = (e: any) => {
   const data = e.response?.data;
+  verification.value = data?.verification ?? null;
   if (data?.errors) {
     errorMessage.value = data.errors;
   } else if (data?.error) { // Добавили проверку поля error
