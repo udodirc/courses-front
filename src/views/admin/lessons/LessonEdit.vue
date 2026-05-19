@@ -168,7 +168,7 @@ console.log(formModel.video_preview);
 
     <BaseInput v-model="formModel.name" label="Имя" required class="mb-4" />
     <BaseTextAreaWithEditor v-model="formModel.content" label="Контент" required class="w-full mb-4" />
-    <BaseInput v-model="formModel.video_link" label="Ссылка на видео" required class="mb-4" />
+    <BaseInput v-model="formModel.video_link" label="Ссылка на видео" class="mb-4" />
 
     <BaseInput
         v-model="formattedDuration"
