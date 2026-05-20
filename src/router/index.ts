@@ -123,6 +123,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'my-courses/:slug', name: 'ClientMyCourseView', component: () => import('../views/client/courses/MyCourseView.vue') },
             { path: 'lesson/:id', name: 'ClientMyLessonView', component: () => import('../views/client/courses/LessonView.vue') },
             { path: 'orders', name: 'ClientOrders', component: () => import('../views/client/order/Order.vue') },
+            { path: 'sponsors-payouts', name: 'SponsorsPayouts', component: () => import('../views/client/partner/SponsorPayout.vue') },
             { path: 'withdrawals', name: 'ClientWithdrawal', component: () => import('../views/client/withdrawal/Withdrawal.vue') },
             { path: 'withdrawal/create', name: 'ClientWithdrawalCreate', component: () => import('../views/client/withdrawal/CreateWithdrawal.vue') },
             { path: 'faq', name: 'ClientFaq', component: () => import('../views/client/faq/Faq.vue') },

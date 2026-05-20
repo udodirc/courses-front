@@ -55,12 +55,10 @@ onMounted(async () => {
   }
 
   // Подставляем query-параметры в фильтры
-  let hasQuery = false;
   filters.value.forEach(f => {
     const queryValue = route.query[f.field];
     if (queryValue !== undefined) {
       f.value = queryValue as string;
-      hasQuery = true;
     }
   });
 

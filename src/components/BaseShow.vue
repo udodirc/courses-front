@@ -8,6 +8,7 @@ const { item, itemId, label, loading, error, labels, exclude } = defineProps<{
   label: string;
   loading: boolean;
   error: string;
+  client: boolean;
   labels?: Record<string, string>;
   exclude?: string[];
 }>();
@@ -57,7 +58,6 @@ const customLabels: Record<string, string> = {
   answer: 'Ответ',
 };
 
-// visibleFields с фильтром exclude
 const visibleFields = computed(() => {
   if (!item) return {};
   const excludeKeys = exclude || [];
@@ -66,10 +66,8 @@ const visibleFields = computed(() => {
   );
 });
 
-// helper для рендеринга значения
-// helper для рендеринга значения
 const renderValue = (key: string | number, value: any) => {
-  const keyStr = String(key); // Явное приведение к строке
+  const keyStr = String(key);
   if (keyStr === 'status') {
     return value == 1 ? 'Активный' : 'Неактивный';
   }
@@ -102,7 +100,11 @@ const renderValue = (key: string | number, value: any) => {
           {{ renderValue(key, value) }}
           <RouterLink
               v-if="value > 0"
-              :to="`/admin/sponsors-payouts?sponsor=${item.login}&page=1`"
+              :to="
+                client
+                  ? `/partner/sponsors-payouts?sponsor=${item.login}&page=1`
+                  : `/admin/sponsors-payouts?sponsor=${item.login}&page=1`
+              "
               target="_blank"
               class="partner-show"
           >
