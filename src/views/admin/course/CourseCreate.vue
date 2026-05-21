@@ -186,7 +186,7 @@ async function save() {
 </script>
 
 <template>
-  <BaseForm label="Создание контента" :loading="loading" :onSubmit="save">
+  <BaseForm label="Создание курса" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
 
     <BaseInput v-model="formModel.name" label="Имя"/>

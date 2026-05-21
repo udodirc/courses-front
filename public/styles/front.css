@@ -2,6 +2,7 @@
     line-height: 1.7;
     font-size: 1rem;
     color: #333;
+    overflow: hidden;
 }
 .main-menu{
     font-size: 1.2em;

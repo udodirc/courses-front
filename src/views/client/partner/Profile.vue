@@ -40,6 +40,7 @@ onMounted(async () => {
         :item="partner"
         :loading="loading"
         :error="error"
+        :client=true
         :exclude="[
         'id',
         'created_at',

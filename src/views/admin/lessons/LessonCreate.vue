@@ -132,7 +132,7 @@ async function save() {
         Курс
       </label>
       <div class="text-base font-medium">
-        {{ courseStore.currentCourseName.value }}
+        <span class="lesson-title-text">{{ courseStore.currentCourseName.value }}</span>
       </div>
     </div>
 
@@ -141,13 +141,13 @@ async function save() {
         Раздел курса
       </label>
       <div class="text-base font-medium">
-        {{ currentCourseSection.currentCourseSectionName.value }}
+        <span class="lesson-title-text">{{ currentCourseSection.currentCourseSectionName.value }}</span>
       </div>
     </div>
 
     <BaseInput v-model="formModel.name" label="Имя" required class="mb-4" />
     <BaseTextAreaWithEditor v-model="formModel.content" label="Контент" required class="w-full mb-4" />
-    <BaseInput v-model="formModel.video_link" label="Ссылка на видео" required class="mb-4" />
+    <BaseInput v-model="formModel.video_link" label="Ссылка на видео" class="mb-4" />
 
     <BaseInput
         v-model="formattedDuration"
