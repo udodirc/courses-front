@@ -132,7 +132,7 @@ async function save() {
         Курс
       </label>
       <div class="text-base font-medium">
-        {{ courseStore.currentCourseName.value }}
+        <span class="lesson-title-text">{{ courseStore.currentCourseName.value }}</span>
       </div>
     </div>
 
@@ -141,7 +141,7 @@ async function save() {
         Раздел курса
       </label>
       <div class="text-base font-medium">
-        {{ currentCourseSection.currentCourseSectionName.value }}
+        <span class="lesson-title-text">{{ currentCourseSection.currentCourseSectionName.value }}</span>
       </div>
     </div>
 
