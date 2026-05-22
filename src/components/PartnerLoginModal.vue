@@ -67,12 +67,8 @@
 
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Спонсор</label>
-          <input
-              type="text"
-              v-model="form.registerSponsor"
-              required
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-          />
+          <span>{{form.registerSponsor}}</span>
+          <input type="hidden" v-model="form.registerSponsor" />
         </div>
 
         <div class="mb-4">
@@ -141,7 +137,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { usePartnerStore } from "../store/client/partner/partner.store.ts";
 import { useRouter } from "vue-router";
 import FormErrors from '../components/ui/FormErrors.vue';
@@ -190,6 +186,27 @@ const handleError = (e: any) => {
     errorMessage.value = e.message || "Произошла ошибка";
   }
 };
+
+const getCookie = (name: string) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+
+  if (parts.length === 2) {
+    return parts.pop()?.split(';').shift();
+  }
+
+  return null;
+};
+
+onMounted(() => {
+  const referral = getCookie('referral');
+
+  if (referral) {
+    form.value.registerSponsor = referral;
+  } else {
+    form.value.registerSponsor = "admin";
+  }
+});
 
 // === AUTH ===
 const login = async () => {
