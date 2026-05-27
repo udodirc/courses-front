@@ -68,6 +68,7 @@ const visibleFields = computed(() => {
 
 const renderValue = (key: string | number, value: any) => {
   const keyStr = String(key);
+  if (value == null) return '';
   if (keyStr === 'status') {
     return value == 1 ? 'Активный' : 'Неактивный';
   }
@@ -77,9 +78,13 @@ const renderValue = (key: string | number, value: any) => {
   if (keyStr === 'is_superadmin') {
     return value == 1 ? 'Да' : 'Нет';
   }
-  if (value == null) return '';
   if (typeof value !== 'object') {
     return keyStr.includes('At') ? new Date(value).toLocaleString() : value;
+  }
+  if (keyStr === 'content' || keyStr === 'answer') {
+    return typeof value === 'string'
+        ? value
+        : JSON.stringify(value);
   }
   return value?.name || JSON.stringify(value);
 };
@@ -132,6 +137,12 @@ const renderValue = (key: string | number, value: any) => {
           >
            - Смотреть
           </RouterLink>
+        </span>
+        <span v-else-if="key == 'content' || key == 'answer'">
+          <div
+              class="prose"
+              v-html="renderValue(key, value)"
+          ></div>
         </span>
         <span v-else>{{ renderValue(key, value) }}</span>
       </div>
