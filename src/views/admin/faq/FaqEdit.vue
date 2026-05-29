@@ -11,6 +11,7 @@ import BaseToggle from '../../../components/ui/BaseToggle.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
 import { UploadDirs } from '../../../config/uploads';
 import api from "../../../api";
+import BaseTextAreaWithEditor from "@/components/ui/BaseTextAreaWithEditor.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -64,7 +65,7 @@ onMounted(async () => {
 
     <BaseInput v-model="formModel.question" label="Вопрос" required />
 
-    <BaseTextArea
+    <BaseTextAreaWithEditor
         v-model="formModel.answer"
         label="Ответ"
         :imageDir="UploadDirs.FAQ"
