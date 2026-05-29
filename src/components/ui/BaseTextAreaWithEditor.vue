@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, watch, nextTick, onMounted, defineProps, defineEmits } from 'vue';
+import api from '../../api';
 
 const props = defineProps<{
   label: string;
   modelValue: string;
+  imageDir: string;
 }>();
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void;
@@ -17,6 +19,7 @@ const undoStack = ref<string[]>([]);
 const redoStack = ref<string[]>([]);
 const textAlign = ref<'left' | 'center' | 'right' | 'justify'>('left');
 const headerLevel = ref<number | null>(null);
+const uploadError = ref('');
 
 // НОВЫЙ ФЛАГ: указывает, что изменение произошло внутри компонента,
 // чтобы игнорировать обратную синхронизацию из props.modelValue.
@@ -50,13 +53,6 @@ watch(
 watch(content, (val) => {
   emit('update:modelValue', val);
 });
-
-// Получение текущего диапазона (оставлено для функций форматирования)
-function getSelectionRange() {
-  const sel = window.getSelection();
-  if (!sel || sel.rangeCount === 0) return null;
-  return sel.getRangeAt(0).cloneRange();
-}
 
 // Вставка HTML с сохранением undo/redo
 function insertHTML(html: string) {
@@ -141,9 +137,54 @@ function insertLink() {
   const url = prompt('Введите URL:');
   if (url) wrapSelectionMultiple([], undefined, url);
 }
-function insertImage() {
-  const url = prompt('Введите URL изображения:');
-  if (url) insertHTML(`<img src="${url}" alt="Image" />`);
+
+async function insertImage() {
+  const input = document.createElement('input');
+
+  input.type = 'file';
+  input.accept = 'image/*';
+
+  input.onchange = async () => {
+    const file = input.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    try {
+      uploadError.value = '';
+
+      const formData = new FormData();
+
+      formData.append('image', file);
+      formData.append('dir', props.imageDir);
+
+      const { data } = await api.post(
+          '/admin/files/image-upload',
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+      );
+
+      if (data?.path) {
+        insertHTML(
+            `<img src="${data.path}" alt="" />`
+        );
+      }
+    } catch (error: any) {
+      console.error('Ошибка загрузки изображения', error);
+
+      uploadError.value =
+          error?.response?.data?.errors?.image?.[0]
+          ?? error?.response?.data?.message
+          ?? 'Ошибка загрузки изображения';
+    }
+  };
+
+  input.click();
 }
 
 // Выравнивание текста
@@ -261,6 +302,12 @@ onMounted(() => {
           <input type="checkbox" v-model="isHtmlView" /> HTML
         </label>
       </div>
+    </div>
+    <div
+        v-if="uploadError"
+        class="mb-2 rounded border border-red-300 bg-red-50 p-2 text-sm text-red-600"
+    >
+      {{ uploadError }}
     </div>
 
     <div

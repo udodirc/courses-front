@@ -3,10 +3,10 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useEntitySave } from '../../../composables/useEntitySave';
 import BaseForm from '../../../components/ui/BaseForm.vue';
-import BaseTextArea from '../../../components/ui/BaseTextArea.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
 import BaseInput from '../../../components/ui/BaseInput.vue';
 import BaseTextAreaWithEditor from "../../../components/ui/BaseTextAreaWithEditor.vue";
+import { UploadDirs } from '../../../config/uploads';
 
 const router = useRouter();
 
@@ -43,6 +43,7 @@ async function save() {
     <BaseTextAreaWithEditor
         v-model="formModel.answer"
         label="Ответ"
+        :imageDir="UploadDirs.FAQ"
         required
     />
   </BaseForm>

@@ -11,6 +11,7 @@ import BaseInput from "../../../components/ui/BaseInput.vue";
 import BaseToggle from '../../../components/ui/BaseToggle.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
 import api from '../../../api';
+import { UploadDirs } from '../../../config/uploads';
 
 const route = useRoute();
 const router = useRouter();
@@ -212,8 +213,20 @@ onMounted(() => projectStore.fetchItem(courseId));
 
     <!-- Основные поля -->
     <BaseInput v-model="formModel.name" label="Имя" />
-    <BaseTextAreaWithEditor v-model="formModel.short_description" label="Краткое описание" required class="w-full mb-4" />
-    <BaseTextAreaWithEditor v-model="formModel.description" label="Описание" required class="w-full mb-4" />
+    <BaseTextAreaWithEditor
+        v-model="formModel.short_description"
+        label="Краткое описание"
+        :imageDir="UploadDirs.COURSES"
+        required
+        class="w-full mb-4"
+    />
+    <BaseTextAreaWithEditor
+        v-model="formModel.description"
+        label="Описание"
+        :imageDir="UploadDirs.COURSES"
+        required
+        class="w-full mb-4"
+    />
     <BaseInput v-model="formModel.price" label="Цена" required />
     <BaseInput v-model="formModel.url" label="URL" required />
     <BaseToggle v-model="formModel.status" label="Статус" :activeLabel="'Активный'" :inactiveLabel="'Неактивный'" class="mb-4" />
