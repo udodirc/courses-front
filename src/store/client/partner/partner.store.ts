@@ -126,7 +126,7 @@ export const usePartnerStore = defineStore('partner', () => {
         loading.value = true;
         error.value = '';
         try {
-            const res = await partnerApi.stats(user.value.id);
+            const res = await partnerApi.stats();
             user.value = res.data;
         } catch (e: any) {
             error.value = e?.response?.data?.message || 'Ошибка загрузки статистики';

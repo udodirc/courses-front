@@ -7,8 +7,8 @@ export class FrontPartnerApi extends BaseApi<CreatePartnerDto, Partner> {
     protected resource = 'partners';
     protected urlPrefix = '/partner';
 
-    async stats(id: number): Promise<{ data: Partner }> {
-        const res = await api.get(`partner/stats/${id}`);
+    async stats(): Promise<{ data: Partner }> {
+        const res = await api.get(`partner/stats`);
         return res.data;
     }
 }

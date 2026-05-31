@@ -9,17 +9,15 @@ interface Props {
   columns: Column[];
   currentPage: number;
   totalPages: number;
+  numberList?: boolean
 }
 
 const props = defineProps<Props>();
-
-// ✅ ИСПРАВЛЕНИЕ: Добавляем 'refresh' в список событий, которые может испускать компонент
 const emit = defineEmits(['prev', 'next', 'go', 'refresh']);
 
 const mappedItems = computed(() =>
     props.items.map(item => ({
       ...item,
-      // на фронте дополнительные поля не нужны
     }))
 );
 </script>
@@ -27,6 +25,12 @@ const mappedItems = computed(() =>
 <template>
   <BaseTable :key="props.currentPage">
     <template #head>
+      <th
+          v-if="props.numberList"
+          class="w-16 text-left py-3 px-4 uppercase font-semibold text-sm"
+      >
+        №
+      </th>
       <th
           v-for="col in props.columns"
           :key="col.field"
@@ -42,7 +46,18 @@ const mappedItems = computed(() =>
           :key="item.id"
           :class="[i % 2 === 0 ? 'bg-white' : 'bg-gray-100', 'hover:bg-gray-200']"
       >
-        <td v-for="col in props.columns" :key="col.field" class="w-1/3 text-left py-3 px-4">
+        <td
+            v-if="props.numberList"
+            class="w-16 text-left py-3 px-4"
+        >
+          {{ i + 1 }}
+        </td>
+
+        <td
+            v-for="col in props.columns"
+            :key="col.field"
+            class="w-1/3 text-left py-3 px-4"
+        >
           {{ item[col.field] }}
         </td>
       </tr>
