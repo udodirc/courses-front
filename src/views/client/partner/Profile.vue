@@ -45,6 +45,8 @@ onMounted(async () => {
         'id',
         'created_at',
         'updated_at',
+        'createdAt',
+        'updatedAt',
         'level',
         'left_key',
         'right_key',

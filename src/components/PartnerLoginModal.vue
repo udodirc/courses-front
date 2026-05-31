@@ -14,7 +14,6 @@
       <!-- Вкладки -->
       <div class="flex justify-around mb-6">
         <button @click="activeTab='login'" :class="tabClass('login')">Вход</button>
-        <button @click="activeTab='register'" :class="tabClass('register')">Регистрация</button>
         <button @click="activeTab='forgot'" :class="tabClass('forgot')">Восстановление</button>
       </div>
 
@@ -61,55 +60,6 @@
         </button>
       </form>
 
-      <!-- Регистрация -->
-      <form v-else-if="activeTab==='register'" @submit.prevent="register">
-        <FormErrors :error="errorMessage" />
-
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Спонсор</label>
-          <span>{{form.registerSponsor}}</span>
-          <input type="hidden" v-model="form.registerSponsor" />
-        </div>
-
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Логин</label>
-          <input
-              type="text"
-              v-model="form.registerLogin"
-              required
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-          />
-        </div>
-
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input
-              type="email"
-              v-model="form.registerEmail"
-              required
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-          />
-        </div>
-
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Пароль</label>
-          <input
-              type="password"
-              v-model="form.registerPassword"
-              required
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-          />
-        </div>
-
-        <button
-            type="submit"
-            class="w-full bg-black text-white py-2 rounded-lg font-semibold hover:bg-gray-800 transition-colors duration-200"
-            :disabled="loading"
-        >
-          {{ loading ? "Регистрация..." : "Зарегистрироваться" }}
-        </button>
-      </form>
-
       <!-- Восстановление пароля -->
       <form v-else @submit.prevent="forgotPassword">
         <FormErrors :error="errorMessage" />
@@ -137,7 +87,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
 import { usePartnerStore } from "../store/client/partner/partner.store.ts";
 import { useRouter } from "vue-router";
 import FormErrors from '../components/ui/FormErrors.vue';
@@ -154,17 +104,12 @@ const verification = ref<boolean | null>(null);
 const form = ref({
   login: "",
   password: "",
-  registerSponsor: "",
-  registerLogin: "",
-  registerEmail: "",
-  registerPassword: "",
   forgotEmail: "",
 });
 
 const activeTabTitle = computed(() => {
   switch(activeTab.value) {
     case 'login': return 'Вход партнёра';
-    case 'register': return 'Регистрация';
     case 'forgot': return 'Восстановление пароля';
   }
 });
@@ -178,7 +123,7 @@ const handleError = (e: any) => {
   verification.value = data?.verification ?? null;
   if (data?.errors) {
     errorMessage.value = data.errors;
-  } else if (data?.error) { // Добавили проверку поля error
+  } else if (data?.error) {
     errorMessage.value = data.error;
   } else if (data?.message) {
     errorMessage.value = data.message;
@@ -186,27 +131,6 @@ const handleError = (e: any) => {
     errorMessage.value = e.message || "Произошла ошибка";
   }
 };
-
-const getCookie = (name: string) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-
-  if (parts.length === 2) {
-    return parts.pop()?.split(';').shift();
-  }
-
-  return null;
-};
-
-onMounted(() => {
-  const referral = getCookie('referral');
-
-  if (referral) {
-    form.value.registerSponsor = referral;
-  } else {
-    form.value.registerSponsor = "admin";
-  }
-});
 
 // === AUTH ===
 const login = async () => {
@@ -244,25 +168,6 @@ const login = async () => {
   } catch (loginError: any) {
     // Ошибка самого входа (неверный пароль и т.д.)
     handleError(loginError);
-  } finally {
-    loading.value = false;
-  }
-};
-
-const register = async () => {
-  loading.value = true;
-  errorMessage.value = "";
-  try {
-    await partnerStore.register(
-        form.value.registerSponsor,
-        form.value.registerLogin,
-        form.value.registerEmail,
-        form.value.registerPassword
-    );
-    emit("close");
-    router.push('/partner/profile');
-  } catch (e) {
-    handleError(e);
   } finally {
     loading.value = false;
   }

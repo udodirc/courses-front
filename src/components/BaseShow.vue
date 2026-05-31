@@ -120,7 +120,7 @@ const renderValue = (key: string | number, value: any) => {
           {{ renderValue(key, value) }}
           <RouterLink
               v-if="value > 0"
-              :to="`/admin/partners/structure/${item.id}`"
+              :to="`/partner/invited-partners`"
               target="_blank"
               class="partner-show"
           >

@@ -43,7 +43,7 @@ const allMenu: MenuItem[] = [
     name: "Партнерская программа",
     icon: "fas fa-user",
     children: [
-      { name: "Партнеры", path: "/partner/structure" },
+      //{ name: "Партнеры", path: "/partner/structure" },
       { name: "Лично приглашеные", path: "/partner/invited-partners" },
       { name: "Статистика", path: "/partner/stats" },
       { name: "Запросы на вывод", path: "/partner/withdrawals" },
