@@ -5,6 +5,7 @@ import { useFetchList } from "../composables/useFetchList";
 import { useStaticContent } from "../composables/useStaticContent";
 import ContactModal from "../components/ContactModal.vue";
 import PartnerLoginModal from "../components/PartnerLoginModal.vue";
+import PartnerRegistrationModal from "../components/PartnerRegistrationModal.vue";
 import api from "../api";
 
 const route = useRoute();
@@ -14,6 +15,7 @@ const expanded = ref<string | null>(null);
 const menuOpen = ref(false);
 const showModal = ref(false);
 const showLoginModal = ref(false);
+const showRegistrationModal = ref(false);
 const formLoginLogin = ref("");
 
 const settings = ref<Record<string, string | boolean>>({});
@@ -73,6 +75,8 @@ const openModal = () => (showModal.value = true);
 const closeModal = () => (showModal.value = false);
 const openLoginModal = () => (showLoginModal.value = true);
 const closeLoginModal = () => (showLoginModal.value = false);
+const openRegistrationModal = () => (showRegistrationModal.value = true);
+const closeRegistrationModal = () => (showRegistrationModal.value = false);
 
 // --- Подсветка активного маршрута ---
 const isActive = (url?: string) => route.path === normalizeUrl(url);
@@ -113,13 +117,6 @@ onBeforeUnmount(() => {
               class="bg-black text-white px-3 py-1 text-sm rounded-md font-semibold hover:bg-gray-800 transition-colors duration-200"
           >
             Связаться
-          </button>
-
-          <button
-              @click="openLoginModal"
-              class="text-sm font-semibold text-gray-800 hover:text-black transition-colors duration-200"
-          >
-            Вход
           </button>
 
           <div v-if="staticContent.messenger_icons" v-html="staticContent.messenger_icons"></div>
@@ -200,6 +197,23 @@ onBeforeUnmount(() => {
                 Курсы
               </RouterLink>
             </li>
+
+            <li class="relative menu-item w-full md:w-auto">
+              <button
+                  @click="openRegistrationModal"
+                  class="block w-full px-4 py-2 rounded-md transition-colors duration-200 text-left md:text-center hover:bg-gray-100"
+              >
+                Регистрация
+              </button>
+            </li>
+            <li class="relative menu-item w-full md:w-auto">
+              <button
+                  @click="openLoginModal"
+                  class="block w-full px-4 py-2 rounded-md transition-colors duration-200 text-left md:text-center hover:bg-gray-100"
+              >
+                Вход
+              </button>
+            </li>
           </ul>
         </nav>
 
@@ -211,13 +225,6 @@ onBeforeUnmount(() => {
               class="bg-black text-white px-5 py-2 rounded-md font-semibold hover:bg-gray-800 transition-colors duration-200"
           >
             Связаться
-          </button>
-
-          <button
-              @click="openLoginModal"
-              class="text-sm font-semibold text-gray-800 hover:text-black transition-colors duration-200"
-          >
-            Вход
           </button>
 
           <div v-if="staticContent.messenger_icons" v-html="staticContent.messenger_icons"></div>
@@ -256,6 +263,10 @@ onBeforeUnmount(() => {
         v-if="showLoginModal"
         @close="closeLoginModal"
         :prefill-login="formLoginLogin"
+    />
+    <PartnerRegistrationModal
+        v-if="showRegistrationModal"
+        @close="closeRegistrationModal"
     />
   </div>
 </template>
