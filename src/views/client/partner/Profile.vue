@@ -43,6 +43,8 @@ onMounted(async () => {
         :client=true
         :exclude="[
         'id',
+        'created_at',
+        'updated_at',
         'createdAt',
         'updatedAt',
         'level',
