@@ -80,13 +80,13 @@ onMounted(() => {
     <BaseInput v-model="formModel.last_name" label="Фамилия"/>
     <BaseInput v-model="formModel.email" label="Email" type="email" required />
     <BaseInput v-model="formModel.phone" label="Телефон"/>
-    <BaseInput v-model="formModel.password" label="Пароль" type="password" />
+    <BaseInput v-model="formModel.password" label="Пароль" type="password" autocomplete="new-password"/>
     <BaseInput
         v-model="formModel.passwordConfirmation"
         label="Повторите пароль"
         type="password"
+        autocomplete="new-password"
     />
-
     <BaseToggle
         v-model="formModel.status"
         label="Статус"

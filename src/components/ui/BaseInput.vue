@@ -7,6 +7,7 @@ const props = defineProps<{
   modelValue: string | null | undefined;
   type?: string;
   required?: boolean;
+  autocomplete?: string;
 }>();
 
 const emit = defineEmits<{
@@ -27,6 +28,7 @@ const model = computed({
         :type="type || 'text'"
         class="w-full px-5 py-1 text-gray-700 bg-gray-200 rounded mb-2.5"
         :required="required"
+        :autocomplete="autocomplete"
     />
   </div>
 </template>
