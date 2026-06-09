@@ -8,9 +8,9 @@ import BaseInput from '../../../components/ui/BaseInput.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
 import BaseTextAreaWithEditor from '../../../components/ui/BaseTextAreaWithEditor.vue';
 import BaseToggle from '../../../components/ui/BaseToggle.vue';
-// import BaseFileUpload from '../../../components/ui/BaseFileUpload.vue';
 import { useCourseStoreWithGetters } from '../../../store/admin/course/course.store.ts';
 import { useCourseSectionStoreWithGetters } from '../../../store/admin/course_section/course_section.store.ts';
+import { UploadDirs } from '../../../config/uploads';
 
 const router = useRouter();
 const route = useRoute();
@@ -132,7 +132,7 @@ async function save() {
         Курс
       </label>
       <div class="text-base font-medium">
-        {{ courseStore.currentCourseName.value }}
+        <span class="lesson-title-text">{{ courseStore.currentCourseName.value }}</span>
       </div>
     </div>
 
@@ -141,13 +141,19 @@ async function save() {
         Раздел курса
       </label>
       <div class="text-base font-medium">
-        {{ currentCourseSection.currentCourseSectionName.value }}
+        <span class="lesson-title-text">{{ currentCourseSection.currentCourseSectionName.value }}</span>
       </div>
     </div>
 
     <BaseInput v-model="formModel.name" label="Имя" required class="mb-4" />
-    <BaseTextAreaWithEditor v-model="formModel.content" label="Контент" required class="w-full mb-4" />
-    <BaseInput v-model="formModel.video_link" label="Ссылка на видео" required class="mb-4" />
+    <BaseTextAreaWithEditor
+        v-model="formModel.content"
+        label="Контент"
+        :imageDir="UploadDirs.LESSONS"
+        required
+        class="w-full mb-4"
+    />
+    <BaseInput v-model="formModel.video_link" label="Ссылка на видео" class="mb-4" />
 
     <BaseInput
         v-model="formattedDuration"

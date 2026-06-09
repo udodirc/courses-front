@@ -40,10 +40,13 @@ onMounted(async () => {
         :item="partner"
         :loading="loading"
         :error="error"
+        :client=true
         :exclude="[
         'id',
         'created_at',
         'updated_at',
+        'createdAt',
+        'updatedAt',
         'level',
         'left_key',
         'right_key',

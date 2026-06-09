@@ -10,6 +10,7 @@ import BaseInput from '../../../components/ui/BaseInput.vue';
 import BaseToggle from '../../../components/ui/BaseToggle.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
 import BaseTextAreaWithEditor from "../../../components/ui/BaseTextAreaWithEditor.vue";
+import { UploadDirs } from '../../../config/uploads';
 
 const route = useRoute();
 const router = useRouter();
@@ -167,8 +168,13 @@ console.log(formModel.video_preview);
     <FormErrors :error="error" />
 
     <BaseInput v-model="formModel.name" label="Имя" required class="mb-4" />
-    <BaseTextAreaWithEditor v-model="formModel.content" label="Контент" required class="w-full mb-4" />
-    <BaseInput v-model="formModel.video_link" label="Ссылка на видео" required class="mb-4" />
+    <BaseTextAreaWithEditor
+        v-model="formModel.content"
+        label="Контент"
+        :imageDir="UploadDirs.LESSONS"
+        required
+        class="w-full mb-4" />
+    <BaseInput v-model="formModel.video_link" label="Ссылка на видео" class="mb-4" />
 
     <BaseInput
         v-model="formattedDuration"

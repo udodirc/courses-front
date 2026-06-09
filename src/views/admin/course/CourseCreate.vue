@@ -8,6 +8,7 @@ import BaseTextAreaWithEditor from "../../../components/ui/BaseTextAreaWithEdito
 import BaseInput from "../../../components/ui/BaseInput.vue";
 import FormErrors from '../../../components/ui/FormErrors.vue';
 import type {Partner} from "../../../types/Partner.ts";
+import { UploadDirs } from '../../../config/uploads';
 
 const router = useRouter();
 const ogFileInputRef = ref<HTMLInputElement | null>(null);
@@ -186,19 +187,21 @@ async function save() {
 </script>
 
 <template>
-  <BaseForm label="Создание контента" :loading="loading" :onSubmit="save">
+  <BaseForm label="Создание курса" :loading="loading" :onSubmit="save">
     <FormErrors :error="error" />
 
     <BaseInput v-model="formModel.name" label="Имя"/>
     <BaseTextAreaWithEditor
         v-model="formModel.short_description"
         label="Краткое описание"
+        :imageDir="UploadDirs.COURSES"
         required
         class="w-full mb-4"
     />
     <BaseTextAreaWithEditor
         v-model="formModel.description"
         label="Описание"
+        :imageDir="UploadDirs.COURSES"
         required
         class="w-full mb-4"
     />

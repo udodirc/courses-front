@@ -12,7 +12,7 @@ const { staticContent, loadingStatic, staticContentError, fetchStaticContent } =
 const partnerStore = usePartnerStore();
 
 const partnerId = localStorage.getItem('partner_id');
-const baseUrl = partnerId ? `/partner/personal-invited/${partnerId}` : '';
+const baseUrl = partnerId ? `/partner/personal-invited` : '';
 
 const schema = ref<FilterSchemaItem[]>([
   { field: 'login', label: 'Логин', type: 'text', col: 'left' },
@@ -23,9 +23,8 @@ const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(pa
 const { onNext, onPrev, goToPage } = usePagination(partnerStore, filters, toFilterObject);
 
 const columns = [
-  { label: 'ID', field: 'id' },
+  //{ label: 'ID', field: 'id' },
   { label: 'Логин', field: 'login' },
-  { label: 'Email', field: 'email' },
   { label: 'Кол-во рефералов', field: 'referrals_count' },
   { label: 'Кол-во курсов', field: 'courses_count' },
   { label: 'Дата регистрации', field: 'createdAt' },
@@ -58,6 +57,7 @@ onMounted(async () => {
       :columns="columns"
       :currentPage="partnerStore.currentPage"
       :totalPages="partnerStore.totalPages"
+      :numberList=true
       @prev="onPrev"
       @next="onNext"
       @go="goToPage"

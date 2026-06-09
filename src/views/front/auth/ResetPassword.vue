@@ -45,7 +45,7 @@ const submit = async () => {
     success.value = true
 
     // можно через 2 секунды перенаправить на логин
-    setTimeout(() => router.push('/login'), 2000)
+    setTimeout(() => router.push('/'), 2000)
   } catch (e: any) {
     error.value = e.response?.data?.message || 'Ошибка при сбросе пароля'
   } finally {

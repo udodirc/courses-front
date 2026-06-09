@@ -104,7 +104,7 @@ async function buyCourse() {
   purchaseError.value = null;
 
   try {
-    await api.post('/partner/payment', {
+    const response = await api.post('/partner/payment', {
       course_id: course.value.id,
       partner_id: user.value.id,
       order_number: crypto.randomUUID(),
@@ -115,6 +115,12 @@ async function buyCourse() {
       status: 'pending',
     });
 
+    if (response.data?.success === false) {
+      purchaseModalMessage.value = 'Ошибка при оплате!';
+      purchaseModal.value = true;
+      return;
+    }
+
     purchaseModalMessage.value = 'Курс успешно куплен!';
     purchaseModal.value = true;
 
@@ -124,7 +130,7 @@ async function buyCourse() {
     } else if (err.response?.data?.message) {
       purchaseModalMessage.value = err.response.data.message;
     } else {
-      purchaseModalMessage.value = 'Ошибка при оплате';
+      purchaseModalMessage.value = 'Ошибка при оплате!';
     }
     purchaseModal.value = true;
   } finally {

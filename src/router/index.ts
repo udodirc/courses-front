@@ -18,9 +18,9 @@ interface AppRouteMeta {
 // Все маршруты
 const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
     {
-        path: '/email/verify-redirect',
-        name: 'verify-email-redirect',
-        component: () => import('../views/front/auth/VerifyEmailView.vue'),
+        path: '/email-status',
+        name: 'email-status',
+        component: () => import('../views/front/auth/EmailStatus.vue'),
     },
 
     {
@@ -116,7 +116,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
         children: [
             { path: 'profile', name: 'PartnerProfile', component: () => import('../views/client/partner/Profile.vue') },
             { path: ':id/edit', name: 'PartnerProfileEdit', component: () => import('../views/client/partner/ProfileEdit.vue') },
-            { path: 'structure', name: 'Structure', component: () => import('../views/client/partner/Structure.vue') },
+            //{ path: 'structure', name: 'Structure', component: () => import('../views/client/partner/Structure.vue') },
             { path: 'invited-partners', name: 'InvitedPartners', component: () => import('../views/client/partner/Invitedpartners.vue') },
             { path: 'stats', name: 'Stats', component: () => import('../views/client/partner/Stats.vue') },
             { path: 'courses', name: 'ClientCourses', component: () => import('../views/client/courses/Course.vue') },
@@ -125,6 +125,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'my-courses/:slug', name: 'ClientMyCourseView', component: () => import('../views/client/courses/MyCourseView.vue') },
             { path: 'lesson/:id', name: 'ClientMyLessonView', component: () => import('../views/client/courses/LessonView.vue') },
             { path: 'orders', name: 'ClientOrders', component: () => import('../views/client/order/Order.vue') },
+            { path: 'sponsors-payouts', name: 'SponsorsPayouts', component: () => import('../views/client/partner/SponsorPayout.vue') },
             { path: 'withdrawals', name: 'ClientWithdrawal', component: () => import('../views/client/withdrawal/Withdrawal.vue') },
             { path: 'withdrawal/create', name: 'ClientWithdrawalCreate', component: () => import('../views/client/withdrawal/CreateWithdrawal.vue') },
             { path: 'faq', name: 'ClientFaq', component: () => import('../views/client/faq/Faq.vue') },

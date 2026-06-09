@@ -86,7 +86,7 @@ const goToPage = (page: number) => {
               class="px-5 pb-5 text-gray-600 border-t border-gray-100 bg-gray-50/50"
           >
             <div class="pt-4 leading-relaxed">
-              {{ faq.answer }}
+              <div class="prose" v-html="faq.answer"></div>
             </div>
           </div>
         </div>

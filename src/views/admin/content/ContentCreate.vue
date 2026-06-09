@@ -11,6 +11,7 @@ import BaseSelect from '../../../components/ui/BaseSelect.vue';
 import BaseFileUpload from '../../../components/ui/BaseFileUpload.vue';
 import BaseImagePreview from '../../../components/ui/BaseImagePreview.vue';
 import FormErrors from '../../../components/ui/FormErrors.vue';
+import { UploadDirs } from '../../../config/uploads';
 
 const router = useRouter();
 
@@ -132,6 +133,7 @@ const removeOgImage = () => {
     <BaseTextAreaWithEditor
         v-model="formModel.content"
         label="Контент"
+        :imageDir="UploadDirs.CONTENT"
         required
         class="w-full mb-4"
     />
