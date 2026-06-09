@@ -16,6 +16,7 @@ const sendNotification = async () => {
   try {
     // Используем api вместо fetch, чтобы путь подставился автоматически
     await api.post('/admin/notifications/send', {
+      chat_id: 0,
       message: notificationMessage.value
     });
     alert('Уведомление успешно отправлено!');
