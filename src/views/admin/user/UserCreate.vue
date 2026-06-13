@@ -55,6 +55,10 @@ async function save() {
 // загрузка ролей при монтировании
 onMounted(() => {
   fetchRoles();
+  setTimeout(() => {
+    formModel.value.password = '';
+    formModel.value.passwordConfirmation = '';
+  }, 100);
 });
 </script>
 
