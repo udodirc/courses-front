@@ -71,6 +71,11 @@ async function save() {
 onMounted(() => {
   fetchRoles();
   userStore.fetchItem(userId);
+
+  setTimeout(() => {
+    formModel.value.password = '';
+    formModel.value.passwordConfirmation = '';
+  }, 100);
 });
 </script>
 
@@ -92,6 +97,7 @@ onMounted(() => {
     <BaseInput
         v-model="formModel.passwordConfirmation"
         label="Повторите пароль"
+        autocomplete="new-password"
         type="password"
     />
 
