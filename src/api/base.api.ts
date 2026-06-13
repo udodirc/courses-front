@@ -37,9 +37,15 @@ export abstract class BaseApi<TCreate, TEntity = any> {
         }
     }
 
-    async create(data: TCreate): Promise<ApiResponse<TEntity>> {
+    async create(
+        ...args: TCreate extends null ? [data?: null] : [data: TCreate]
+    ): Promise<ApiResponse<TEntity>> {
+        const data = args[0];
         try {
-            const res: AxiosResponse<ApiResponse<TEntity>> = await api.post(`${this.urlPrefix}/${this.resource}`, data);
+            const res: AxiosResponse<ApiResponse<TEntity>> = await api.post(
+                `${this.urlPrefix}/${this.resource}`,
+                data
+            );
             return res.data;
         } catch (err) {
             console.error(err);

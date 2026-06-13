@@ -78,7 +78,10 @@ onMounted(async () => {
             >
               <div>
                 <h2 class="font-semibold text-lg mb-1 line-clamp-2">{{ course.name }}</h2>
-                <p class="text-gray-600 text-sm mb-2 line-clamp-3">{{ course.short_description }}</p>
+                <p
+                    class="text-gray-600 text-sm mb-2 line-clamp-3"
+                    v-html="course.short_description">
+                </p>
               </div>
             </router-link>
             <!-- Цена и кнопки действий -->
