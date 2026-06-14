@@ -67,5 +67,9 @@ export function useCrudActions(
         }
     };
 
-    return { view, edit, toggleStatus, toggleFreePay, changeOrder, delete: destroy, payment, structure };
+    const sendMessage = (id: number) => {
+        emit?.('sendMessage', id);
+    };
+
+    return { view, edit, toggleStatus, toggleFreePay, changeOrder, delete: destroy, payment, structure, sendMessage };
 }

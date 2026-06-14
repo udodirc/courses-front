@@ -33,6 +33,12 @@ const columns: { label: string; field: keyof TelegramSubscribe | string }[] = [
   { label: 'Chat id', field: 'chat_id' },
   { label: 'Username', field: 'username' },
 ];
+
+const showSendMessageModal = ref(false);
+const openSendMessageModal = (id: number) => {
+  showSendMessageModal.value = true;
+  alert(id);
+};
 </script>
 
 <template>
@@ -61,6 +67,7 @@ const columns: { label: string; field: keyof TelegramSubscribe | string }[] = [
           @prev="onPrev"
           @go="goToPage"
           @refresh="applyFilters"
+          @sendMessage="openSendMessageModal"
       />
     </main>
   </div>

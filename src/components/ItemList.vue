@@ -18,9 +18,9 @@ const props = withDefaults(defineProps<Props>(), {
   showActions: true,
 });
 
-const emit = defineEmits(['prev', 'next', 'go', 'refresh', 'payment', 'changeStatus']);
+const emit = defineEmits(['prev', 'next', 'go', 'refresh', 'payment', 'changeStatus', 'sendMessage']);
 
-const { view, edit, toggleStatus, toggleFreePay, changeOrder, delete: destroy, payment, structure } =
+const { view, edit, toggleStatus, toggleFreePay, changeOrder, delete: destroy, payment, structure, sendMessage } =
     useCrudActions(props.basePath, props.deleteItem, emit);
 </script>
 
@@ -45,6 +45,7 @@ const { view, edit, toggleStatus, toggleFreePay, changeOrder, delete: destroy, p
       @delete="destroy"
       @payment="payment"
       @structure="structure"
+      @sendMessage="sendMessage"
       @changeStatus="(data) => emit('changeStatus', data)"
   />
 </template>
