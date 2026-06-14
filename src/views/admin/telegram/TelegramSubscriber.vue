@@ -37,7 +37,6 @@ const columns: { label: string; field: keyof TelegramSubscribe | string }[] = [
 const showSendMessageModal = ref(false);
 const openSendMessageModal = (id: number) => {
   showSendMessageModal.value = true;
-  alert(id);
 };
 </script>
 
@@ -69,6 +68,19 @@ const openSendMessageModal = (id: number) => {
           @refresh="applyFilters"
           @sendMessage="openSendMessageModal"
       />
+
+      <div
+          v-if="showSendMessageModal"
+          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      >
+        <div class="bg-white rounded-xl p-6 w-[400px] relative">
+          <h2 class="text-xl font-bold mb-4">
+            Сообщение подписчику
+          </h2>
+
+
+        </div>
+      </div>
     </main>
   </div>
 </template>
