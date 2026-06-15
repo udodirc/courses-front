@@ -7,6 +7,7 @@ import { usePagination } from '../../../composables/usePagination';
 import type { FilterSchemaItem } from '../../../types/Filters.ts';
 import type { TelegramSubscribe } from '../../../types/TelegramSubscribe.ts';
 import { useTelegramSubscribeStoreWithGetters } from "../../../store/admin/telegram_subscriber/telegram_subscribe.store.ts";
+import api from "../../../api";
 
 const telegramSubscribeStore = useTelegramSubscribeStoreWithGetters();
 
@@ -35,8 +36,35 @@ const columns: { label: string; field: keyof TelegramSubscribe | string }[] = [
 ];
 
 const showSendMessageModal = ref(false);
+const chatId = ref<number | null>(null);
+const message = ref<number | null>(null);
 const openSendMessageModal = (id: number) => {
   showSendMessageModal.value = true;
+  chatId.value = id;
+};
+
+const closeSendMessageModal = () => {
+  showSendMessageModal.value = false;
+};
+
+const sendMessage = async () => {
+  if (!message.value) {
+    alert('Выберите курс');
+    return;
+  }
+
+  try {
+    await api.post('/admin/notifications/send', {
+      chat_id: chatId.value,
+      message: message.value,
+    });
+
+    alert(`Сообщение отправлено!`);
+    closeSendMessageModal();
+  } catch (error: any) {
+    console.error(error);
+    alert('Ошибка при отправке');
+  }
 };
 </script>
 
@@ -77,8 +105,16 @@ const openSendMessageModal = (id: number) => {
           <h2 class="text-xl font-bold mb-4">
             Сообщение подписчику
           </h2>
-
-
+          <textarea
+              v-model="message"
+              class="w-full px-4 py-2 text-gray-700 bg-gray-200 rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          <button
+              class="px-4 py-2 bg-green-500 text-white rounded disabled:opacity-50"
+              @click="sendMessage"
+          >
+            Отправить
+          </button>
         </div>
       </div>
     </main>
