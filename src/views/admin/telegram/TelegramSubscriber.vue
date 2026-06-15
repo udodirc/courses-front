@@ -6,12 +6,11 @@ import { useFilterList } from '../../../composables/useFilterList';
 import { usePagination } from '../../../composables/usePagination';
 import type { FilterSchemaItem } from '../../../types/Filters.ts';
 import type { TelegramSubscribe } from '../../../types/TelegramSubscribe.ts';
-import { useTelegramSubscribeStoreWithGetters } from "../../../store/admin/telegram_subscriber/telegram_subscribe.store.ts";
-import api from "../../../api";
+import { useTelegramSubscribeStoreWithGetters } from '../../../store/admin/telegram_subscriber/telegram_subscribe.store.ts';
+import api from '../../../api';
 
 const telegramSubscribeStore = useTelegramSubscribeStoreWithGetters();
 
-// схема фильтров
 const schema = ref<FilterSchemaItem[]>([
   { field: 'chat_id', label: 'Chat id', type: 'text', col: 'left' },
   { field: 'username', label: 'Username', type: 'text', col: 'middle' },
@@ -19,16 +18,16 @@ const schema = ref<FilterSchemaItem[]>([
   { field: 'created_to', label: 'Создано по', type: 'date', col: 'middle' },
 ]);
 
-// composables
-const { filters, applyFilters, resetFilters, toFilterObject } = useFilterList(telegramSubscribeStore, schema.value);
-const { onNext, onPrev, goToPage } = usePagination(telegramSubscribeStore, filters, toFilterObject);
+const { filters, applyFilters, resetFilters, toFilterObject } =
+    useFilterList(telegramSubscribeStore, schema.value);
 
-// загрузка списка
+const { onNext, onPrev, goToPage } =
+    usePagination(telegramSubscribeStore, filters, toFilterObject);
+
 onMounted(() => {
   applyFilters();
 });
 
-// колонки для таблицы
 const columns: { label: string; field: keyof TelegramSubscribe | string }[] = [
   { label: 'ID', field: 'id' },
   { label: 'Chat id', field: 'chat_id' },
@@ -37,19 +36,23 @@ const columns: { label: string; field: keyof TelegramSubscribe | string }[] = [
 
 const showSendMessageModal = ref(false);
 const chatId = ref<number | null>(null);
-const message = ref<number | null>(null);
+const message = ref('');
+
 const openSendMessageModal = (id: number) => {
-  showSendMessageModal.value = true;
   chatId.value = id;
+  message.value = '';
+  showSendMessageModal.value = true;
 };
 
 const closeSendMessageModal = () => {
   showSendMessageModal.value = false;
+  chatId.value = null;
+  message.value = '';
 };
 
 const sendMessage = async () => {
-  if (!message.value) {
-    alert('Выберите курс');
+  if (!message.value.trim()) {
+    alert('Введите сообщение');
     return;
   }
 
@@ -59,7 +62,7 @@ const sendMessage = async () => {
       message: message.value,
     });
 
-    alert(`Сообщение отправлено!`);
+    alert('Сообщение отправлено!');
     closeSendMessageModal();
   } catch (error: any) {
     console.error(error);
@@ -67,13 +70,13 @@ const sendMessage = async () => {
   }
 };
 </script>
-
 <template>
   <div class="w-full h-screen overflow-x-hidden border-t flex flex-col">
     <main class="w-full flex-grow p-6">
-      <h1 class="text-3xl text-black pb-6">Подписчики телеграм бота</h1>
+      <h1 class="text-3xl text-black pb-6">
+        Подписчики телеграм бота
+      </h1>
 
-      <!-- Фильтры -->
       <Filters
           v-model:filters="filters"
           :schema="schema"
@@ -81,7 +84,7 @@ const sendMessage = async () => {
           @reset="resetFilters"
       />
 
-     <ItemList
+      <ItemList
           :key="telegramSubscribeStore.currentPage.value"
           :items="telegramSubscribeStore.telegramSubscribeList.value"
           :columns="columns"
@@ -97,24 +100,46 @@ const sendMessage = async () => {
           @sendMessage="openSendMessageModal"
       />
 
+      <!-- Модальное окно -->
       <div
           v-if="showSendMessageModal"
-          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          @click.self="closeSendMessageModal"
       >
-        <div class="bg-white rounded-xl p-6 w-[400px] relative">
+        <div class="bg-white rounded-xl p-6 w-[500px] relative shadow-lg">
+          <button
+              class="absolute top-3 right-4 text-gray-500 hover:text-black text-2xl"
+              @click="closeSendMessageModal"
+          >
+            ×
+          </button>
+
           <h2 class="text-xl font-bold mb-4">
             Сообщение подписчику
           </h2>
+
           <textarea
               v-model="message"
-              class="w-full px-4 py-2 text-gray-700 bg-gray-200 rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+              rows="6"
+              placeholder="Введите сообщение..."
+              class="w-full px-4 py-2 border rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <button
-              class="px-4 py-2 bg-green-500 text-white rounded disabled:opacity-50"
-              @click="sendMessage"
-          >
-            Отправить
-          </button>
+
+          <div class="flex justify-end gap-2 mt-4">
+            <button
+                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                @click="closeSendMessageModal"
+            >
+              Отмена
+            </button>
+
+            <button
+                class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                @click="sendMessage"
+            >
+              Отправить
+            </button>
+          </div>
         </div>
       </div>
     </main>

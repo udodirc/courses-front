@@ -240,7 +240,7 @@ function handleStatusChange(event: Event, item: any) {
         <td v-else-if="item.canSendMessage" class="flex gap-2 justify-center">
           <button
               v-if="item.canSendMessage"
-              @click="emit('sendMessage', item.id)"
+              @click="emit('sendMessage', item.chat_id)"
           >
             <i class="fab fa-telegram-plane"></i>
           </button>
