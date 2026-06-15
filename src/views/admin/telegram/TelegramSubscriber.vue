@@ -35,6 +35,7 @@ const columns: { label: string; field: keyof TelegramSubscribe | string }[] = [
 ];
 
 const showSendMessageModal = ref(false);
+const showSendMessageToAllModal = ref(false);
 const chatId = ref<number | null>(null);
 const message = ref('');
 
@@ -69,6 +70,38 @@ const sendMessage = async () => {
     alert('Ошибка при отправке');
   }
 };
+
+const openSendMessageToAllModal = () => {
+  chatId.value = 0;
+  message.value = '';
+  showSendMessageToAllModal.value = true;
+};
+
+const closeSendMessageToAllModal = () => {
+  showSendMessageToAllModal.value = false;
+  chatId.value = null;
+  message.value = '';
+};
+
+const sendMessageToAll = async () => {
+  if (!message.value.trim()) {
+    alert('Введите сообщение');
+    return;
+  }
+
+  try {
+    await api.post('/admin/notifications/send', {
+      chat_id: 0,
+      message: message.value,
+    });
+
+    alert('Сообщение отправлено!');
+    closeSendMessageToAllModal();
+  } catch (error: any) {
+    console.error(error);
+    alert('Ошибка при отправке');
+  }
+};
 </script>
 <template>
   <div class="w-full h-screen overflow-x-hidden border-t flex flex-col">
@@ -83,6 +116,13 @@ const sendMessage = async () => {
           @apply="applyFilters"
           @reset="resetFilters"
       />
+
+      <button
+          class="inline-block mb-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded"
+          @click="openSendMessageToAllModal"
+      >
+        Отправить сообщение всем пользователям
+      </button>
 
       <ItemList
           :key="telegramSubscribeStore.currentPage.value"
@@ -136,6 +176,47 @@ const sendMessage = async () => {
             <button
                 class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
                 @click="sendMessage"
+            >
+              Отправить
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+          v-if="showSendMessageToAllModal"
+          class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          @click.self="closeSendMessageToAllModal"
+      >
+        <div class="bg-white rounded-xl p-6 w-[500px] relative shadow-lg">
+          <button
+              class="absolute top-3 right-4 text-gray-500 hover:text-black text-2xl"
+              @click="closeSendMessageToAllModal"
+          >
+            ×
+          </button>
+
+          <h2 class="text-xl font-bold mb-4">
+            Сообщение все подписчикам
+          </h2>
+
+          <textarea
+              v-model="message"
+              rows="6"
+              placeholder="Введите сообщение..."
+              class="w-full px-4 py-2 border rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          <div class="flex justify-end gap-2 mt-4">
+            <button
+                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                @click="closeSendMessageToAllModal"
+            >
+              Отмена
+            </button>
+
+            <button
+                class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                @click="sendMessageToAll"
             >
               Отправить
             </button>
