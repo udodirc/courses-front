@@ -59,7 +59,8 @@ const emit = defineEmits([
   'delete',
   'payment',
   'structure',
-  'changeStatus'
+  'changeStatus',
+  'sendMessage'
 ]);
 
 function handleStatusChange(event: Event, item: any) {
@@ -80,7 +81,14 @@ function handleStatusChange(event: Event, item: any) {
       >
         {{ col.label }}
       </th>
-      <th v-if="props.showActions">Действия</th>
+      <th
+          v-if="
+        props.showActions ||
+        props.items.some(item => item.canSendMessage)
+    "
+      >
+        Действия
+      </th>
     </template>
 
     <template #body>
@@ -192,6 +200,7 @@ function handleStatusChange(event: Event, item: any) {
         <td v-if="props.showActions" class="flex gap-2 justify-center">
           <button v-if="item.structure" @click="emit('structure', item.id)">structure</button>
           <button v-if="item.canPay" @click="emit('payment', item.id)">$</button>
+          <button v-if="item.canSendMessage" @click="emit('sendMessage', item.id)">send</button>
           <button @click="emit('view', item.id)">👁</button>
           <button @click="emit('edit', item.id)">✏️</button>
 
@@ -227,6 +236,14 @@ function handleStatusChange(event: Event, item: any) {
               v-if="item.canDelete ?? true"
               @click="emit('delete', item.id)"
           >❌</button>
+        </td>
+        <td v-else-if="item.canSendMessage" class="flex gap-2 justify-center">
+          <button
+              v-if="item.canSendMessage"
+              @click="emit('sendMessage', item.chat_id)"
+          >
+            <i class="fab fa-telegram-plane"></i>
+          </button>
         </td>
 
       </tr>

@@ -21,6 +21,7 @@ export function useTelegramSubscribeStoreWithGetters() {
             canToggleStatus: false,
             canShowAction: false,
             canEditAction: false,
+            canSendMessage: true
         }))
     );
 

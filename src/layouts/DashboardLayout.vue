@@ -95,7 +95,6 @@ const allMenu: MenuItem[] = [
     icon: "fa fa-book",
     superadmin: true,
     children: [
-      { name: "Отправка сообщения", path: "/admin/telegram-bot" },
       { name: "Подписчики бота", path: "/admin/telegram-subscribe" }
     ],
   },
