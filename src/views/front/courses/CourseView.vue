@@ -129,7 +129,6 @@ onMounted(async () => {
 
     <div v-else-if="course">
       <h1 class="text-2xl font-bold mb-4">{{ course.name }}</h1>
-      <div class="mb-6 prose" v-html="course.short_description"></div>
       <div class="mb-6 prose" v-html="course.description"></div>
 
       <!-- Аккордеон уроков -->
