@@ -105,6 +105,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'tickets', name: 'AdminTicket', component: () => import('../views/admin/ticket/Ticket.vue') },
             { path: '/admin/ticket/:id', name: 'AdminTickets', component: () => import('../views/admin/ticket/Tickets.vue') },
             { path: 'telegram-subscribe', name: 'AdminTelegramSubscribe', component: () => import('../views/admin/telegram/TelegramSubscriber.vue') },
+            { path: 'telegram-messages', name: 'AdminTelegramMessage', component: () => import('../views/admin/telegram_messages/TelegramMessages.vue') },
         ],
     },
 
