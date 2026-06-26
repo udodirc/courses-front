@@ -19,18 +19,18 @@ export function useTelegramMessagesStoreWithGetters() {
     const telegramMessagesList = computed(() =>
         store.items.map(item => ({
             ...item,
-            canToggleStatus: false,
+            canToggleStatus: true,
         }))
     );
 
-    const currentMenu = computed(() => store.item);
+    const currentTelegramMessage = computed(() => store.item);
     const totalPages = computed(() => store.totalPages);
     const currentPage = computed(() => store.currentPage);
 
     return {
         ...store,
         telegramMessagesList,
-        currentMenu,
+        currentTelegramMessage,
         totalPages,
         currentPage
     };
