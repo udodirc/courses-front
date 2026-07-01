@@ -141,6 +141,11 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
         component: FrontendLayout,
         meta: { layout: 'front' },
         children: [
+            {
+                path: '',
+                name: 'FrontendHome',
+                component: () => import('../views/front/courses/Course.vue'),
+            },
             { path: 'courses', name: 'FrontendCourses', component: () => import('../views/front/courses/Course.vue') },
             { path: 'courses/:slug', name: 'FrontendCourseView', component: () => import('../views/front/courses/CourseView.vue') },
             { path: ':slug', name: 'FrontendPage', component: () => import('../views/front/Page.vue'), props: true },
