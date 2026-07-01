@@ -1,21 +1,36 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, toRefs } from 'vue';
 import { fieldLabels } from '../utils/fieldLabels';
 
-const { item, itemId, label, loading, error, labels, exclude } = defineProps<{
+const props = withDefaults(defineProps<{
   item: Record<string, any> | null;
   itemId?: number | string;
   label: string;
   loading: boolean;
   error: string;
-  client: boolean;
+  client?: boolean;
   labels?: Record<string, string>;
   exclude?: string[];
-}>();
+}>(), {
+  client: false,
+  labels: () => ({}),
+  exclude: () => [],
+});
+
+const {
+  item,
+  itemId,
+  label,
+  loading,
+  error,
+  client,
+  labels,
+  exclude,
+} = toRefs(props);
 
 const mergedLabels = computed(() => ({
   ...fieldLabels,
-  ...(labels || {}),
+  ...labels.value,
 }));
 
 const customLabels: Record<string, string> = {
@@ -56,98 +71,152 @@ const customLabels: Record<string, string> = {
   payment_method: 'Система платежа',
   question: 'Вопрос',
   answer: 'Ответ',
+  interval: 'Время',
 };
 
 const visibleFields = computed(() => {
-  if (!item) return {};
-  const excludeKeys = exclude || [];
+  if (!item.value) return {};
+
   return Object.fromEntries(
-      Object.entries(item).filter(([key]) => !excludeKeys.includes(key))
+      Object.entries(item.value).filter(
+          ([key]) => !exclude.value.includes(key)
+      )
   );
 });
 
 const renderValue = (key: string | number, value: any) => {
   const keyStr = String(key);
+
   if (value == null) return '';
+
   if (keyStr === 'status') {
     return value == 1 ? 'Активный' : 'Неактивный';
   }
+
   if (keyStr === 'free_pay') {
     return value == 1 ? 'Да' : 'Нет';
   }
+
   if (keyStr === 'is_superadmin') {
     return value == 1 ? 'Да' : 'Нет';
   }
-  if (typeof value !== 'object') {
-    return keyStr.includes('At') ? new Date(value).toLocaleString() : value;
+
+  if (keyStr === 'interval') {
+    const hours = Math.floor(value / 3600);
+    const minutes = Math.floor((value % 3600) / 60);
+    const seconds = value % 60;
+
+    return `${hours.toString().padStart(2, '0')}:${minutes
+        .toString()
+        .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }
+
   if (keyStr === 'content' || keyStr === 'answer') {
     return typeof value === 'string'
         ? value
         : JSON.stringify(value);
   }
+
+  if (typeof value !== 'object') {
+    return keyStr.includes('At')
+        ? new Date(value).toLocaleString()
+        : value;
+  }
+
   return value?.name || JSON.stringify(value);
 };
 </script>
 
 <template>
   <div class="max-w-3xl mx-auto p-6 bg-white rounded shadow">
-    <h2 v-if="label != ''" class="text-xl font-semibold mb-4">{{ label }} #{{ itemId }}</h2>
-    <p v-if="loading" class="text-gray-600">Загрузка...</p>
-    <p v-else-if="error" class="text-red-600">{{ error }}</p>
+    <h2 v-if="label !== ''" class="text-xl font-semibold mb-4">
+      {{ label }} #{{ itemId }}
+    </h2>
 
-    <div v-if="item" class="border border-gray-200 p-4 rounded bg-gray-50 space-y-2">
-      <div v-for="(value, key) in visibleFields" :key="key" class="flex">
+    <p v-if="loading" class="text-gray-600">
+      Загрузка...
+    </p>
+
+    <p v-else-if="error" class="text-red-600">
+      {{ error }}
+    </p>
+
+    <div
+        v-else-if="item"
+        class="border border-gray-200 p-4 rounded bg-gray-50 space-y-2"
+    >
+      <div
+          v-for="(value, key) in visibleFields"
+          :key="key"
+          class="flex"
+      >
         <span class="font-bold mr-2">
-          {{ (customLabels[key] || mergedLabels[key] || key).charAt(0).toUpperCase() + (customLabels[key] || mergedLabels[key] || key).slice(1) }}:
+          {{
+            (customLabels[key] || mergedLabels[key] || key)
+                .charAt(0)
+                .toUpperCase() +
+            (customLabels[key] || mergedLabels[key] || key).slice(1)
+          }}:
         </span>
-        <span v-if="key == 'total_amount'">
+
+        <span v-if="key === 'total_amount'">
           {{ renderValue(key, value) }}
+
           <RouterLink
               v-if="value > 0"
               :to="
-                client
-                  ? `/partner/sponsors-payouts?sponsor=${item.login}&page=1`
-                  : `/admin/sponsors-payouts?sponsor=${item.login}&page=1`
-              "
+              client
+                ? `/partner/sponsors-payouts?sponsor=${item.login}&page=1`
+                : `/admin/sponsors-payouts?sponsor=${item.login}&page=1`
+            "
               target="_blank"
               class="partner-show"
           >
-           - Смотреть
+            - Смотреть
           </RouterLink>
         </span>
-        <span v-else-if="key == 'referrals_count'">
+
+        <span v-else-if="key === 'referrals_count'">
           {{ renderValue(key, value) }}
+
           <RouterLink
               v-if="value > 0"
-              :to="`/partner/invited-partners`"
+              to="/partner/invited-partners"
               target="_blank"
               class="partner-show"
           >
-           - Смотреть
+            - Смотреть
           </RouterLink>
         </span>
-        <span v-else-if="key == 'courses_count'">
+
+        <span v-else-if="key === 'courses_count'">
           {{ renderValue(key, value) }}
+
           <RouterLink
               v-if="value > 0"
               :to="`/admin/courses-payments?customer=${item.login}&page=1`"
               target="_blank"
               class="partner-show"
           >
-           - Смотреть
+            - Смотреть
           </RouterLink>
         </span>
-        <span v-else-if="key == 'content' || key == 'answer'">
+
+        <span v-else-if="key === 'content' || key === 'answer'">
           <div
               class="prose"
               v-html="renderValue(key, value)"
-          ></div>
+          />
         </span>
-        <span v-else>{{ renderValue(key, value) }}</span>
+
+        <span v-else>
+          {{ renderValue(key, value) }}
+        </span>
       </div>
     </div>
 
-    <p v-else class="text-gray-500">Данные не найдены.</p>
+    <p v-else class="text-gray-500">
+      Данные не найдены.
+    </p>
   </div>
 </template>

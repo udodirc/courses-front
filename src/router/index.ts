@@ -108,6 +108,7 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'telegram-messages', name: 'AdminTelegramMessage', component: () => import('../views/admin/telegram_messages/TelegramMessages.vue') },
             { path: '/admin/telegram-messages/create', name: 'AdminTelegramMessageCreate', component: () => import('../views/admin/telegram_messages/TelegramMessageCreate.vue') },
             { path: 'telegram-messages/:id/edit', name: 'AdminTelegramMessageEdit', component: () => import('../views/admin/telegram_messages/TelegramMessageEdit.vue') },
+            { path: '/admin/telegram-messages/:id', name: 'AdminTelegramMessageShow', component: () => import('../views/admin/telegram_messages/TelegramMessageShow.vue') },
         ],
     },
 
