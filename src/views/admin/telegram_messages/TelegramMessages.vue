@@ -26,7 +26,8 @@ onMounted(async () => {
 // колонки для таблицы
 const columns = [
   { label: 'ID', field: 'id' },
-  { label: 'Название', field: 'name' }
+  { label: 'Название', field: 'name' },
+  { label: 'Время', field: 'interval' }
 ];
 </script>
 <template>

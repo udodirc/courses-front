@@ -12,7 +12,7 @@ const router = useRouter();
 const formModel = ref({
   name: '',
   content: '',
-  hours: '',
+  hours: '0',
   minutes: '0',
 });
 
