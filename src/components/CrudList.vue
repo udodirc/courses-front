@@ -4,6 +4,7 @@ import BaseTable from './BaseTable.vue';
 import BasePagination from './BasePagination.vue';
 import type { Column } from '../types/Column.ts';
 import { useFetchList } from '../composables/useFetchList';
+import defaultAvatar from '../assets/images/avatar.png';
 
 interface StatusOption {
   label: string;
@@ -202,6 +203,15 @@ function formatInterval(value: number | string): string {
 
           <template v-else-if="col.field === 'interval'">
             {{ formatInterval(item[col.field]) }}
+          </template>
+
+          <template v-else-if="col.field === 'avatar'">
+            <img
+                :src="item.avatar ? `/storage/${item.avatar}` : defaultAvatar"
+                :alt="item.first_name || 'Avatar'"
+                class="w-12 h-12 rounded-full object-cover border"
+                @error="($event.target as HTMLImageElement).src = defaultAvatar"
+            />
           </template>
 
           <!-- Дефолт -->

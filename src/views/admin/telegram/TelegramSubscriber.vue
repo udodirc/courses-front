@@ -30,8 +30,11 @@ onMounted(() => {
 
 const columns: { label: string; field: keyof TelegramSubscribe | string }[] = [
   { label: 'ID', field: 'id' },
+  { label: 'Avatar', field: 'avatar' },
   { label: 'Chat id', field: 'chat_id' },
   { label: 'Username', field: 'username' },
+  { label: 'Имя', field: 'first_name' },
+  { label: 'Фамилия', field: 'last_name' },
 ];
 
 const showSendMessageModal = ref(false);
