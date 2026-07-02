@@ -66,6 +66,19 @@ onMounted(fetchSettings);
           </label>
         </template>
 
+        <template
+            v-else-if="
+              setting.key === 'telegram_bot_start' ||
+              setting.key === 'telegram_bot_end'
+            "
+        >
+          <input
+              v-model="setting.value"
+              type="time"
+              class="border rounded p-2 flex-1"
+          />
+        </template>
+
         <!-- иначе обычный текстовый input -->
         <template v-else>
           <input
