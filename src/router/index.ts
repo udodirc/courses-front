@@ -105,6 +105,10 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
             { path: 'tickets', name: 'AdminTicket', component: () => import('../views/admin/ticket/Ticket.vue') },
             { path: '/admin/ticket/:id', name: 'AdminTickets', component: () => import('../views/admin/ticket/Tickets.vue') },
             { path: 'telegram-subscribe', name: 'AdminTelegramSubscribe', component: () => import('../views/admin/telegram/TelegramSubscriber.vue') },
+            { path: 'telegram-messages', name: 'AdminTelegramMessage', component: () => import('../views/admin/telegram_messages/TelegramMessages.vue') },
+            { path: '/admin/telegram-messages/create', name: 'AdminTelegramMessageCreate', component: () => import('../views/admin/telegram_messages/TelegramMessageCreate.vue') },
+            { path: 'telegram-messages/:id/edit', name: 'AdminTelegramMessageEdit', component: () => import('../views/admin/telegram_messages/TelegramMessageEdit.vue') },
+            { path: '/admin/telegram-messages/:id', name: 'AdminTelegramMessageShow', component: () => import('../views/admin/telegram_messages/TelegramMessageShow.vue') },
         ],
     },
 
@@ -137,6 +141,11 @@ const routes: Array<RouteRecordRaw & { meta?: AppRouteMeta }> = [
         component: FrontendLayout,
         meta: { layout: 'front' },
         children: [
+            {
+                path: '',
+                name: 'FrontendHome',
+                component: () => import('../views/front/courses/Course.vue'),
+            },
             { path: 'courses', name: 'FrontendCourses', component: () => import('../views/front/courses/Course.vue') },
             { path: 'courses/:slug', name: 'FrontendCourseView', component: () => import('../views/front/courses/CourseView.vue') },
             { path: ':slug', name: 'FrontendPage', component: () => import('../views/front/Page.vue'), props: true },

@@ -69,6 +69,20 @@ function handleStatusChange(event: Event, item: any) {
     emit('changeStatus', { id: item.id, newStatus: target.value });
   }
 }
+
+function formatInterval(value: number | string): string {
+  const totalSeconds = Number(value) || 0;
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${hours.toString().padStart(2, '0')}:${minutes
+      .toString()
+      .padStart(2, '0')}:${seconds
+      .toString()
+      .padStart(2, '0')}`;
+}
 </script>
 
 <template>
@@ -184,6 +198,10 @@ function handleStatusChange(event: Event, item: any) {
                 {{ item.status }}
               </option>
             </select>
+          </template>
+
+          <template v-else-if="col.field === 'interval'">
+            {{ formatInterval(item[col.field]) }}
           </template>
 
           <!-- Дефолт -->

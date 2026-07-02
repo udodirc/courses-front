@@ -83,7 +83,7 @@ const allMenu: MenuItem[] = [
       { name: "Курсы", path: "/admin/courses" },
       // { name: "Разделы курсов", path: "/admin/course_section" },
       // { name: "Уроки", path: "/admin/lessons" },
-      { name: "Коментарии к урокам", path: "/admin/lessons-comments" },
+      { name: "Комментарии к урокам", path: "/admin/lessons-comments" },
     ],
   },
   { name: "Запросы", path: "/admin/tickets", icon: "fas fa-clone" },
@@ -95,7 +95,8 @@ const allMenu: MenuItem[] = [
     icon: "fa fa-book",
     superadmin: true,
     children: [
-      { name: "Подписчики бота", path: "/admin/telegram-subscribe" }
+      { name: "Подписчики бота", path: "/admin/telegram-subscribe" },
+      { name: "Сообщения", path: "/admin/telegram-messages" }
     ],
   },
   { name: "F.A.Q", path: "/admin/faq", icon: "fas fa-clone" },
